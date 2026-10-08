@@ -1,0 +1,143 @@
+# HighGround pipeline configuration.
+# Every number here is either a sourced fact (see `source`) or an explicit,
+# documented modelling assumption (see `assumption`). Nothing is silently tuned.
+
+domain:
+  # WGS84 bbox: Greater Chennai Corporation plus the Adyar entry near
+  # Thirumudivakkam (west edge) and the coast with a strip of sea (east edge).
+  bbox_wgs84: [80.10, 12.85, 80.33, 13.24]   # [W, S, E, N]
+  crs: "EPSG:32644"                            # UTM 44N
+  cell_m: 30
+
+paths:
+  raw: data/raw
+  work: data/work
+  out: data/out
+
+dem:
+  tiles:
+    - Copernicus_DSM_COG_10_N12_00_E080_00_DEM
+    - Copernicus_DSM_COG_10_N13_00_E080_00_DEM
+  bucket: copernicus-dem-30m
+
+conditioning:
+  building_mask_fraction: 0.30    # cell treated as "built" for DTM masking above this footprint share
+  building_obstacle_fraction: 0.55 # cell raised as an obstacle above this footprint share (never on road cells)
+  building_obstacle_m: 3.0
+  tree_tags: ["landuse=forest", "natural=wood", "natural=scrub", "landuse=orchard"]
+  percentile_filter: {percentile: 5, size: 3}
+  burn_depth_m: 2.0
+  burn_waterways: [river, canal, drain, stream]
+  major_rivers: [Adyar, Cooum, "Buckingham Canal", Kosasthalaiyar, Otteri Nullah]
+
+landcover:
+  # Infiltration only on pervious cells (parks, open ground, scrub). Wetland/marsh
+  # and water are treated as saturated (no infiltration) during a monsoon storm.
+  infiltration_mm_h: {pervious: 6.0, wetland: 0.0, water: 0.0, urban: 0.0}
+  # Manning's n
+  manning: {urban: 0.035, road: 0.020, pervious: 0.050, wetland: 0.060, water: 0.030, building: 0.100}
+  # Storm drains: uniform removal rate on urban cells. This is THE calibration
+  # parameter; the value used for all published runs is written by 06_validate.py
+  # to data/out/calibration.json. Candidates searched on the calibration half only.
+  drainage_mm_h_default: 10.0
+  drainage_mm_h_candidates: [0.0, 5.0, 10.0, 15.0, 20.0, 30.0]
+
+solver:
+  scheme: local-inertial (Bates et al. 2010, de Almeida et al. 2012 theta=1)
+  g: 9.81
+  cfl_alpha: 0.7
+  h_dry_m: 0.001
+  max_dt_s: 10.0
+  snapshot_every_s: 3600
+  wet_threshold_m: 0.15            # time-to-15cm
+
+tide:
+  # Sea cells held at a fixed level (m above EGM2008 ~ MSL).
+  mean_m: 0.0
+  high_m: 0.5
+  assumption: "Chennai mean spring tidal range is roughly 1 m; +0.5 m approximates high water. Storm surge is not modelled."
+
+scenarios:
+  design:
+    totals_mm: [50, 100, 150, 200, 300, 400]
+    duration_h: 24
+    tail_h: 6                       # dry recession after the rain
+    start_local: "18:00"            # 'tonight' starts at 6 PM
+    pattern: front_loaded
+    pattern_note: "Gamma-shaped hyetograph peaking in hour 4; 50% of the total falls in the first ~7 hours. Assumption, not a measured Chennai pattern."
+  tides: [mean, high]
+
+replays:
+  dec2015_rain:
+    label: "1–2 Dec 2015"
+    start_local: "2015-12-01T08:30"
+    total_mm: 374
+    duration_h: 24
+    tail_h: 12
+    pattern: front_loaded
+    tide: mean
+    source: "~374 mm in a day at the worst-hit stations, 1–2 Dec 2015 (project spec; IMD station reports)."
+  dec2015_reservoir:
+    label: "1–2 Dec 2015 with Chembarambakkam release"
+    inherits: dec2015_rain
+    reservoir:
+      # Inflow hydrograph at the Adyar's upstream domain edge.
+      # Timeline from the CAG audit and PWD statements as reported by The News Minute:
+      # 10,000 cusecs by 10 AM, 12,000 by noon, 20,960 at 2 PM, 29,000 by 6 PM,
+      # held at 29,000 cusecs for 21 hours across 1–2 Dec.
+      # ASSUMPTION: the full release reaches the domain edge undiminished, with no
+      # added catchment inflow from other tanks (which the government says also occurred).
+      entry_lonlat: [80.105, 12.975]
+      cusecs_timeline_local:
+        - ["2015-12-01T08:30", 900]
+        - ["2015-12-01T10:00", 10000]
+        - ["2015-12-01T12:00", 12000]
+        - ["2015-12-01T14:00", 20960]
+        - ["2015-12-01T18:00", 29000]
+        - ["2015-12-02T15:00", 29000]
+        - ["2015-12-02T20:30", 5000]
+      cusec_to_m3s: 0.0283168
+      source: "CAG report on 2015 Chennai floods (29,000 cusecs for 21 h); PWD release schedule via thenewsminute.com"
+  michaung2023:
+    label: "Cyclone Michaung, Dec 2023"
+    start_local: "2023-12-03T00:00"
+    total_mm: 415
+    duration_h: 48
+    tail_h: 6
+    pattern: era5_scaled
+    era5_file: data/raw/rain/era5_michaung.json
+    tide: high
+    source: "IMD: Meenambakkam 415 mm from 3 Dec to 1:30 PM 4 Dec 2023 (The News Minute). Hourly timing from ERA5 via Open-Meteo, scaled to the IMD total."
+  fengal2024:
+    label: "Cyclone Fengal, Nov 2024"
+    start_local: "2024-11-30T00:00"
+    total_mm: 114
+    duration_h: 30
+    tail_h: 6
+    pattern: era5_scaled
+    era5_file: data/raw/rain/era5_fengal.json
+    tide: high
+    source: "IMD bulletin: Meenambakkam 11.4 cm since 08:30 IST 30 Nov 2024. Hourly timing from ERA5 via Open-Meteo, scaled to the IMD total."
+
+risk_bands_cm:
+  dry: [0, 5]
+  wet: [5, 15]
+  unsafe_two_wheeler: [15, 30]
+  unsafe_car: [30, 100000]
+
+routing:
+  car_impassable_cm: 30
+  two_wheeler_impassable_cm: 15
+
+validation:
+  hit_depth_m: 0.15
+  hit_length_share: 0.30
+  river_buffer_m: 500
+  baseline_lowest_share: 0.20
+  split: "GCC 2022 wards, alternating by ward number: odd = calibration, even = validation"
+
+forecast_points:
+  Velachery: [12.9791, 80.2209]
+  T. Nagar: [13.0418, 80.2341]
+  Anna Nagar: [13.0850, 80.2101]
+  Tambaram: [12.9249, 80.1000]

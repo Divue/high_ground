@@ -1,0 +1,13 @@
+.env
+data/
+!data/README.md
+node_modules/
+web/dist/
+web/public/data/
+.aws-sam/
+__pycache__/
+*.pyc
+.venv/
+infra/.aws-sam/
+infra/functions/*/package/
+*.log
