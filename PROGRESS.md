@@ -144,3 +144,10 @@ Decision rule, fixed before results: adopt a variant only if the calibration-hal
 | C: A + B | 0.149 | 0.359 | 0.374 | 0.25 |
 
 **Kept the current model.** Smoothing clearly hurts, so the fine DSM structure carries signal. The wet antecedent is +0.005, below the pre-set bar. The main chain resumed at 10:45 IST. For the demo, use addresses where the model floods. Teammate 2's address list should span risk levels as the spec says.
+
+### Stage B: ANUGA cross-check, done within the timebox (08:28 → 10:49 IST, 2 h 21 min)
+
+- ANUGA 4.0.1, DE0 flow algorithm, 103,159 triangles: max 900 m² overall, 350 m² in the Velachery core (~25–40 m spacing; the spec's ~10 m along streets did not fit the timebox). Box 80.19–80.25 E, 12.925–12.99 N. Same terrain, rain, losses and channel antecedent water as Stage A; transmissive boundaries. First 14 h of the 200 mm storm (covers the front-loaded peak). Hourly maxima in both models.
+- **Agreement:** 92.8% of 45,907 land cells agree on ≥15 cm; CSI 0.78; depth correlation 0.90; median |Δdepth| 0.7 cm; wet share 28.4% (ANUGA) vs 30.6% (Stage A).
+- `review/p2/anuga_vs_fast.png`: side-by-side peak depth. Included in `proof.json` → Proof screen.
+- Caveat for the Proof screen: same 30 m terrain, so this checks the numerics, not the terrain.
