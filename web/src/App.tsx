@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { API_BASE, VELACHERY, prefersReducedMotion } from './config'
-import { loadCurrent, loadRuns, postAPI, type Current, type Runs } from './lib/data'
+import { loadCurrent, loadParking, loadRuns, postAPI, type Current, type Runs } from './lib/data'
+import { loadGraph } from './lib/routing'
+import { nearestSegment, segmentValues } from './lib/streets'
 import { fromCurrent, replay } from './lib/scenario'
 import { MapView } from './map/MapView'
 import About from './screens/About'
@@ -44,9 +46,13 @@ export default function App() {
       v.water?.setRain(mix.length ? 0.8 : 0)   // no rain on screen when the forecast is dry
       if (mix.length) await v.showMix(mix, 'max', 0)
       if (!alive) return
+      // warm the answer while the camera flies: street tiles, parking, routing graph
+      nearestSegment(VELACHERY[0], VELACHERY[1]).then((sg) => { if (sg && mix.length) segmentValues(sg, mix) }).catch(() => {})
+      loadParking().catch(() => {})
+      if (mix.length) loadGraph().catch(() => {})
       if (screenFromHash() === 'tonight') {
         await v.openingSequence(() => v.water?.setRise(1, prefersReducedMotion() ? 0 : 3200))
-        await new Promise((res) => setTimeout(res, prefersReducedMotion() ? 0 : 900))
+        await new Promise((res) => setTimeout(res, prefersReducedMotion() ? 0 : 300))
         setPlace((p) => p ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
       } else {
         v.water?.setRise(1)
