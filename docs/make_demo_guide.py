@@ -63,10 +63,11 @@ def main():
         "",
         "- **0:15–1:15 Tonight:** the load flight from the Bay of Bengal, Michaung replay, street search, depth and time, dry parking, the amber route, then *Email me if this changes*. Show the real SNS email arriving (trigger it from `#admin` → *Run and send alerts* with 300 mm).",
         "- **1:15–1:50 What if / Hospitals:** drag to 400 mm; open Hospitals at 300 mm.",
-        f"- **1:50–2:30 Proof:** \"On wards we never tuned on, the model floods **{pct(h['model_hit_rate'])}** of the streets residents reported in 2015. "
-        f"An elevation-only map that floods the same area catches **{pct(h['matched_baseline_hit_rate'])}**; the naive lowest-20% map **{pct(h['baseline_hit_rate'])}**.\"",
-        f"  - Rain-driven streets: {pct(g['rain_plus_reservoir']['rain_driven']['hit_rate'])} vs {pct(g['rain_plus_reservoir']['rain_driven']['matched_baseline_hit_rate'])}. "
-        f"River-driven: {pct(g['rain_only']['river_driven']['hit_rate'])} without the Chembarambakkam release, {pct(g['rain_plus_reservoir']['river_driven']['hit_rate'])} with it.",
+        "- **1:50–2:30 Proof:** say it plainly: \"We tested it on wards we never tuned on. Pick a street residents reported "
+        f"flooded in 2015 and one they didn't: the model ranks the reported one deeper **{pct(proof['honest_test']['model']['auc'])}** of the time. "
+        f"Chance is 50%, elevation alone {pct(proof['honest_test']['low_elevation']['auc'])}, and the distance to the nearest canal "
+        f"{pct(proof['honest_test']['near_a_channel']['auc'])}. So the model is {proof['honest_test']['verdict']} at street level, and we show you that.\"",
+        f"  - The Chembarambakkam release matters on river-side streets: ranking {pct(proof['auc_even_wards']['model_rain_only']['river_driven']['auc'])} without it, {pct(proof['auc_even_wards']['model']['river_driven']['auc'])} with it.",
         f"  - One sentence: \"{proof['sentence']}\"",
     ]
     if an:
