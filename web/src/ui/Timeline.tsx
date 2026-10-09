@@ -1,8 +1,9 @@
 import type { Runs } from '../lib/data'
 import { clockLabel, type Scenario } from '../lib/scenario'
 
-export default function Timeline({ scenario, runs, hour, setHour }: {
+export default function Timeline({ scenario, runs, hour, setHour, marker = null }: {
   scenario: Scenario; runs: Runs; hour: number; setHour: (h: number) => void
+  marker?: { hour: number; label: string } | null
 }) {
   const hours = scenario.hours
   // rain bars from the runs' own hyetographs (blended like the depths)
@@ -21,8 +22,14 @@ export default function Timeline({ scenario, runs, hour, setHour }: {
       <div className="bars" aria-hidden>
         {rain.map((r, i) => <i key={i} className={i < hour ? 'on' : ''} style={{ height: `${Math.max(3, (r / maxR) * 100)}%` }} />)}
       </div>
-      <input type="range" min={1} max={hours} step={1} value={hour} onChange={(e) => setHour(Number(e.target.value))}
-        aria-label="Hour of the storm" />
+      <div style={{ position: 'relative' }}>
+        <input type="range" min={1} max={hours} step={1} value={hour} onChange={(e) => setHour(Number(e.target.value))}
+          aria-label="Hour of the storm" />
+        {marker && (
+          <button className="tl-marker" style={{ left: `${((marker.hour - 1) / Math.max(1, hours - 1)) * 100}%` }}
+            onClick={() => setHour(marker.hour)} title={marker.label}><span>{marker.label}</span></button>
+        )}
+      </div>
       <div className="ticks">{ticks.map((t) => <span key={t}>{clockLabel(scenario.start, t, hours > 24)}</span>)}</div>
     </div>
   )

@@ -64,7 +64,8 @@ void main() {
   vec2 q = vUv * vec2(900.0, 1500.0);
   float n1 = noise(q * 0.35 + vec2(time * 0.6, time * 0.4));
   float n2 = noise(q * 0.9 - vec2(time * 0.9, -time * 0.5));
-  vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35, (n2 - 0.5) * 0.35, 1.0));
+  float rip = 1.0 - smoothstep(0.05, 0.14, minDepth);   // ripples only when zoomed in
+  vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35 * rip, (n2 - 0.5) * 0.35 * rip, 1.0));
   vec3 view = normalize(camPos - vWorld);
   float fres = pow(1.0 - clamp(dot(nrm, view), 0.0, 1.0), 3.0);
   col = mix(col, vec3(0.78, 0.86, 0.9), fres * 0.35);
@@ -76,7 +77,7 @@ void main() {
   }
   col += amber * glint * 0.55;
   float edge = smoothstep(minDepth, minDepth + 0.11, depth);
-  float a = opacity * edge * (0.5 + 0.42 * t);
+  float a = opacity * edge * (0.72 + 0.28 * t);
   col *= 1.12;
   gl_FragColor = vec4(col * a, a);  // premultiplied
 }

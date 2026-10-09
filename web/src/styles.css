@@ -8,7 +8,7 @@
   --grey: #C9D4D8;
   --grey-dim: #8FA2AA;
   --line: rgba(201, 212, 216, 0.14);
-  --panel: rgba(14, 37, 48, 0.94);
+  --panel: #0E2530;
   --red: #E5484D;
   --head: 'Anek Latin', system-ui, sans-serif;
   --body: 'Hind', system-ui, sans-serif;
@@ -37,10 +37,14 @@ a { color: var(--grey); }
 
 /* top bar */
 .topbar {
-  position: absolute; top: 0; left: 0; right: 0; height: 56px; z-index: 5;
-  display: flex; align-items: center; gap: 36px; padding: 0 24px;
-  background: linear-gradient(rgba(10, 28, 36, 0.92), rgba(10, 28, 36, 0));
+  position: absolute; top: 0; left: 0; right: 0; height: 72px; z-index: 5;
+  display: flex; align-items: flex-start; padding-top: 8px; gap: 36px; padding-left: 24px; padding-right: 24px;
+  background: linear-gradient(#0B2029 0 44px, rgba(11, 32, 41, 0) 72px);
+  pointer-events: none;
 }
+.topbar > * { pointer-events: auto; }
+.brand { line-height: 40px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .brand { font-family: var(--head); font-weight: 650; font-size: 21px; letter-spacing: 0.01em; color: var(--grey); font-variation-settings: 'wdth' 110; }
 .nav { display: flex; gap: 6px; }
 .nav button {
@@ -114,13 +118,15 @@ a { color: var(--grey); }
 
 /* timeline */
 .timeline {
-  position: absolute; z-index: 4; left: 400px; right: 380px; bottom: 26px; padding: 10px 16px 8px;
+  position: absolute; z-index: 4; left: 400px; right: 380px; bottom: 40px; padding: 10px 16px 8px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
 }
 .timeline .bars { display: flex; align-items: flex-end; gap: 2px; height: 26px; margin-bottom: 4px; }
 .timeline .bars i { flex: 1; background: rgba(201, 212, 216, 0.22); border-radius: 1px; }
 .timeline .bars i.on { background: rgba(201, 212, 216, 0.55); }
 .timeline input[type='range'] { width: 100%; accent-color: var(--grey); }
+.tl-marker { position: absolute; top: -6px; width: 2px; height: 22px; background: var(--grey); border: 0; padding: 0; cursor: pointer; transform: translateX(-1px); }
+.tl-marker span { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11.5px; color: var(--grey); }
 .timeline .ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--grey-dim); }
 .timeline .now { font-family: var(--head); font-size: 14px; }
 
@@ -153,12 +159,13 @@ a { color: var(--grey); }
 
 /* hospitals */
 .hlist { list-style: none; padding: 0; margin: 8px 0 0; max-height: 52vh; overflow-y: auto; }
+.hlist li span:last-child { white-space: nowrap; }
 .hlist li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 4px; border-bottom: 1px solid var(--line); cursor: pointer; font-size: 14px; }
 .hlist li.cut { color: #6F8189; }
 .hlist li:hover { background: rgba(201, 212, 216, 0.05); }
 
 /* about */
-.about { left: 50%; top: 72px; transform: translateX(-50%); width: 680px; max-height: calc(100% - 100px); overflow-y: auto; }
+.about { left: 50%; top: 72px; transform: translateX(-50%); width: 680px; max-height: calc(100% - 130px); overflow-y: auto; }
 .about li { margin: 6px 0; }
 
 .loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 10; pointer-events: none; font-family: var(--head); color: var(--grey-dim); }
@@ -175,3 +182,12 @@ a { color: var(--grey); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+.sticky-foot { position: sticky; bottom: -14px; margin: 10px -16px -14px; padding: 9px 16px 12px; background: var(--panel); border-top: 1px solid var(--line); }
+.seg.tight button { padding: 4px 8px; font-size: 12.5px; }
+.strip { position: relative; height: 54px; margin: 6px 4px 2px; border-top: 1px solid var(--line); }
+.strip .mk { position: absolute; top: 0; transform: translateX(-50%); text-align: center; font-size: 12px; color: var(--grey-dim); white-space: nowrap; }
+.strip .mk::before { content: ''; display: block; width: 1px; height: 10px; margin: 0 auto 2px; background: var(--grey-dim); }
+.strip .mk b { display: block; font-family: var(--head); font-size: 22px; font-weight: 600; color: var(--grey); }
+.strip .mk.model b { color: #fff; font-size: 26px; }
+details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15px; margin: 2px 0 6px; }

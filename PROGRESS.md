@@ -198,3 +198,19 @@ Acted on:
 7. Frontend consistency: street peak = max of the same hourly series as the time text; routing/hospital edge depth = p90 of samples (same statistic as the card), server and client.
 - **Calibration withdrawn:** with the rank-based score, drain capacity 0–30 mm/h all score 0.53–0.54 with overlapping CIs, so **10 mm/h is a stated assumption** (`calibration.json`, About, Proof).
 - v3 runs (all 16 + ANUGA) restarted 16:05 IST with these fixes.
+
+### Design critic #1 (Fri ~16:40) → acted on
+Blockers fixed:
+1. The card said 154 cm over a dry map (route planning jumped the map to the leave-by hour). The map now stays at the peak, and the leave-by hour is a marker on the timeline.
+2. What if at 200 mm showed nothing (a zero-weight 150 mm run blocked the blend). Zero-weight runs are dropped in `designMix` and in the forecast blend.
+
+Majors fixed:
+- Opening starts low over the bay (zoom 10.6, pitch 55, bearing −60), fog hides the data edge, the flight is 5 s, water rises from 2.5 s, no centred loading text.
+- Darker building ramp (opacity 0.85); shallow water more opaque (0.72 + 0.28·t), so the water is the bold element.
+- 112 line in a sticky footer; compact replay row; duplicate route line removed.
+- Nav is a solid bar (no label collisions).
+- Proof: four numbers on one shared scale (no bigger number for the model than for a baseline that beats it); test tables and limits collapsed; city framed below the headline card.
+- Hospitals: cut-off hospitals are labelled hollow white rings and reachable ones small dots; names title-cased; no wrap. The pipeline drops veterinary/animal places (applies on the next `05_features` run).
+
+Minors: ripples fade when zoomed out and water under 15 cm is hidden below zoom 13; "peak Sun 3 PM"; "No rain forecast tonight"; route cleared when leaving Tonight; timeline and About clear the credits; panels opaque.
+QA tester #1 was cut off by a usage limit (re-run).

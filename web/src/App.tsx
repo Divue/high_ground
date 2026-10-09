@@ -45,9 +45,8 @@ export default function App() {
       if (mix.length) await v.showMix(mix, 'max', 0)
       if (!alive) return
       if (screenFromHash() === 'tonight') {
-        await v.openingSequence()
-        v.water?.setRise(1, prefersReducedMotion() ? 0 : 3200)
-        await new Promise((res) => setTimeout(res, prefersReducedMotion() ? 0 : 1400))
+        await v.openingSequence(() => v.water?.setRise(1, prefersReducedMotion() ? 0 : 3200))
+        await new Promise((res) => setTimeout(res, prefersReducedMotion() ? 0 : 900))
         setPlace((p) => p ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
       } else {
         v.water?.setRise(1)
@@ -87,7 +86,7 @@ export default function App() {
           {NAV.map(([id, label]) => <button key={id} aria-current={screen === id ? 'page' : undefined} onClick={() => go(id)}>{label}</button>)}
         </nav>
       </header>
-      {intro && <div className="loading" aria-live="polite">{mv ? '' : 'Loading Chennai…'}</div>}
+      {intro && !mv && <div className="loading" aria-live="polite"><span className="sr-only">Loading Chennai</span></div>}
       {mv && runs && scenario && !intro && (
         <>
           {screen === 'tonight' && <Tonight mv={mv} runs={runs} current={current} scenario={scenario} replayRun={replayRun}

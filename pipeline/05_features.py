@@ -198,7 +198,8 @@ def main():
         except ValueError:
             return 0
     hosp = [x for x in h.hospitals if x["name"] and w <= x["lon"] <= e and s <= x["lat"] <= n
-            and (x["area"] >= 4000 or beds(x) >= 100)]
+            and (x["area"] >= 4000 or beds(x) >= 100)
+            and not any(k in x["name"].lower() for k in ("veterinary", "animal", "pinjrapole"))]
     seen = set()
     hosp = [x for x in hosp if not (x["name"].lower() in seen or seen.add(x["name"].lower()))]
     hq = np.array([[x["lon"], x["lat"]] for x in hosp])

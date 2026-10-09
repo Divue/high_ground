@@ -190,7 +190,7 @@ export class WaterLayer implements CustomLayerInterface {
     // rain follows the camera target and fades out when zoomed out
     this.rainLevel += (this.rainTarget - this.rainLevel) * 0.05
     const zoom = this.map.getZoom()
-    u.minDepth.value = 0.04 + 0.11 * Math.min(1, Math.max(0, (13.5 - zoom) / 1.5))
+    u.minDepth.value = 0.04 + 0.11 * Math.min(1, Math.max(0, (14 - zoom) / 1.0))
     const ru = this.rain.material.uniforms
     const c = MercatorCoordinate.fromLngLat(this.map.getCenter())
     const box = 2.2 / Math.pow(2, zoom)

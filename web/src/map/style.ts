@@ -62,11 +62,11 @@ export function baseStyle(): StyleSpecification {
         paint: {
           'fill-extrusion-color': [
             'interpolate', ['linear'], ['coalesce', ['get', 'height'], 8],
-            4, '#2E4651', 12, TOKENS.wetAsphalt, 30, '#4C5F63', 60, '#5E6A63',
+            4, '#1E3742', 12, '#24404C', 30, '#2B4753', 60, '#33505B',
           ],
           'fill-extrusion-height': ['coalesce', ['get', 'height'], 8],
           'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],
-          'fill-extrusion-opacity': 0.92,
+          'fill-extrusion-opacity': 0.85,
           'fill-extrusion-vertical-gradient': true,
         },
       },
@@ -74,8 +74,8 @@ export function baseStyle(): StyleSpecification {
       ...base.filter((l) => l.type === 'symbol'),
     ],
     sky: {
-      'sky-color': '#0A1C24', 'horizon-color': '#1B3B47', 'fog-color': '#14303D',
-      'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.3, 'atmosphere-blend': 0.4,
+      'sky-color': '#0B2029', 'horizon-color': '#14303D', 'fog-color': '#0B2029',
+      'sky-horizon-blend': 0.7, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.45, 'atmosphere-blend': 0.4,
     },
   } as StyleSpecification
 }

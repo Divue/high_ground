@@ -29,7 +29,8 @@ export function designMix(mm: number, tide: 'mean' | 'high'): MixPart[] {
   for (let i = 0; i < t.length - 1; i++) {
     if (mm >= t[i] && mm <= t[i + 1]) {
       const w = (mm - t[i]) / (t[i + 1] - t[i])
-      return [{ run: `design_${t[i]}_${tide}`, w: 1 - w }, { run: `design_${t[i + 1]}_${tide}`, w }]
+      // a run with no weight is never fetched (it may not even exist)
+      return [{ run: `design_${t[i]}_${tide}`, w: 1 - w }, { run: `design_${t[i + 1]}_${tide}`, w }].filter((p) => p.w > 0)
     }
   }
   return [{ run: `design_200_${tide}`, w: 1 }]
@@ -43,7 +44,8 @@ export function fromCurrent(cur: Current | null, runs: Runs): Scenario {
     }
   }
   const s = cur.scenario
-  const mix = s.lower === s.upper ? [{ run: s.lower, w: 1 }] : [{ run: s.lower, w: 1 - s.w }, { run: s.upper, w: s.w }]
+  const mix = s.lower === s.upper ? [{ run: s.lower, w: 1 }]
+    : [{ run: s.lower, w: 1 - s.w }, { run: s.upper, w: s.w }].filter((p) => p.w > 0)
   return {
     kind: 'forecast', mix, start: new Date(cur.start_local), hours: runs[s.lower]?.hours ?? 30,
     label: `Tonight's forecast, about ${Math.round(cur.forecast.mean_24h_mm)} mm in 24 hours`,

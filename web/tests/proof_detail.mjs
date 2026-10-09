@@ -5,7 +5,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 const errs = []
 page.on('pageerror', (e) => errs.push(String(e)))
 await page.goto((process.argv[2] ?? 'http://127.0.0.1:5173/') + '#proof')
-await page.waitForSelector('.hit', { timeout: 120000 })
+await page.waitForSelector('.strip', { timeout: 120000 })
 await page.waitForTimeout(5000)
 await page.screenshot({ path: `${out}/proof_split.png`, timeout: 120000 })
 await page.click('button:has-text("Detail: ANUGA")')

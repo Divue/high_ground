@@ -40,6 +40,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const flown = useRef<string>('')
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
+  useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
 
   // Answer for the place under the active scenario
   useEffect(() => {
@@ -131,7 +132,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       const plan = await leaveByPlan([place.lon, place.lat], [o.lon, o.lat], mv.meta,
         (h) => blendedFrame(scenario.mix, h, n), until, 30)
       setRoute({ normal: plan.normal, safe: plan.route, to: o.name, leaveBy: plan.leaveByHour, until, streetFloods })
-      if (plan.leaveByHour) setHour(plan.leaveByHour)
+      // the map stays at the peak the card describes; the leave-by hour is marked on the timeline
       mv.setGeoJSON('route-normal', plan.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.normal.coords } } : null)
       mv.setGeoJSON('route-safe', plan.route ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.route.coords } } : null)
     } finally { setRouting(false) }
@@ -155,10 +156,10 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     <>
       <div className="panel left" aria-live="polite">
         <Search onPick={setPlace} />
-        <div className="seg" role="group" aria-label="Replay a storm">
+        <div className="seg tight" role="group" aria-label="Replay a storm">
           <button aria-pressed={!replayRun} onClick={() => setReplayRun(null)}>Tonight</button>
           {REPLAYS.filter((r) => runs[r.run]).map((r) => (
-            <button key={r.run} aria-pressed={replayRun === r.run} onClick={() => setReplayRun(r.run)}>Replay {r.short}</button>
+            <button key={r.run} aria-pressed={replayRun === r.run} onClick={() => setReplayRun(r.run)}>{r.short}</button>
           ))}
         </div>
         <div className="muted small" style={{ marginTop: 8 }}>
@@ -169,8 +170,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
         {dryTonight && (
           <div style={{ marginTop: 12 }}>
-            <h2>Tonight looks dry</h2>
-            <p className="muted">The forecast for the next 24 hours is {scenario.forecastMm != null ? `about ${Math.round(scenario.forecastMm)} mm` : 'unavailable'}, below the smallest storm we model (50 mm). Replay a past storm to see what HighGround shows on a bad night.</p>
+            <h2>{scenario.forecastMm != null && scenario.forecastMm < 1 ? 'No rain forecast tonight' : 'Tonight looks dry'}</h2>
+            <p className="muted">{scenario.forecastMm != null && scenario.forecastMm >= 1 ? `About ${Math.round(scenario.forecastMm)} mm is forecast in the next 24 hours, below the smallest storm we model (50 mm). ` : ''}Replay a past storm to see what HighGround shows on a bad night.</p>
             <button className="btn primary" onClick={() => setReplayRun('michaung2023')}>See Cyclone Michaung as if it were tonight</button>
           </div>
         )}
@@ -184,7 +185,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <div className="when">
               {ans.hoursTo15 ? <>Reaches 15 cm by {clockLabel(scenario.start, ans.hoursTo15)}</> :
                 ans.maxCm >= 5 ? <>Stays under 15 cm</> : <>Stays dry</>}
-              {ans.peakHour && ans.maxCm >= 5 ? <span className="muted"> · deepest around {clockLabel(scenario.start, ans.peakHour)}</span> : null}
+              {ans.peakHour && ans.maxCm >= 5 ? <span className="muted"> · peak {clockLabel(scenario.start, ans.peakHour)}</span> : null}
             </div>
             <span className={`band ${band.code}`}>{band.label}</span>
             <span className="chip">from the model</span>
@@ -219,22 +220,17 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
               </div>
             ))}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
-            {route && (
-              <p className="small muted" style={{ margin: '4px 0 0' }}>
-                {route.safe && route.leaveBy
-                  ? <>Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}{route.normal && route.safe.lengthM - route.normal.lengthM > 30 ? `, ${fmtDistance(route.safe.lengthM - route.normal.lengthM)} longer than the usual way (grey)` : ''}. Leave by {clockLabel(scenario.start, route.leaveBy)}.</>
-                  : <>No route to {route.to} stays under 30 cm before your street floods.</>}
-              </p>
-            )}
             <div className="divider" />
             <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />
           </>
         )}
         {!place && !dryTonight && <p className="muted" style={{ marginTop: 12 }}>Type your street to see how deep the water gets there tonight, when, and where to move your car.</p>}
-        <div className="divider" />
-        <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <span className="emergency">112</span>.</p>
+        <div className="sticky-foot">
+          <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <span className="emergency">112</span>.</p>
+        </div>
       </div>
-      {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={setHour} />}
+      {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={setHour}
+        marker={route?.leaveBy ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
     </>
   )
 }

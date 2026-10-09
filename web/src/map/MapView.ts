@@ -31,10 +31,10 @@ export class MapView {
     this.map = new MLMap({
       container,
       style: baseStyle(),
-      center: [80.62, 12.86],   // over the Bay of Bengal
-      zoom: 9.2,
-      pitch: 20,
-      bearing: -12,
+      center: [80.40, 12.95],   // low over the Bay of Bengal, looking back at the coast
+      zoom: 10.6,
+      pitch: 55,
+      bearing: -60,
       maxPitch: 75,
       attributionControl: { compact: true },
       canvasContextAttributes: { antialias: true },
@@ -73,10 +73,13 @@ export class MapView {
     m.addLayer({ id: 'street', type: 'line', source: 'street', layout: { 'line-cap': 'round' },
       paint: { 'line-color': TOKENS.rainGrey, 'line-width': 6, 'line-opacity': 0.9, 'line-blur': 1 } })
     m.addLayer({ id: 'hospitals', type: 'circle', source: 'hospitals',
-      paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 15, 7],
-        'circle-color': ['case', ['==', ['get', 'reach'], 1], TOKENS.rainGrey, '#4A5A60'],
-        'circle-stroke-color': TOKENS.stormSky, 'circle-stroke-width': 1.5,
-        'circle-opacity': ['case', ['==', ['get', 'reach'], 1], 1, 0.55] } })
+      paint: { 'circle-radius': ['case', ['==', ['get', 'reach'], 1], ['interpolate', ['linear'], ['zoom'], 10, 2.5, 15, 5], ['interpolate', ['linear'], ['zoom'], 10, 6, 15, 10]],
+        'circle-color': ['case', ['==', ['get', 'reach'], 1], TOKENS.rainGrey, 'rgba(0,0,0,0)'],
+        'circle-stroke-color': ['case', ['==', ['get', 'reach'], 1], TOKENS.stormSky, '#ffffff'],
+        'circle-stroke-width': ['case', ['==', ['get', 'reach'], 1], 1, 2.5] } })
+    m.addLayer({ id: 'hospitals-label', type: 'symbol', source: 'hospitals', filter: ['==', ['get', 'reach'], 0],
+      layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 12, 'text-offset': [0, 1.3], 'text-anchor': 'top', 'text-max-width': 12 },
+      paint: { 'text-color': '#ffffff', 'text-halo-color': TOKENS.stormSky, 'text-halo-width': 1.5 } })
     m.addLayer({ id: 'parking', type: 'circle', source: 'parking',
       paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 16, 9], 'circle-color': TOKENS.amber,
         'circle-stroke-color': TOKENS.stormSky, 'circle-stroke-width': 2 } })
@@ -122,13 +125,18 @@ export class MapView {
   }
 
   /** The one orchestrated moment: high over the Bay of Bengal, descend to Velachery. */
-  async openingSequence() {
+  async openingSequence(onLanding?: () => void) {
     if (prefersReducedMotion()) {
       this.map.jumpTo({ center: VELACHERY, zoom: 14.2, pitch: 60, bearing: -18 })
+      onLanding?.()
       return
     }
-    await new Promise((r) => setTimeout(r, 400))
-    this.map.flyTo({ center: VELACHERY, zoom: 14.2, pitch: 60, bearing: -18, duration: 7000, curve: 1.3, essential: true })
+    await new Promise((r) => setTimeout(r, 300))
+    this.map.flyTo({ center: VELACHERY, zoom: 14.2, pitch: 60, bearing: -18, duration: 5000, curve: 1.2, essential: true })
+    // the water starts rising before the camera settles
+    const t = window.setTimeout(() => onLanding?.(), 2500)
     await new Promise<void>((r) => this.map.once('moveend', () => r()))
+    window.clearTimeout(t)
+    onLanding?.()
   }
 }

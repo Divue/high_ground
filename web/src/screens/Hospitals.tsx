@@ -26,6 +26,7 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
   }, [mv])
   useEffect(() => { if (runs[run]) mv.showMix([{ run, w: 1 }], 'max', 350) }, [run, runs, mv])
 
+  const title = (n: string) => (n === n.toLowerCase() ? n.replace(/\b\w/g, (c) => c.toUpperCase()) : n)
   const rows = useMemo(() => {
     if (!data || !data.runs[run]) return []
     const r = data.runs[run]
@@ -34,7 +35,7 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
   }, [data, run])
 
   useEffect(() => {
-    mv.setGeoJSON('hospitals', { type: 'FeatureCollection', features: rows.map((h) => ({ type: 'Feature', properties: { name: h.name, reach: h.reach },
+    mv.setGeoJSON('hospitals', { type: 'FeatureCollection', features: rows.map((h) => ({ type: 'Feature', properties: { name: title(h.name), reach: h.reach },
       geometry: { type: 'Point', coordinates: [h.lon, h.lat] } })) })
   }, [rows, mv])
 
@@ -71,7 +72,7 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
       <ul className="hlist">
         {rows.map((h) => (
           <li key={h.id} className={h.reach ? '' : 'cut'} onClick={() => pick(h.i)} aria-current={sel === h.i}>
-            <span>{h.name}</span><span className="muted small">{h.reach ? 'Reachable' : 'Cut off'}</span>
+            <span>{title(h.name)}</span><span className="muted small">{h.reach ? 'Reachable' : 'Cut off'}</span>
           </li>
         ))}
       </ul>

@@ -42,7 +42,8 @@ export default function Proof({ mv }: { mv: MapView }) {
   useEffect(() => { getJSON<ProofJ>('proof.json').then(setP).catch(() => setP(null)) }, [])
 
   useEffect(() => {
-    mv.map.easeTo({ center: [80.215, 13.02], zoom: 11.6, pitch: 0, bearing: 0, duration: 1200 })
+    // city on screen below the headline card, centred on the split line
+    mv.map.easeTo({ center: [80.225, 13.03], zoom: 11.5, pitch: 0, bearing: 0, padding: { top: 240, bottom: 0, left: 0, right: 0 }, duration: 1200 })
     mv.showMix([{ run: 'dec2015_reservoir', w: 1 }], 'max', 500)
     mv.water?.setRain(0)
     const style = baseStyle()
@@ -120,15 +121,15 @@ export default function Proof({ mv }: { mv: MapView }) {
       {p && h && g && t && (
         <>
           {!detail && <div className="panel proof-center">
-            <p className="hit-sub" style={{ margin: '0 0 8px' }}>{t.question}</p>
-            <div className="vs">
-              <div>
-                <div className="hit">{pct(t.model.auc)}</div>
-                <div className="hit-sub">the model</div>
-              </div>
-              <div><div className="base">50%</div><div className="hit-sub">chance</div></div>
-              <div><div className="base">{pct(t.low_elevation.auc)}</div><div className="hit-sub">elevation alone</div></div>
-              <div><div className="base">{pct(t.near_a_channel.auc)}</div><div className="hit-sub">nearest channel</div></div>
+            <p style={{ margin: '0 0 4px', fontFamily: 'var(--head)', fontSize: 17 }}>{t.question}</p>
+            {/* all four on one shared scale: nothing is drawn bigger than a baseline that beats it */}
+            <div className="strip" aria-label="Ranking test results">
+              {([['model', 'the model', t.model.auc], ['chance', 'chance', 0.5], ['elev', 'elevation alone', t.low_elevation.auc], ['chan', 'nearest channel', t.near_a_channel.auc]] as const)
+                .map(([k, label, v]) => (
+                  <div key={k} className={`mk${k === 'model' ? ' model' : ''}`} style={{ left: `${(((v ?? 0.5) - 0.44) / 0.14) * 100}%` }}>
+                    <b>{pct(v)}</b>{label}
+                  </div>
+                ))}
             </div>
             <p style={{ margin: '12px 0 4px' }}>On wards we never tuned on, the model is <b>{t.verdict}</b>{t.model.ci95 ? ` (95% range ${pct(t.model.ci95[0])}–${pct(t.model.ci95[1])})` : ''}.</p>
             <p className="muted small" style={{ margin: 0 }}>
@@ -137,7 +138,8 @@ export default function Proof({ mv }: { mv: MapView }) {
           </div>}
           <div className="panel proof-bottom" style={detail ? { width: 620 } : undefined}>
             {!detail && <>
-            <h3 style={{ marginTop: 0 }}>Every test we ran, on the {h.reported_segments} reported streets in the held-out wards</h3>
+            <details className="tests">
+            <summary>Every test we ran, on the {h.reported_segments} reported streets in the held-out wards</summary>
             <table className="proof-table">
               <thead><tr><th>How often a reported street ranks above an unreported one</th><th>All</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
               <tbody>
@@ -149,7 +151,17 @@ export default function Proof({ mv }: { mv: MapView }) {
             {nr && <p className="small" style={{ marginTop: 10 }}>Satellite (NRSC) 2015 flood extent: the model covers {pct(nr.model.hit)} of it, a random map of the same size {pct(nr.random_same_share.hit)}, the lowest ground of the same size {pct(nr.elevation_same_share.hit)}.</p>}
             {pts && <p className="small">GCC’s own 2015 flood hotspots, ranked against random road points: model {pct(pts.model)}, distance to a channel {pct(pts.near_a_channel)}, elevation {pct(pts.low_elevation)}, random {pct(pts.random)}.</p>}
             {p.null_maps && <p className="small muted">Why we do not lead with “share of reported streets flooded”: the model floods {pct(h.model_hit_rate)} of them, but a random speckle of the same size floods {pct(p.null_maps.random_speckle_same_share?.hit_rate)}, because reports are spread wherever people live.</p>}
+            </details>
             </>}
+            {!detail && <details className="tests">
+            <summary>Drain capacity and the limits of this test</summary>
+            <p className="small" style={{ margin: 0 }}>
+              {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${c.auc != null ? pct(c.auc) : pct(c.hit_rate)}`).join(' · ')}
+              <span className="muted"> on the tuning half. Within the error bars these are the same, so we use {p.split.value_mm_h} mm/h as an assumption.</span>
+            </p>
+            <h3 style={{ fontSize: 14 }}>Limits</h3>
+            <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
+            </details>}
             {p.anuga && (
               <div className="small">
                 <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics, so this checks the arithmetic, not the terrain.</p>
@@ -160,15 +172,7 @@ export default function Proof({ mv }: { mv: MapView }) {
                 </div>
               </div>
             )}
-            {!detail && <>
-            <h3>Drain capacity</h3>
-            <p className="small" style={{ margin: 0 }}>
-              {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${c.auc != null ? pct(c.auc) : pct(c.hit_rate)}`).join(' · ')}
-              <span className="muted"> on the tuning half. Within the error bars these are the same, so we use {p.split.value_mm_h} mm/h as an assumption.</span>
-            </p>
-            <h3>Limits of this test</h3>
-            <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
-            </>}
+
           </div>
         </>
       )}
