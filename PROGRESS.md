@@ -160,3 +160,12 @@ Decision rule, fixed before results: adopt a variant only if the calibration-hal
 - Found while picking demo streets: in every scenario, ~17,700 land cells (2% of the city) were already ≥15 cm when the storm started, e.g. streets around Velachery Lake at ~150 cm with time-to-15 cm of 0. Cause: channels started full to the **sink-filled spill level**, which in raised pit reaches sits up to 0.5 m+ above the measured water surface, so water spilled onto adjacent land during the 2 h spin-up.
 - Fix: channels start at their **measured water surface** (`clip(DTM − bed, 0, burn depth)`), in both Stage A and ANUGA. A 1 h check of the 50 mm storm leaves 6,205 wet land cells (0.7%), mostly Pallikaranai marsh holding ~22 cm and low land beside channels, which is realistic for the monsoon.
 - All v1 outputs archived in `data/out/runs_v1/` (calibration, runs, ANUGA 92.8% agreement on the v1 setup). Calibration, the 16 runs and ANUGA restarted at 11:14 IST; expected done ~16:30.
+
+### v2 results so far (Fri 15:00 IST)
+
+- Calibration (odd wards) chose **0 mm/h** again: gains 0.210 / 0.203 / 0.191 / 0.154 / 0.106 for 0 / 5 / 10 / 20 / 30 mm/h.
+- **P3 PASS** on v2: model 39.3% vs same-area elevation map 25.8% vs lowest-20% 10.0% (held-out wards, 3,200 segments). Rain-driven 41.3% vs 25.1%; river-driven 13.8% (rain only) → 18.8% (with release) vs 32.6%.
+- **ANUGA v2:** 92.4% cell agreement, CSI 0.77, depth correlation 0.90, median |Δ| 0.7 cm; 2 h 18 min (12:33 → 14:51), within the timebox. Proof screen has a **Detail** toggle: ANUGA vs fast model on the Velachery box, identical styling (`proof/anuga_200mm.png`, `proof/fast_200mm.png`).
+- All three replays are done (mass error 0.0000%). Michaung: 36.5% of street segments ≥15 cm, 27/47 hospitals cut off. Fengal (114 mm): 23.0% of segments and 13/47 hospitals, probably high. **New limit added** (About, proof caveats, assistant `model_limits`): drain capacity was tuned on the extreme 2015 event, so smaller storms are probably overstated.
+- Demo streets (Michaung replay): Arumugam Road (154 cm, reaches 15 cm by 11 PM), Kuberan Nagar 8th Street, Kakkan Nagar Main Road (`docs/DEMO.md` after the post-run step).
+- Local moto test of subscribe → forecast-check → SNS → filtered delivery: **passes** (`infra/tests/test_lambdas_moto.py`).

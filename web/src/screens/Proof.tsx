@@ -74,7 +74,7 @@ export default function Proof({ mv }: { mv: MapView }) {
       m.addLayer({ id: 'detail', type: 'raster', source: 'detail', paint: { 'raster-opacity': 0.95, 'raster-fade-duration': 0 } }, 'buildings-3d')
       mv.water?.setOpacity(0)
       const lons = meta.coordinates.map((c) => c[0]), lats = meta.coordinates.map((c) => c[1])
-      m.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: 80, pitch: 0, duration: 1200 })
+      m.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: { top: 90, bottom: 190, left: 60, right: 60 }, pitch: 0, duration: 1200 })
     }).catch(() => setDetail(null))
     return () => { dead = true }
   }, [detail, mv])
@@ -108,7 +108,7 @@ export default function Proof({ mv }: { mv: MapView }) {
 
       {p && h && g && (
         <>
-          <div className="panel proof-center">
+          {!detail && <div className="panel proof-center">
             <div className="vs">
               <div>
                 <div className="hit">{pct(h.model_hit_rate)}</div>
@@ -128,8 +128,9 @@ export default function Proof({ mv }: { mv: MapView }) {
             <p className="muted small" style={{ margin: 0 }}>
               Scored only on the {h.reported_segments} reported street segments in the other half. {p.metric_note}
             </p>
-          </div>
-          <div className="panel proof-bottom">
+          </div>}
+          <div className="panel proof-bottom" style={detail ? { width: 620 } : undefined}>
+            {!detail && <>
             <h3 style={{ marginTop: 0 }}>Where rain modelling works, and why the reservoir mattered</h3>
             <table className="proof-table">
               <thead><tr><th></th><th>All reported streets</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
@@ -147,6 +148,7 @@ export default function Proof({ mv }: { mv: MapView }) {
               GCC hazard zones: {pct(p.zones.rain_plus_reservoir?.share_in_moderate_high_veryhigh)} of the model’s flooded area falls in moderate, high or very high zones, which cover {pct(p.zones.rain_plus_reservoir?.city_share_moderate_or_higher)} of the zoned city.
               {p.nrsc_2015.rain_plus_reservoir && <> Satellite (NRSC) 2015 inundation: the model covers {pct(p.nrsc_2015.rain_plus_reservoir.hit)} of it.</>}
             </p>
+            </>}
             {p.anuga && (
               <div className="small">
                 <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics.</p>
@@ -157,6 +159,7 @@ export default function Proof({ mv }: { mv: MapView }) {
                 </div>
               </div>
             )}
+            {!detail && <>
             <h3>Tuning, on the other half of the wards</h3>
             <p className="small" style={{ margin: 0 }}>
               {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${pct(c.hit_rate)} vs ${pct(c.matched_baseline_hit_rate)}`).join(' · ')}
@@ -164,6 +167,7 @@ export default function Proof({ mv }: { mv: MapView }) {
             </p>
             <h3>Limits of this test</h3>
             <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
+            </>}
           </div>
         </>
       )}
