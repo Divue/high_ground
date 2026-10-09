@@ -14,17 +14,17 @@ Built for **Environmental Hacks** (Bharat Builds Tour, WeMakeDevs × AWS), Heat 
 
 | Part | What it does |
 |---|---|
-| `pipeline/` | Offline Python. Fetches open data, builds a bare-earth terrain from the Copernicus surface model, runs a 2D flood model for 12 design storms and 3 historical storms, calibrates drain capacity on half the wards, validates on the other half, and exports tiles and JSON. |
+| `pipeline/` | Offline Python. Fetches open data, builds a bare-earth terrain from the Copernicus surface model, runs a 2D flood model for 12 design storms and 3 historical storms, tests the 2015 replay against citizen reports on wards held out from any tuning (drain capacity is a stated assumption, 10 mm/h), cross-checks Velachery with ANUGA, and exports tiles and JSON. |
 | `infra/` | AWS SAM stack: S3 + CloudFront, Lambda (forecast check, subscribe, assistant, geocode), API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amazon Bedrock via the Strands Agents SDK, Amazon Location Service, Amplify Hosting. |
 | `web/` | Vite + React + TypeScript. MapLibre GL (dark Protomaps basemap, 3D terrain, extruded buildings) with a three.js custom layer for water and rain. Screens: Tonight, What if, Proof, Hospitals, About the model. |
 
 ## The model, briefly
 
 - **Terrain:** Copernicus DEM GLO-30 (a surface model) → buildings, tree canopy (ESA WorldCover), bridges and unmapped tall objects masked and filled → 5th-percentile filter → rivers and drains burnt 2 m → buildings re-added as +3 m obstacles where they fill a cell and no road passes. 30 m grid, EPSG:32644, 836 × 1440 cells.
-- **Solver:** local-inertial shallow water (Bates et al. 2010) in numba. Adaptive timestep, Froude cap, donor-cell limiter for exact mass conservation (mass error < 0.01% on every run). Rain is a source term; drains are one uniform capacity in mm/h on urban cells; infiltration on parks and open ground; the sea is held at mean or high tide; the land edges of the box are free outfalls.
+- **Solver:** local-inertial shallow water (Bates et al. 2010) in numba. Adaptive timestep, Froude cap, donor-cell limiter for exact mass conservation (mass error < 0.01% on every run). Rain is a source term; drains are one uniform capacity in mm/h on urban cells; infiltration on parks and open ground; the sea is held at mean or high tide; the land edges of the box are free outfalls, except where the Adyar enters.
 - **Storms:** 50–400 mm in 24 hours (front-loaded) at mean and high tide; 1–2 Dec 2015 with and without the Chembarambakkam release (29,000 cusecs, CAG audit timeline); Cyclone Michaung 2023 (415 mm, IMD Meenambakkam); Cyclone Fengal 2024 (114 mm). Historical timing comes from ERA5 via Open-Meteo, scaled to IMD totals.
 - **Tested, honestly:** we held out half of the GCC wards and asked the 2015 citizen reports a question that cannot be gamed by flooding more: pick a reported-flooded street and an unreported one; does the model rank the reported one deeper? It does slightly more often than chance; elevation alone does not; distance to a canal does a little better than the model. An independent review showed our first metric rewarded patchy maps (even random noise), so we withdrew it, and storm-drain capacity is a stated assumption because the data cannot pin it down. Every number is in `proof.json` and on the Proof screen.
-- **Cross-check:** ANUGA (Geoscience Australia) on a box around Velachery and Pallikaranai.
+- **Cross-check:** ANUGA (Geoscience Australia) on a 103,000-triangle mesh around Velachery and Pallikaranai, same 30 m terrain and 200 mm storm: the two models agree on 94% of cells about whether water passes 15 cm (depth correlation 0.90). That checks the numerics, not the terrain.
 
 The limits are written out on the About screen. The short version: 30 m satellite terrain, drains approximated, the reservoir release is an assumption, no storm surge, not an official warning.
 
@@ -36,7 +36,7 @@ source pipeline/env.sh
 python pipeline/00_fetch.py          # DEM tiles, OSM, WorldCover, validation KMLs, ERA5 timing
 python pipeline/01_condition.py      # terrain
 python pipeline/inspect_kml.py       # look at the validation data before scoring it
-pipeline/run_all.sh                  # calibration + all 16 runs (~5 h on a 2-core laptop)
+pipeline/run_all.sh                  # all 16 runs (~6 h on a 2-core laptop)
 python pipeline/06_validate.py       # proof.json
 python pipeline/04_streets.py && python pipeline/05_features.py && python pipeline/07_export_tiles.py
 python pipeline/gates.py p1|p2|p3    # scripted phase gates
