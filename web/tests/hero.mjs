@@ -40,6 +40,9 @@ await step('03_search', async () => {
   await page.waitForSelector('.readout', { timeout: 30_000 })
 })
 await step('04_route', async () => {
+  // the second dry place sits behind "1 more dry place nearby"
+  const more = page.locator('button:has-text("1 more dry place nearby")')
+  if (await more.count()) await more.first().click()
   const btn = page.locator('button:has-text("when to leave")').first()
   await btn.click()
   await page.waitForSelector('text=/Move your car to|No dry way out|Leave by|No route to/', { timeout: 90_000 })

@@ -17,9 +17,9 @@ export const TOKENS = {
 export const DESIGN_TOTALS = [50, 100, 150, 200, 300, 400]
 
 export const REPLAYS = [
-  { run: 'dec2015_reservoir', label: '2015 floods', short: '2015' },
-  { run: 'michaung2023', label: 'Cyclone Michaung, 2023', short: 'Michaung 2023' },
-  { run: 'fengal2024', label: 'Cyclone Fengal, 2024', short: 'Fengal 2024' },
+  { run: 'dec2015_reservoir', label: '2015 floods', short: '2015', line: 'The Dec 2015 floods' },
+  { run: 'michaung2023', label: 'Cyclone Michaung, 2023', short: 'Michaung 2023', line: 'Cyclone Michaung 2023' },
+  { run: 'fengal2024', label: 'Cyclone Fengal, 2024', short: 'Fengal 2024', line: 'Cyclone Fengal 2024' },
 ] as const
 
 export const BANDS = [

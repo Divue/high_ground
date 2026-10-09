@@ -1,40 +1,40 @@
 {
  "01_load": {
   "ok": true,
-  "ms": 12092
+  "ms": 6890
  },
  "02_answer_default": {
   "ok": true,
-  "ms": 655
+  "ms": 433
  },
  "03_search": {
   "ok": true,
-  "ms": 6824
+  "ms": 7274
  },
  "04_route": {
   "ok": true,
-  "ms": 1857
+  "ms": 1879
  },
  "05_subscribe": {
   "ok": true,
-  "ms": 322
+  "ms": 65
  },
- "fps": 57,
+ "fps": 59,
  "06_whatif": {
   "ok": true,
-  "ms": 4532
+  "ms": 4526
  },
  "07_proof": {
   "ok": true,
-  "ms": 4540
+  "ms": 4513
  },
  "08_hospitals": {
   "ok": true,
-  "ms": 4539
+  "ms": 4512
  },
  "09_about": {
   "ok": true,
-  "ms": 4569
+  "ms": 4511
  },
  "renderer": "ANGLE (AMD, AMD Radeon Vega 3 Graphics (radeonsi raven2 ACO), OpenGL ES 3.2)",
  "errors": [],

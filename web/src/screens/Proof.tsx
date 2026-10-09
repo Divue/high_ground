@@ -3,7 +3,7 @@ import type * as GeoJSON from 'geojson'
 import { useEffect, useRef, useState } from 'react'
 import { getJSON } from '../lib/data'
 import type { MapView } from '../map/MapView'
-import { baseStyle } from '../map/style'
+import { COPERNICUS_NOTICE, baseStyle } from '../map/style'
 import { DATA_BASE, TOKENS } from '../config'
 
 interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number; matched_baseline_hit_rate?: number; gain?: number; flooded_share?: number }
@@ -49,7 +49,9 @@ export default function Proof({ mv }: { mv: MapView }) {
     const style = baseStyle()
     delete (style as { terrain?: unknown }).terrain
     style.layers = style.layers.filter((l) => l.id !== 'buildings-3d')
-    const m = new MLMap({ container: right.current!, style, interactive: false, attributionControl: false,
+    // this map covers the main map's corner, so it carries the licence notices itself
+    const m = new MLMap({ container: right.current!, style, interactive: false,
+      attributionControl: { compact: true, customAttribution: `${COPERNICUS_NOTICE} | 2015 reports: OpenCity, osm-in flood-map contributors` },
       center: mv.map.getCenter(), zoom: mv.map.getZoom(), pitch: 0, bearing: 0 })
     rmap.current = m
     m.on('load', async () => {

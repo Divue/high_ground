@@ -44,7 +44,7 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
 
   return (
     <div className="search">
-      <input
+      <input spellCheck={false} autoCorrect="off"
         aria-label="Search your address in Chennai"
         placeholder="Search your street or area"
         value={q}

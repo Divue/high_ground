@@ -17,6 +17,10 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
 
 /** The hero camera: close enough to read streets, pitched to show the city in 3D. */
 const STREET_VIEW = { zoom: 15.2, pitch: 62, bearing: -18 }
+/** Keep the street in the open part of the map, clear of the answer card and the timeline. */
+const viewPadding = () => (window.innerWidth > 900
+  ? { left: 380, top: 0, right: 0, bottom: 120 }
+  : { left: 0, top: 0, right: 0, bottom: Math.round(window.innerHeight * 0.45) })
 
 export class MapView {
   map: MLMap
@@ -135,7 +139,7 @@ export class MapView {
 
   flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
     const reduced = prefersReducedMotion()
-    this.map.flyTo({ center, ...STREET_VIEW, duration: reduced ? 0 : 3200, essential: true, ...opts,
+    this.map.flyTo({ center, ...STREET_VIEW, padding: viewPadding(), duration: reduced ? 0 : 3200, essential: true, ...opts,
       ...(reduced ? { duration: 0 } : {}) })
     return new Promise<void>((res) => {
       if (reduced) return res()
@@ -148,7 +152,7 @@ export class MapView {
   showWide() {
     const reduced = prefersReducedMotion()
     this.map.easeTo({ center: [80.185, 12.975], zoom: 12.9, pitch: 60, bearing: -40, duration: reduced ? 0 : 2200,
-      padding: { left: 380, top: 0, right: 0, bottom: 120 }, essential: true })
+      padding: viewPadding(), essential: true })
     return new Promise<void>((res) => { if (reduced) res(); else this.map.once('moveend', () => res()) })
   }
 
@@ -169,14 +173,14 @@ export class MapView {
 
   async openingSequence() {
     if (prefersReducedMotion()) {
-      this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW })
+      this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW, padding: viewPadding() })
       return
     }
     await new Promise((r) => setTimeout(r, 300))
     // land on the street view itself, so the hero flow needs no second flight
     const duration = 5000
     this.flightTarget = VELACHERY
-    this.map.flyTo({ center: VELACHERY, ...STREET_VIEW, duration, curve: 1.2, essential: true })
+    this.map.flyTo({ center: VELACHERY, ...STREET_VIEW, padding: viewPadding(), duration, curve: 1.2, essential: true })
     this.map.once('moveend', () => { this.flightTarget = null })
     // hand over 2 s before landing: the night starts playing while the camera settles
     await new Promise((r) => setTimeout(r, duration - 2000))

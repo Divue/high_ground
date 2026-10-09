@@ -22,16 +22,21 @@ function flavor(): Flavor {
     bridges_minor: '#304A55', bridges_major: asphalt, bridges_highway: '#4A626D', bridges_link: '#344E59', bridges_other: '#2A424D',
     railway: '#2C4550', boundaries: '#2C4550',
     roads_label_minor: '#8FA2AA', roads_label_minor_halo: sky, roads_label_major: '#A9B8BE', roads_label_major_halo: sky,
-    subplace_label: '#9FB0B6', subplace_label_halo: sky, city_label: TOKENS.rainGrey, city_label_halo: sky,
+    subplace_label: '#6F8590', subplace_label_halo: sky, city_label: TOKENS.rainGrey, city_label_halo: sky,
+    runway: '#2A424D',
     ocean_label: '#4E6A75', address_label: '#7D9099', address_label_halo: sky,
   })
   return f
 }
 
+/** Required by the Copernicus DEM licence wherever the terrain or anything derived from it is shown. */
+export const COPERNICUS_NOTICE = 'Copernicus DEM GLO-30 © DLR e.V. 2010–2014 and © Airbus 2014–2018, provided under COPERNICUS by the EU and ESA'
+
 export function baseStyle(): StyleSpecification {
   const base = layers('protomaps', flavor(), { lang: 'en' })
     // our own 3D buildings replace the flat ones; POI icons stay off for a quiet map
-    .filter((l) => l.id !== 'buildings' && !l.id.startsWith('pois'))
+    // no POIs, no highway shields (black badges everywhere compete with the water)
+    .filter((l) => l.id !== 'buildings' && !l.id.startsWith('pois') && l.id !== 'roads_shields')
     // sentence case everywhere: no all-caps neighbourhood labels
     .map((l) => (l.type === 'symbol' ? { ...l, layout: { ...(l.layout ?? {}), 'text-transform': 'none' } } : l)) as ReturnType<typeof layers>
   return {
@@ -49,7 +54,7 @@ export function baseStyle(): StyleSpecification {
         // keep the {z}/{x}/{y} braces literal (new URL() would percent-encode them)
         tiles: [`${new URL(`${DATA_BASE}/terrain/`, window.location.href).href}{z}/{x}/{y}.png`],
         tileSize: 256, encoding: 'mapbox', minzoom: 8, maxzoom: 14, bounds: DOMAIN_BBOX,
-        attribution: 'Copernicus DEM GLO-30 © DLR e.V. 2010–2014 and © Airbus 2014–2018, provided under COPERNICUS by the EU and ESA',
+        attribution: COPERNICUS_NOTICE,
       },
     },
     layers: [

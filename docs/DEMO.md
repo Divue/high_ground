@@ -6,14 +6,14 @@ Live app: (live URL after infra/deploy.sh)
 
 | Street | Peak depth (cm) | Reaches 15 cm after (h from 6 PM) | Distance from Velachery station |
 |---|---|---|---|
-| 3rd Street | 168 | 10 | 2179 m |
-| 10th Main Road | 168 | 10 | 2008 m |
-| Kuberan Nagar 8th Street | 165 | 13 | 2366 m |
-| 9th Street | 160 | 8 | 2483 m |
-| Kakkan Nagar Main Road | 154 | 5 | 2422 m |
-| Arumugam Road | 154 | 5 | 1541 m |
-| 6th Street | 154 | 22 | 2318 m |
-| 6th Main road | 147 | 27 | 1750 m |
+| 3rd Street | 121 | 33 | 2179 m |
+| 10th Main Road | 121 | 33 | 2008 m |
+| Dhandeeswaram Nagar 8th Cross Road | 118 | 32 | 656 m |
+| Dhandeeswaram Nagar 4th Avenue [west] 2 cross street | 118 | 32 | 678 m |
+| Dhandeeswaram Nagar 4th Avenue [west] 1 cross street | 118 | 32 | 749 m |
+| Dhandeeswaram Nagar 4th Avenue [west] | 118 | 32 | 749 m |
+| Dhandeeshwaram Nagar 3rd Main Road | 118 | 32 | 672 m |
+| Dhandeeshwaram 3rd Main Road | 118 | 32 | 746 m |
 
 Type the street name in the search box with **Replay Michaung 2023** selected (or open the app with `?replay=michaung2023`).
 
@@ -24,6 +24,7 @@ Type the street name in the search box with **Replay Michaung 2023** selected (o
 - **1:50–2:30 Proof:** say it plainly: "We tested it on wards we never tuned on. Pick a street residents reported flooded in 2015 and one they didn't: the model ranks the reported one deeper **53%** of the time. Chance is 50%, elevation alone 47%, and the distance to the nearest canal 56%. So the model is slightly better than chance at street level, and we show you that."
   - The Chembarambakkam release matters on river-side streets: ranking 51% without it, 53% with it.
   - One sentence: "Storm-drain capacity (10 mm/h) is a stated assumption: on the tuning half of the wards, every value from 0 to 30 mm/h scored the same within its error bars."
+  - ANUGA (Geoscience Australia) cross-check in Velachery: 94% of cells agree on ≥15 cm, depth correlation 0.90.
 - **2:30–3:00 Architecture + limits:** `docs/architecture.png`; read two limits from *About the model*; end on the What-if slider dragged back to 50 mm (water recedes).
 
 ## AWS services visible in the product (say each one)

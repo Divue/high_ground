@@ -71,7 +71,9 @@ export function whatIf(mm: number, tide: 'mean' | 'high', runs: Runs): Scenario 
 
 export function clockLabel(start: Date, hours: number, withDay = hours > 12): string {
   const t = new Date(start.getTime() + hours * 3600_000)
-  const time = t.toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true }).replace(' ', '\u202f').toUpperCase()
+  // minutes only when not on the hour (historical replays start at :30); U+00A0 so every font has the space
+  const time = t.toLocaleTimeString('en-IN', { hour: 'numeric', minute: t.getMinutes() ? '2-digit' : undefined, hour12: true })
+    .replace(/\s+/g, '\u00a0').toUpperCase()
   return withDay ? `${t.toLocaleDateString('en-IN', { weekday: 'short' })} ${time}` : time
 }
 

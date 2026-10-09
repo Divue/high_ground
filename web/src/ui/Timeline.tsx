@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import type { Runs } from '../lib/data'
 import { clockLabel, type Scenario } from '../lib/scenario'
 
-export default function Timeline({ scenario, runs, hour, setHour, marker = null }: {
+export default function Timeline({ scenario, runs, hour, setHour, marker = null, action = null }: {
   scenario: Scenario; runs: Runs; hour: number; setHour: (h: number) => void
   marker?: { hour: number; label: string } | null
+  action?: ReactNode
 }) {
   const hours = scenario.hours
   // rain bars from the runs' own hyetographs (blended like the depths)
@@ -16,7 +18,10 @@ export default function Timeline({ scenario, runs, hour, setHour, marker = null 
   return (
     <div className="timeline" aria-label="Storm timeline">
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
-        <span className="now">{clockLabel(scenario.start, hour)}</span>
+        <span className="row" style={{ gap: 12, alignItems: 'center' }}>
+          <span className="now">{clockLabel(scenario.start, hour)}</span>
+          {action}
+        </span>
         <span className="muted small">{Math.round(rain[hour - 1] ?? 0)} mm of rain in this hour{scenario.kind === 'forecast' ? ' (modelled storm)' : ''}</span>
       </div>
       <div className="bars" aria-hidden>

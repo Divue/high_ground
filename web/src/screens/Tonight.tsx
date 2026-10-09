@@ -46,6 +46,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const playToken = useRef(0)
   const fadeMs = useRef(450)
   const [rising, setRising] = useState(false)    // the night is playing to the peak
+  const [morePark, setMorePark] = useState(false)
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -134,7 +135,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   // "Watch the whole storm": a replay played hour by hour over a wide view of the city
   const [lapse, setLapse] = useState<'off' | 'playing' | 'done'>('off')
   const lapseRun = scenario.kind === 'replay' && scenario.mix.length === 1 ? scenario.mix[0].run : null
-  useEffect(() => { setLapse('off') }, [place, scenario])
+  useEffect(() => { setLapse('off'); setMorePark(false) }, [place, scenario])
   const watchStorm = async () => {
     if (!lapseRun) return
     const token = ++playToken.current
@@ -234,13 +235,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           ))}
         </div>
         <div className="muted small" style={{ marginTop: 8 }}>
-          {scenario.label}
-          {scenario.kind === 'replay' && ', running as if it started at 6 PM tonight'}
+          {scenario.kind === 'replay'
+            ? lapse !== 'off'
+              ? <>{REPLAYS.find((r) => r.run === lapseRun)?.line ?? scenario.label}, on its real dates</>
+              : <>{REPLAYS.find((r) => r.run === lapseRun)?.line ?? scenario.label}, replayed from 6 PM tonight</>
+            : scenario.label}
           {scenario.kind === 'forecast' && current && <> · forecast updated {new Date(current.updated_at).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</>}
         </div>
-        {lapseRun && lapse === 'off' && runs[lapseRun]?.wet_share_15cm_hourly && (
-          <button className="btn" style={{ marginTop: 10 }} onClick={watchStorm}>Watch the whole storm</button>
-        )}
         {lapseRun && lapse !== 'off' && (
           <Timelapse run={runs[lapseRun]} hour={hour} playing={lapse === 'playing'} onStop={endLapse}
             onProof={lapseRun.startsWith('dec2015') ? () => { window.location.hash = 'proof' } : null} />
@@ -289,7 +290,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <div className="divider" />
             <h3>Park on dry ground</h3>
             {park.length === 0 && <p className="muted small">No mapped flyover or parking ground near you stays dry in this scenario.</p>}
-            {park.slice(0, 2).map((o) => (
+            {park.slice(0, morePark ? 2 : 1).map((o) => (
               <div className="park" key={`${o.name}-${o.lon}`}>
                 <span className="pin" />
                 <div style={{ flex: 1 }}>
@@ -300,6 +301,9 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                 </div>
               </div>
             ))}
+            {park.length > 1 && !morePark && (
+              <button className="linkbtn" style={{ marginLeft: 22 }} onClick={() => setMorePark(true)}>1 more dry place nearby</button>
+            )}
             {route && !route.streetFloods && (
               <p className="small muted" style={{ margin: '2px 0 6px' }}>
                 {route.safe ? <>Your street stays dry. Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}.</> : <>No practical dry route to {route.to} at the storm’s peak.</>}
@@ -318,7 +322,9 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       {scenario.mix.length > 0 && <Timeline runs={runs} hour={hour} setHour={scrub}
         // during the time-lapse the timeline shows the storm's real dates, like the caption card
         scenario={lapse !== 'off' && lapseRun && runs[lapseRun]?.start_local ? { ...scenario, start: new Date(runs[lapseRun].start_local!) } : scenario}
-        marker={lapse === 'off' && route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
+        marker={lapse === 'off' && route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null}
+        action={lapseRun && lapse === 'off' && runs[lapseRun]?.wet_share_15cm_hourly
+          ? <button className="btn small-btn" onClick={watchStorm}>Watch the whole storm</button> : null} />}
     </>
   )
 }
