@@ -12,7 +12,8 @@ interface ProofJ {
     matched_baseline_hit_rate: number; matched_baseline_false_rate: number; model_flooded_share_of_city: number; reported_segments: number }
   sentence: string
   metric_note?: string
-  split: { value_mm_h: number; candidates: { drainage_mm_h: number; hit_rate: number; false_rate: number; skill: number }[] }
+  calibration_note?: string | null
+  split: { value_mm_h: number; candidates: { drainage_mm_h: number; hit_rate: number; false_rate: number; skill: number; gain?: number; matched_baseline_hit_rate?: number }[] }
   by_group: Record<'rain_only' | 'rain_plus_reservoir', Record<'all' | 'rain_driven' | 'river_driven', M>>
   baseline: { rule: string; metrics: Record<string, M> }
   zones: Record<string, { share_in_moderate_high_veryhigh: number; city_share_moderate_or_higher: number }>
@@ -92,6 +93,7 @@ export default function Proof({ mv }: { mv: MapView }) {
               </div>
             </div>
             <p style={{ margin: '12px 0 4px' }}>{p.sentence}</p>
+            {p.calibration_note && <p className="muted small" style={{ margin: '0 0 4px' }}>{p.calibration_note}</p>}
             <p className="muted small" style={{ margin: 0 }}>
               Scored only on the {h.reported_segments} reported street segments in the other half. {p.metric_note}
             </p>
@@ -115,6 +117,11 @@ export default function Proof({ mv }: { mv: MapView }) {
               {p.nrsc_2015.rain_plus_reservoir && <> Satellite (NRSC) 2015 inundation: the model covers {pct(p.nrsc_2015.rain_plus_reservoir.hit)} of it.</>}
             </p>
             {p.anuga && <p className="small">Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm. Same terrain, different numerics.</p>}
+            <h3>Tuning, on the other half of the wards</h3>
+            <p className="small" style={{ margin: 0 }}>
+              {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${pct(c.hit_rate)} vs ${pct(c.matched_baseline_hit_rate)}`).join(' · ')}
+              <span className="muted"> (drain capacity: model hit rate vs elevation alone, same area)</span>
+            </p>
             <h3>Limits of this test</h3>
             <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
           </div>

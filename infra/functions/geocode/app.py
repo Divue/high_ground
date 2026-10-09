@@ -13,7 +13,15 @@ import boto3
 
 CHENNAI = [80.2209, 12.9791]          # bias position (lon, lat): Velachery
 BBOX = [80.10, 12.85, 80.33, 13.24]   # model domain
-places = boto3.client("geo-places")
+_places = None
+
+
+def places():
+    """Created lazily: an older bundled boto3 without 'geo-places' must not break the fallback."""
+    global _places
+    if _places is None:
+        _places = boto3.client("geo-places")
+    return _places
 
 
 def inside(lon, lat):
@@ -21,7 +29,7 @@ def inside(lon, lat):
 
 
 def amazon(q):
-    r = places.geocode(QueryText=q, BiasPosition=CHENNAI, MaxResults=5,
+    r = places().geocode(QueryText=q, BiasPosition=CHENNAI, MaxResults=5,
                        Filter={"IncludeCountries": ["IND"]})
     out = []
     for it in r.get("ResultItems", []):

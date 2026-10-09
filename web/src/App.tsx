@@ -41,7 +41,7 @@ export default function App() {
       const sc = fromCurrent(c, r)
       const mix = new URLSearchParams(location.search).get('replay') ? [{ run: new URLSearchParams(location.search).get('replay')!, w: 1 }] : sc.mix
       v.water?.setRise(0)
-      v.water?.setRain(mix.length ? 0.8 : 0.25)
+      v.water?.setRain(mix.length ? 0.8 : 0)   // no rain on screen when the forecast is dry
       if (mix.length) await v.showMix(mix, 'max', 0)
       if (!alive) return
       if (screenFromHash() === 'tonight') {

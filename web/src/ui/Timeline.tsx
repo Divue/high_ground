@@ -16,7 +16,7 @@ export default function Timeline({ scenario, runs, hour, setHour }: {
     <div className="timeline" aria-label="Storm timeline">
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 4 }}>
         <span className="now">{clockLabel(scenario.start, hour)}</span>
-        <span className="muted small">{Math.round(rain[hour - 1] ?? 0)} mm of rain in this hour</span>
+        <span className="muted small">{Math.round(rain[hour - 1] ?? 0)} mm of rain in this hour{scenario.kind === 'forecast' ? ' (modelled storm)' : ''}</span>
       </div>
       <div className="bars" aria-hidden>
         {rain.map((r, i) => <i key={i} className={i < hour ? 'on' : ''} style={{ height: `${Math.max(3, (r / maxR) * 100)}%` }} />)}

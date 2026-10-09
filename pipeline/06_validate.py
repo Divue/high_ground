@@ -123,6 +123,9 @@ def main():
         headline=head,
         sentence=(f"We tuned one number, storm-drain capacity ({cal['drainage_mm_h']:g} mm/h), on half of "
                   f"Chennai's wards and tested on the other half."),
+        calibration_note=(None if cal["drainage_mm_h"] > min(c["drainage_mm_h"] for c in cal["candidates"]) else
+                          "The best fit sits at the low edge of the range tried: for the 2015 floods the model needs all "
+                          "the water it has, consistent with overwhelmed drains and tank surpluses the model does not include."),
         metric_note=("Citizen reports only say where it flooded. A map that floods everything would catch every report, "
                      "so the fair comparison is a map that floods the same amount of land, chosen by elevation alone."),
         split=dict(rule=V["split"], parameter=cal["parameter"], value_mm_h=cal["drainage_mm_h"],

@@ -98,3 +98,25 @@ Experiments (200 mm, drainage 10 mm/h, scored on odd wards = calibration half on
 | **cap 1.0 m + burn depth by type (river 2, canal 1.5, stream 0.6, drain 0.4 m)** | 15% | 35% | 19% | 0.241 | 0.091 | **0.150** |
 
 **Decision:** adopt the last row. It is physically motivated, and it improves the calibration-half score only; the validation half is untouched. Calibration and all runs were restarted at 07:10 IST. The previous terrain is backed up in `data/work_backup_v1/`. The P2 place gate (Velachery wet, T. Nagar mostly dry) will be judged on the calibrated runs.
+
+### Calibration result (Fri 08:16 IST)
+
+Objective (pre-registered before any results): hit-rate gain over the matched-area elevation baseline, odd wards, 2015 rain + reservoir.
+
+| drain capacity | hit | matched baseline | gain | flooded share |
+|---|---|---|---|---|
+| **0 mm/h** | 0.426 | 0.214 | **0.212** | 0.379 |
+| 5 | 0.398 | 0.196 | 0.202 | 0.356 |
+| 10 | 0.371 | 0.177 | 0.194 | 0.330 |
+| 20 | 0.300 | 0.143 | 0.157 | 0.279 |
+| 30 | 0.217 | 0.101 | 0.116 | 0.224 |
+
+**Chosen: 0 mm/h**, the low edge of the range. Reading: for the 2015 event the model needs all its water, consistent with overwhelmed drains and with tank surpluses the model leaves out. This is stated on the Proof screen (`calibration_note`). The objective was not changed after seeing results. A ratio objective would have picked 5 mm/h; it was rejected to avoid metric-shopping.
+
+### P2 place gate (200 mm, calibrated)
+
+- Velachery 23.5% of land ≥15 cm, Pallikaranai 48.7%, T. Nagar 29.0%. Mass error −0.0000%.
+- **Partial fail:** Velachery is under the 25% threshold set before the run and below T. Nagar. Three distinct fixes were tried: depression cap 2.5 → 1.0 m, burn depth by waterway type, calibrated drains.
+- **Evidence the expectation is not supported by observed data:** the 2015 citizen reports flag 38.8% of Velachery's road length (1.2 km circle) and 38.3% of T. Nagar's (1 km circle) as flooded, which is equal, and Pallikaranai 21.8%. The model's ranking matches the reports better than the spec's intuition does.
+- Decision (autonomy rule: three fixes tried, never sit blocked): log it, keep the 25% threshold unchanged, continue. The Proof screen reports validation honestly.
+- ANUGA first launch failed: the env lacked numba, which it needs to import the scenario helper. Installed numba and restarted at 08:28 IST, 103k triangles, 14 h of the 200 mm storm, 4 h timebox (until 12:28).

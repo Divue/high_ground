@@ -39,7 +39,7 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
       <div className="row" style={{ gap: 24, alignItems: 'flex-end' }}>
         <div>
           <div className="stat">{Math.round(wet * 100)}%</div>
-          <div className="muted small">of the city under 15 cm or more<span className="chip">from the model</span></div>
+          <div className="muted small">of the city’s land under at least 15 cm of water<span className="chip">from the model</span></div>
         </div>
         {hr && hosp && (
           <div>

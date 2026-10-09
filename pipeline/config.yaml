@@ -66,7 +66,7 @@ scenarios:
     tail_h: 6                       # dry recession after the rain
     start_local: "18:00"            # 'tonight' starts at 6 PM
     pattern: front_loaded
-    pattern_note: "Gamma-shaped hyetograph peaking in hour 4; 50% of the total falls in the first ~7 hours. Assumption, not a measured Chennai pattern."
+    pattern_note: "Gamma-shaped hyetograph (k=2.5) peaking in hour 5; 70% of the total falls in the first 8 hours. Assumption, not a measured Chennai pattern."
   tides: [mean, high]
 
 replays:
