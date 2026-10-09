@@ -177,3 +177,24 @@ Decision rule, fixed before results: adopt a variant only if the calibration-hal
 - All three replays are done (mass error 0.0000%). Michaung: 36.5% of street segments ≥15 cm, 27/47 hospitals cut off. Fengal (114 mm): 23.0% of segments and 13/47 hospitals, probably high. **New limit added** (About, proof caveats, assistant `model_limits`): drain capacity was tuned on the extreme 2015 event, so smaller storms are probably overstated.
 - Demo streets (Michaung replay): Arumugam Road (154 cm, reaches 15 cm by 11 PM), Kuberan Nagar 8th Street, Kakkan Nagar Main Road (`docs/DEMO.md` after the post-run step).
 - Local moto test of subscribe → forecast-check → SNS → filtered delivery: **passes** (`infra/tests/test_lambdas_moto.py`).
+
+## Reviews
+
+### Judge #1 (Fri ~15:45, end of P3, local build)
+Scores: idea 8, AWS 5 (≈8 once deployed), design 6, execution 7, demo readiness 5.
+Top suggestion: **deploy and film the real alert email + a grounded assistant answer**. This is blocked on the user (AWS profile). Best code-only change: **time-aware routing**.
+Acted on:
+- Time-aware routing. Edge depth at any hour is sampled in the browser from the hourly depth frames (no new data). The card now leads with a decision: "Move your car to Velachery MRTS Bridge by 10 PM" (the last hour a dry route exists, one hour before the street passes 15 cm).
+- What if no longer shows an invented "0%" for runs that are not computed.
+- Smooth water (depth sampled per pixel), labels above 3D buildings, readable attribution, larger street marker, compact card, Proof panel clears the attribution, primary replay button on dry nights.
+
+### Model reviewer #1 (Fri ~15:50): FAIL → acted on
+1. **Blocker: the validation metric rewarded patchy maps.** Random speckle at the same share scored 64% hit vs the model's 39%; reported-vs-unreported discrimination was ≈0.5 for every map. **Fix:** Proof now leads with a rank-based test that flooding more cannot game (P(reported street ranks deeper than unreported), even wards, bootstrap 95% CI). It also reports random/shifted null maps, NRSC overlap vs a random map of the same size, GCC official hotspots/stagnation points, and the ward-level correlation. On v2 runs the model scores 52% (CI 51–53%) against 50% chance, 47% elevation and 56% nearest channel. Honest verdict on screen: "slightly better than chance".
+2. **Major: about a third of the 2015 release exited the west edge.** Fixed: the Adyar entry stretch of the west edge (±65 rows) is no longer an outlet.
+3. **Major: sloshing (peaks inflated up to 1.6 m at cfl 0.7) and the Ennore short circuit at high tide.** Fixed: `cfl_alpha` 0.5. The builder's test (`review/model-review/theta_test.json`) matches a 4× smaller step to 0.1 cm; the θ=0.7 scheme was tried and left 110 cm outliers. Edge outlets now hold the tide level where their bed is below it. Outflow is split sea vs land edges in `info.json`.
+4. Place check: same root cause; disclosed.
+5. Mass balance: an identity check; the outflow split is now recorded.
+6. Pre-storm wet land: depth at storm start is saved (`h_start.npy`); ≥5 cm is masked as standing water in streets, routing, textures and validation.
+7. Frontend consistency: street peak = max of the same hourly series as the time text; routing/hospital edge depth = p90 of samples (same statistic as the card), server and client.
+- **Calibration withdrawn:** with the rank-based score, drain capacity 0–30 mm/h all score 0.53–0.54 with overlapping CIs, so **10 mm/h is a stated assumption** (`calibration.json`, About, Proof).
+- v3 runs (all 16 + ANUGA) restarted 16:05 IST with these fixes.
