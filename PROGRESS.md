@@ -256,3 +256,8 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 
   Skipped as infeasible or off-licence: photogrammetry and Google 3D tiles. Open Buildings 2.5D heights (CC BY 4.0) are optional, last.
 - Design-critic and qa-tester run once after tonight's v3 rebuild, covering these frontend changes too.
+
+### Model-timed rise + single opening flight (Fri ~19:50)
+- **Glitch found and fixed.** The opening landed at zoom 14.2 and started the water rising. The default Velachery place then triggered a second flight to zoom 15.2, which snapped the water to zero and raised it again. The opening now lands on the street view itself (`STREET_VIEW`), and Tonight skips the flight when the camera already frames the place (`MapView.isFraming`).
+- **The water now rises the way the model says.** There is no uniform 0→1 multiplier any more. The flight shows hour 1 (6 PM: channels only). After landing, the timeline plays the night to the street's peak through 8 of the model's own hourly frames, cross-faded, in about 3 s. Rain follows the hourly rainfall. It plays once per place and storm, scrubbing by hand stops it, and reduced motion jumps to the peak.
+- **Answer card at about 12 s** after load (was 17.6 s in QA); the hero test's load step went 14.7 s → 10.6 s. Frames: `review/p5-dev/opening_rise/` (`contact.png`). Hero test: 9/9 OK, no errors. Leave-by test OK; its `route line` probe targets a removed element.

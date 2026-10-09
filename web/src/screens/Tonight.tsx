@@ -2,9 +2,9 @@
 // answer card (depth, time) -> nearest dry parking -> dry route -> email alerts.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { REPLAYS, bandFor, prefersReducedMotion } from '../config'
-import { loadParking, type Current, type Parking, type Runs } from '../lib/data'
+import { loadGray, loadParking, type Current, type Parking, type Runs } from '../lib/data'
 import { distM, fmtDistance } from '../lib/geo'
-import { blendedFrame } from '../lib/frames'
+import { blendedFrame, frameName } from '../lib/frames'
 import { leaveByPlan, type Route } from '../lib/routing'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
 import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
@@ -38,6 +38,10 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [error, setError] = useState('')
   const [nearby, setNearby] = useState<{ wet: number; total: number } | null>(null)
   const flown = useRef<string>('')
+  const [arrived, setArrived] = useState('')     // place key the camera has reached
+  const played = useRef('')                       // place+scenario whose night has been played
+  const playToken = useRef(0)
+  const fadeMs = useRef(450)
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -65,38 +69,54 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       if (dead) return
       setAns(a)
       nearbyShare(place.lon, place.lat, scenario.mix).then((n) => { if (!dead) setNearby(n) }).catch(() => setNearby(null))
-      setHour(a.peakHour ?? Math.min(scenario.hours, 8))
     })()
     return () => { dead = true }
   }, [place, scenario, mv])
 
-  // Fly to the street once per place; water rises from zero to the selected hour
+  // Fly to the street once per place (the opening flight may already have framed it)
   useEffect(() => {
     if (!place) return
     const key = `${place.lon},${place.lat}`
     if (flown.current === key) return
     flown.current = key
-    mv.water?.setRise(0)
-    mv.flyTo([place.lon, place.lat]).then(() => {
-      mv.water?.setRise(1, prefersReducedMotion() ? 0 : 2600)
-    })
+    if (mv.isFraming([place.lon, place.lat])) { setArrived(key); return }
+    mv.flyTo([place.lon, place.lat]).then(() => setArrived(key))
   }, [place, mv])
 
-  // Switching storms replays the rise: water drains away, then rises to the new storm
-  const firstScenario = useRef(true)
+  // The water rises the way the model says it does: the timeline plays the night from 6 PM to
+  // this street's peak through the model's own hourly frames (cross-faded), once per place and storm.
   useEffect(() => {
-    if (firstScenario.current) { firstScenario.current = false; return }
-    if (prefersReducedMotion()) return
-    mv.water?.setRise(0, 500)
-    const t = window.setTimeout(() => mv.water?.setRise(1, 2600), 650)
-    return () => window.clearTimeout(t)
-  }, [scenario, mv])
+    if (!place || !ans || !scenario.mix.length || arrived !== `${place.lon},${place.lat}`) return
+    const key = `${arrived}|${scenario.mix.map((m) => `${m.run}:${m.w}`).join()}`
+    if (played.current === key) return
+    played.current = key
+    const peak = ans.peakHour ?? Math.min(scenario.hours, 8)
+    const token = ++playToken.current
+    if (prefersReducedMotion() || peak <= 1) { setHour(peak); return }
+    const steps = Math.min(8, peak)
+    const hours = Array.from({ length: steps }, (_, k) => Math.max(1, Math.round(((k + 1) * peak) / steps)))
+    const stepMs = Math.round(3000 / steps)
+    ;(async () => {
+      // the keyframes decode in a worker while the card appears
+      await Promise.all(hours.flatMap((h) => scenario.mix.map(({ run }) => loadGray(`water/${run}/${frameName(h)}.png`).catch(() => null))))
+      for (const h of hours) {
+        if (playToken.current !== token) return
+        fadeMs.current = stepMs
+        setHour(h)
+        await new Promise((r) => setTimeout(r, stepMs))
+      }
+      fadeMs.current = 450
+    })()
+  }, [place, ans, arrived, scenario])
+
+  // scrubbing by hand stops the playback
+  const scrub = useCallback((h: number) => { playToken.current++; fadeMs.current = 450; setHour(h) }, [])
 
   // Depth frame for the current hour
   useEffect(() => {
     if (!scenario.mix.length) { mv.showMix([], 'max'); return }
     mv.preload(scenario.mix, scenario.hours, hour)
-    mv.showMix(scenario.mix, hour, 450)
+    mv.showMix(scenario.mix, hour, fadeMs.current)
   }, [scenario, hour, mv])
 
   // Rain on screen follows the hyetograph at the scrubbed hour
@@ -234,7 +254,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <span className="emergency">112</span>.</p>
         </div>
       </div>
-      {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={setHour}
+      {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={scrub}
         marker={route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
     </>
   )

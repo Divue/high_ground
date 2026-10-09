@@ -15,6 +15,9 @@ import { baseStyle } from './style'
 let protocolAdded = false
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 
+/** The hero camera: close enough to read streets, pitched to show the city in 3D. */
+const STREET_VIEW = { zoom: 15.2, pitch: 62, bearing: -18 }
+
 export class MapView {
   map: MLMap
   water: WaterLayer | null = null
@@ -130,7 +133,7 @@ export class MapView {
 
   flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
     const reduced = prefersReducedMotion()
-    this.map.flyTo({ center, zoom: 15.2, pitch: 62, bearing: -18, duration: reduced ? 0 : 3200, essential: true, ...opts,
+    this.map.flyTo({ center, ...STREET_VIEW, duration: reduced ? 0 : 3200, essential: true, ...opts,
       ...(reduced ? { duration: 0 } : {}) })
     return new Promise<void>((res) => {
       if (reduced) return res()
@@ -138,19 +141,23 @@ export class MapView {
     })
   }
 
+  /** True when the camera already shows this point at street view (no second flight needed). */
+  isFraming(p: [number, number]) {
+    const c = this.map.getCenter()
+    const dx = (c.lng - p[0]) * 108_500, dy = (c.lat - p[1]) * 110_500
+    return Math.hypot(dx, dy) < 80 && Math.abs(this.map.getZoom() - STREET_VIEW.zoom) < 0.3 && !this.map.isMoving()
+  }
+
   /** The one orchestrated moment: high over the Bay of Bengal, descend to Velachery. */
-  async openingSequence(onLanding?: () => void) {
+  async openingSequence() {
     if (prefersReducedMotion()) {
-      this.map.jumpTo({ center: VELACHERY, zoom: 14.2, pitch: 60, bearing: -18 })
-      onLanding?.()
+      this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW })
       return
     }
     await new Promise((r) => setTimeout(r, 300))
-    this.map.flyTo({ center: VELACHERY, zoom: 14.2, pitch: 60, bearing: -18, duration: 5000, curve: 1.2, essential: true })
-    // the water starts rising before the camera settles
-    const t = window.setTimeout(() => onLanding?.(), 2500)
+    // land on the street view itself, so the hero flow needs no second flight
+    this.map.flyTo({ center: VELACHERY, ...STREET_VIEW, duration: 5000, curve: 1.2, essential: true })
     await new Promise<void>((r) => this.map.once('moveend', () => r()))
-    window.clearTimeout(t)
-    onLanding?.()
   }
+
 }

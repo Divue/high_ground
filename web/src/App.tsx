@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { API_BASE, VELACHERY, prefersReducedMotion } from './config'
+import { API_BASE, VELACHERY } from './config'
 import { loadCurrent, loadParking, loadRuns, postAPI, type Current, type Runs } from './lib/data'
 import { loadGraph } from './lib/routing'
 import { nearestSegment, segmentValues } from './lib/streets'
@@ -43,20 +43,18 @@ export default function App() {
       // the one orchestrated moment
       const sc = fromCurrent(c, r)
       const mix = new URLSearchParams(location.search).get('replay') ? [{ run: new URLSearchParams(location.search).get('replay')!, w: 1 }] : sc.mix
-      v.water?.setRise(0)
+      // the flight shows the city at 6 PM (hour 1); Tonight then plays the night to the street's peak
+      v.water?.setRise(1)
       v.water?.setRain(mix.length ? 0.8 : 0)   // no rain on screen when the forecast is dry
-      if (mix.length) await v.showMix(mix, 'max', 0)
+      if (mix.length) await v.showMix(mix, 1, 0)
       if (!alive) return
       // warm the answer while the camera flies: street tiles, parking, routing graph
       nearestSegment(VELACHERY[0], VELACHERY[1]).then((sg) => { if (sg && mix.length) segmentValues(sg, mix) }).catch(() => {})
       loadParking().catch(() => {})
       if (mix.length) loadGraph().catch(() => {})
       if (screenFromHash() === 'tonight') {
-        await v.openingSequence(() => v.water?.setRise(1, prefersReducedMotion() ? 0 : 3200))
-        await new Promise((res) => setTimeout(res, prefersReducedMotion() ? 0 : 300))
+        await v.openingSequence()
         setPlace((p) => p ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
-      } else {
-        v.water?.setRise(1)
       }
       setIntro(false)
     })
