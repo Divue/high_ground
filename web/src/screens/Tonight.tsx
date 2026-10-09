@@ -108,7 +108,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     const dom = [...scenario.mix].sort((a, b) => b.w - a.w)[0].run
     const flags = parking.dry[dom] ?? []
     const opts = parking.candidates.map((c, i) => ({ ...c, d: distM(place.lon, place.lat, c.lon, c.lat), ok: flags[i] === 1 }))
-      .filter((c) => c.ok).sort((a, b) => a.d - b.d).slice(0, 3)
+      .filter((c) => c.ok).sort((a, b) => a.d - b.d)
+      .filter((c, i, arr) => arr.findIndex((o) => o.name === c.name) === i).slice(0, 3)
     setPark(opts)
     mv.setGeoJSON('parking', { type: 'FeatureCollection', features: opts.map((o) => ({ type: 'Feature', properties: { name: o.name }, geometry: { type: 'Point', coordinates: [o.lon, o.lat] } })) })
     setRoute(null)

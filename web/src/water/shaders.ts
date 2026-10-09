@@ -69,7 +69,8 @@ void main() {
   }
   col += amber * glint * 0.55;
   float edge = smoothstep(0.04, 0.15, vDepth);
-  float a = opacity * edge * (0.38 + 0.5 * t);
+  float a = opacity * edge * (0.5 + 0.42 * t);
+  col *= 1.12;
   gl_FragColor = vec4(col * a, a);  // premultiplied
 }
 `

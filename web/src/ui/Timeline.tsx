@@ -23,7 +23,7 @@ export default function Timeline({ scenario, runs, hour, setHour }: {
       </div>
       <input type="range" min={1} max={hours} step={1} value={hour} onChange={(e) => setHour(Number(e.target.value))}
         aria-label="Hour of the storm" />
-      <div className="ticks">{ticks.map((t) => <span key={t}>{clockLabel(scenario.start, t)}</span>)}</div>
+      <div className="ticks">{ticks.map((t) => <span key={t}>{clockLabel(scenario.start, t, hours > 24)}</span>)}</div>
     </div>
   )
 }

@@ -1,66 +1,27 @@
 [
  {
-  "address": "Velachery",
-  "picked": "Velachery, Chennai",
-  "street": "Unnamed street",
-  "depth": "1 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
-  "parking": [
-   "Velachery MRTS Bridge",
-   "Velachery Lower Flyover"
-  ],
-  "ok": true
- },
- {
-  "address": "T. Nagar",
-  "picked": "T. Nagar, Chennai",
-  "street": "South Usman Road",
-  "depth": "4 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
-  "parking": [
-   "South Usman Road",
-   "Flyover"
-  ],
-  "ok": true
- },
- {
-  "address": "Saidapet",
-  "picked": "Saidapet, Chennai",
-  "street": "Jeenis Road",
-  "depth": "1 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
-  "parking": [
-   "Maraimalai Adigal Bridge",
-   "Abraham Bridge"
-  ],
-  "ok": true
- },
- {
-  "address": "Pallikaranai",
-  "picked": "Pallikaranai, Chennai",
-  "street": "Unnamed street",
-  "depth": "3 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
+  "address": "Kuberan Nagar 8th Street",
+  "picked": "Kuberan Nagar 8th Street, Chennai",
+  "street": "Kuberan Nagar 8th Street",
+  "depth": "31 centimetres",
+  "when": "Reaches 15 cm by 8 AM · deepest around 2 PM",
+  "band": "Unsafe for cars",
   "parking": [
    "Major Mukund Varadharajan Road Flyover",
-   "Medavakkam Flyover"
+   "Major Mukund Varadharajan Road Flyover"
   ],
   "ok": true
  },
  {
-  "address": "Mylapore",
-  "picked": "Mylapore, Chennai",
-  "street": "Andal Ninappan Street",
-  "depth": "1 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
+  "address": "Arumugam Road",
+  "picked": "Arumugam Road, Chennai",
+  "street": "Arumugam Road",
+  "depth": "154 centimetres",
+  "when": "Reaches 15 cm by 11 PM · deepest around 3 PM",
+  "band": "Unsafe for cars",
   "parking": [
-   "Santhome High Road",
-   "Alwarpet Flyover"
+   "Velachery MRTS Bridge",
+   "Major Mukund Varadharajan Road Flyover"
   ],
   "ok": true
  }

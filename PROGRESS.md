@@ -151,3 +151,9 @@ Decision rule, fixed before results: adopt a variant only if the calibration-hal
 - **Agreement:** 92.8% of 45,907 land cells agree on ≥15 cm; CSI 0.78; depth correlation 0.90; median |Δdepth| 0.7 cm; wet share 28.4% (ANUGA) vs 30.6% (Stage A).
 - `review/p2/anuga_vs_fast.png`: side-by-side peak depth. Included in `proof.json` → Proof screen.
 - Caveat for the Proof screen: same 30 m terrain, so this checks the numerics, not the terrain.
+
+### Initial-condition fix, full rerun (Fri 11:05–11:14 IST)
+
+- Found while picking demo streets: in every scenario, ~17,700 land cells (2% of the city) were already ≥15 cm when the storm started, e.g. streets around Velachery Lake at ~150 cm with time-to-15 cm of 0. Cause: channels started full to the **sink-filled spill level**, which in raised pit reaches sits up to 0.5 m+ above the measured water surface, so water spilled onto adjacent land during the 2 h spin-up.
+- Fix: channels start at their **measured water surface** (`clip(DTM − bed, 0, burn depth)`), in both Stage A and ANUGA. A 1 h check of the 50 mm storm leaves 6,205 wet land cells (0.7%), mostly Pallikaranai marsh holding ~22 cm and low land beside channels, which is realistic for the monsoon.
+- All v1 outputs archived in `data/out/runs_v1/` (calibration, runs, ANUGA 92.8% agreement on the v1 setup). Calibration, the 16 runs and ANUGA restarted at 11:14 IST; expected done ~16:30.

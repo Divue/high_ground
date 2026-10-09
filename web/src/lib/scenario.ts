@@ -67,9 +67,10 @@ export function whatIf(mm: number, tide: 'mean' | 'high', runs: Runs): Scenario 
   }
 }
 
-export function clockLabel(start: Date, hours: number): string {
+export function clockLabel(start: Date, hours: number, withDay = hours >= 18): string {
   const t = new Date(start.getTime() + hours * 3600_000)
-  return t.toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true }).replace(' ', ' ').toUpperCase()
+  const time = t.toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true }).replace(' ', '\u202f').toUpperCase()
+  return withDay ? `${t.toLocaleDateString('en-IN', { weekday: 'short' })} ${time}` : time
 }
 
 export function mixDescription(mix: MixPart[], runs: Runs): string {
