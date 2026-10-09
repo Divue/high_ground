@@ -14,12 +14,15 @@ Rivers sit 4.5 m below banks; DSM−DTM is 1.6 m on buildings vs 0.24 m on open 
 - The Luma listing for the Delhi stop says online submissions close **Sunday 8:00 PM IST**, which means **Sun Oct 11, 2026, 20:00 IST**. Confirm on the wemakedevs.org/aws/env submission form.
 - Rules: project must be built during the event; must use AWS and *show it in the video*; 3-minute video; teams of 1–4; blog on AWS Builder Center for the blog prize.
 
-## FOR THE USER (things Claude cannot do)
+## FOR THE USER (things Claude cannot do) — do these in order
 
-1. **AWS profile `highground` does not exist** in `~/.aws/config` (only `default`). Per the safety rules Claude will not use `default`. Run `aws configure --profile highground` (region `us-east-1`), or copy the default block under `[profile highground]`. Every AWS step is blocked until this exists; offline phases continue.
-2. **`ALERT_TEST_EMAIL` in `.env` is the placeholder `you@example.com`.** Put a real inbox there so the SNS alert demo can arrive. After the first subscribe, click the SNS confirmation link in that inbox.
-3. Verify student status on AWS Builder Center (needed for eligibility).
-4. Bedrock model access: confirm Claude Sonnet is enabled in us-east-1 (Claude will check via CLI once the profile exists).
+1. **Create the AWS profile `highground`** (blocks P4/P5: nothing can deploy without it; Claude will not touch `default`):
+   `aws configure --profile highground` → keys for the AWS account you want to use, region `us-east-1`.
+2. **Put your real inbox in `.env`**: `ALERT_TEST_EMAIL=you@yourdomain` (currently the placeholder `you@example.com`).
+3. **Bedrock model access**: in the AWS console (us-east-1) → Amazon Bedrock → Model access → enable an Anthropic Claude Sonnet model. `infra/deploy.sh` picks the newest enabled Claude Sonnet inference profile automatically.
+4. Then run (or ask Claude to run): `infra/deploy.sh`. It creates the $10 budget alarm, deploys the SAM stack, uploads the model outputs (~200 MB), builds the site, deploys it to Amplify, and runs the first forecast check. It prints the live URL and writes `data/deploy_outputs.json`; the admin token for `#admin` is in `data/admin_token`.
+5. **Subscribe once from the live site** with the `.env` email → **click the AWS Notifications confirmation link** in that inbox. Then `#admin` → "Run and send alerts" (e.g. 300 mm) sends a real alert email for the video.
+6. Verify student status on AWS Builder Center (eligibility). Teammates: video (script in `docs/DEMO.md`) and blog.
 
 ## Current phase
 
