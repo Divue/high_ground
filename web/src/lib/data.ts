@@ -107,22 +107,33 @@ export async function loadCurrent(): Promise<Current | null> {
 }
 
 // ---------------------------------------------------------------- images -> pixel arrays
+// PNG decoding runs in a worker: getImageData on the main thread cost ~1 s in every 5 s while
+// hourly frames preloaded, which dropped the map to ~10 fps.
+type Decoded = { data: Uint8Array | Uint8ClampedArray; width: number; height: number }
+let worker: Worker | null = null
+let nextId = 0
+const pending = new Map<number, { ok: (d: Decoded) => void; fail: (e: Error) => void }>()
+function decode(path: string, gray: boolean): Promise<Decoded> {
+  if (!worker) {
+    worker = new Worker(new URL('./decode.worker.ts', import.meta.url), { type: 'module' })
+    worker.onmessage = (e: MessageEvent<{ id: number; error?: string } & Decoded>) => {
+      const p = pending.get(e.data.id)
+      if (!p) return
+      pending.delete(e.data.id)
+      if (e.data.error) p.fail(new Error(e.data.error))
+      else p.ok(e.data)
+    }
+  }
+  const id = nextId++
+  const url = new URL(`${DATA_BASE}/${path}`, window.location.href).href
+  return new Promise((ok, fail) => { pending.set(id, { ok, fail }); worker!.postMessage({ id, url, gray }) })
+}
+
 export async function loadPixels(path: string): Promise<{ data: Uint8ClampedArray; width: number; height: number }> {
   const key = `px:${path}`
   if (!cache.has(key)) {
-    cache.set(key, (async () => {
-      const blob = await fetch(`${DATA_BASE}/${path}`).then((r) => {
-        // a dev server may answer a missing file with index.html (SPA fallback)
-        if (!r.ok || !(r.headers.get('content-type') ?? '').startsWith('image/')) throw new Error(`missing ${path}`)
-        return r.blob()
-      })
-      const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })
-      const c = new OffscreenCanvas(bmp.width, bmp.height)
-      const ctx = c.getContext('2d', { colorSpace: 'srgb' }) as OffscreenCanvasRenderingContext2D
-      ctx.drawImage(bmp, 0, 0)
-      const img = ctx.getImageData(0, 0, bmp.width, bmp.height)
-      return { data: img.data, width: bmp.width, height: bmp.height }
-    })())
+    cache.set(key, decode(path, false))
+    cache.get(key)!.catch(() => cache.delete(key))
   }
   return cache.get(key) as Promise<{ data: Uint8ClampedArray; width: number; height: number }>
 }
@@ -131,21 +142,7 @@ export async function loadPixels(path: string): Promise<{ data: Uint8ClampedArra
 export async function loadGray(path: string): Promise<Uint8Array> {
   const key = `gray:${path}`
   if (!cache.has(key)) {
-    cache.set(key, (async () => {
-      const blob = await fetch(`${DATA_BASE}/${path}`).then((r) => {
-        if (!r.ok || !(r.headers.get('content-type') ?? '').startsWith('image/')) throw new Error(`missing ${path}`)
-        return r.blob()
-      })
-      const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })
-      const c = new OffscreenCanvas(bmp.width, bmp.height)
-      const ctx = c.getContext('2d') as OffscreenCanvasRenderingContext2D
-      ctx.drawImage(bmp, 0, 0)
-      const rgba = ctx.getImageData(0, 0, bmp.width, bmp.height).data
-      const out = new Uint8Array(bmp.width * bmp.height)
-      for (let i = 0; i < out.length; i++) out[i] = rgba[4 * i]
-      bmp.close()
-      return out
-    })())
+    cache.set(key, decode(path, true).then((d) => d.data as Uint8Array))
     cache.get(key)!.catch(() => cache.delete(key))
   }
   return cache.get(key) as Promise<Uint8Array>

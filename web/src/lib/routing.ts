@@ -277,16 +277,28 @@ export async function leaveByPlan(fromLL: [number, number], toLL: [number, numbe
   const s = nearestNode(g, fromLL[0], fromLL[1])
   const t = nearestNode(g, toLL[0], toLL[1])
   const normal = astar(g, s, t, null, limitCm)
+  const yieldFrame = () => new Promise((r) => setTimeout(r, 0))
+  const tooLong = (r: Route) => !!normal && r.lengthM > Math.max(3 * normal.lengthM, normal.lengthM + 4000)
+  const tryHour = async (h: number) => {
+    const f = await frameAt(h)
+    if (!f) return null
+    await yieldFrame()
+    const r = astar(g, s, t, await edgeDepthFromFrame(g, meta, f), limitCm)
+    await yieldFrame()
+    return r && !tooLong(r) ? r : null
+  }
+  // water only rises before the street floods, so the open hours form a prefix: binary search it
   let best: Route | null = null
   let bestH: number | null = null
-  for (let h = 1; h <= untilHour; h++) {
-    const f = await frameAt(h)
-    if (!f) break
-    const r = astar(g, s, t, await edgeDepthFromFrame(g, meta, f), limitCm)
-    // a 56 km loop for a 1 km trip is not a dry route anyone would take
-    if (!r || (normal && r.lengthM > Math.max(3 * normal.lengthM, normal.lengthM + 4000))) break
-    best = r
-    bestH = h
+  let lo = 1, hi = untilHour
+  const last = await tryHour(hi)
+  if (last) { best = last; bestH = hi } else {
+    hi -= 1
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1
+      const r = await tryHour(mid)
+      if (r) { best = r; bestH = mid; lo = mid + 1 } else hi = mid - 1
+    }
   }
   return { leaveByHour: bestH, route: best, normal, openAllNight: bestH === untilHour }
 }

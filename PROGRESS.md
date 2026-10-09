@@ -231,3 +231,10 @@ Minors fixed: no leave-by marker for dry streets (a quiet "your street stays dry
 
 ### v3 check: Michaung spikes gone (Fri ~18:30)
 Land cells whose recorded peak exceeds the hourly maximum by more than 20 cm: **v2 4,952 → v3 0** (largest excess 3.3 m → 0.06 m). Mass error 3e-13 %. Outflow 30.8 Mm³ to sea, 9.5 Mm³ through land edges. Wet share ≥15 cm: 24.0% → 21.9%.
+
+### Frontend lag investigation (Fri ~19:00, user reported lag)
+Intent was always smooth (60 fps on an integrated GPU). Measured, not guessed:
+- **Main-thread profile** (`web/tests/profile_idle.mjs`): `getImageData` took 1.2 s of every 5 s while hourly depth frames preloaded. PNG decoding now runs in a Web Worker (`src/lib/decode.worker.ts`); the main thread went from 38% to 62% idle.
+- **The real cost was rain.** Rain was drawn inside the map's custom layer, so every rain frame forced MapLibre to redraw terrain, 3D buildings and water. Rain is now its own transparent canvas (`src/water/RainOverlay.ts`, pixel ratio 1) using the last map camera matrix, and the map is render-on-demand. A still map redraws 1–2 times a second, against continuous redraws before (9.2/s measured while the GPU was starved, ~60/s on a free GPU). Rain still animates: 5.6% of pixels change between frames 150 ms apart (`tests/rain_diff.mjs` + `.py`). Ripples freeze when the camera is still, which matches the spec ("nothing else animates on its own"). Reduced motion turns rain off.
+- Also: pixel ratio capped at 1.5, water mesh step 2 → 3 (about 135k vertices), single-run frames skip the blend arithmetic, leave-by planning binary-searches the hours and yields between searches, and hourly frames preload nearest-first in idle time.
+- **The lag the user saw is mostly the machine.** Per-process GPU accounting (`/proc/*/fdinfo`) showed the user's Firefox tab on the app using 86–99.6% of the Vega 3 (clocked at 640 MHz), and the model run takes about 2.2 of 4 CPU threads. Even a flat basemap with all our layers off ran at about 10 fps in a second browser. Our page (new code) idles at 5.3% GPU in Chromium. **Re-measure fps after the model runs finish, with only one browser tab open.**

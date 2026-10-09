@@ -38,6 +38,7 @@ export class MapView {
       maxPitch: 75,
       attributionControl: { compact: true },
       canvasContextAttributes: { antialias: true },
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),   // HiDPI at full scale costs 2-4x fill rate
     })
     ;(window as unknown as { __map: MLMap; __mv: MapView }).__map = this.map
     ;(window as unknown as { __mv: MapView }).__mv = this
@@ -109,9 +110,22 @@ export class MapView {
     this.water.showFrame(frame ?? new Uint8Array(this.meta.width * this.meta.height), prefersReducedMotion() ? 0 : ms)
   }
 
-  /** Preload hourly frames for a mix so scrubbing is instant. */
-  preload(mix: MixPart[], hours: number) {
-    for (const { run } of mix) for (let h = 1; h <= hours; h++) loadGray(`water/${run}/h${String(h).padStart(2, '0')}.png`).catch(() => {})
+  /** Preload hourly frames for a mix, nearest hours first, one at a time in idle time. */
+  private preloadToken = 0
+  preload(mix: MixPart[], hours: number, around = 1) {
+    const token = ++this.preloadToken
+    const order = Array.from({ length: hours }, (_, i) => i + 1).sort((a, b) => Math.abs(a - around) - Math.abs(b - around))
+    const idle = (cb: () => void) => ('requestIdleCallback' in window
+      ? (window as unknown as { requestIdleCallback: (f: () => void, o?: object) => void }).requestIdleCallback(cb, { timeout: 500 })
+      : setTimeout(cb, 60))
+    const next = (k: number) => {
+      if (token !== this.preloadToken || k >= order.length) return
+      idle(() => {
+        Promise.all(mix.map(({ run }) => loadGray(`water/${run}/h${String(order[k]).padStart(2, '0')}.png`).catch(() => null)))
+          .then(() => next(k + 1))
+      })
+    }
+    next(0)
   }
 
   flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {

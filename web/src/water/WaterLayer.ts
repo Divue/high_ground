@@ -1,10 +1,11 @@
 // three.js custom layer for MapLibre: one water plane draped over the terrain, coloured by
-// depth, plus GPU-instanced rain. The browser only blends precomputed textures.
+// depth. Rain lives on its own overlay canvas (RainOverlay). The browser only blends precomputed textures.
 import * as THREE from 'three'
 import { LngLat, MercatorCoordinate, type CustomLayerInterface, type CustomRenderMethodInput, type Map as MLMap } from 'maplibre-gl'
-import { TOKENS } from '../config'
+import { TOKENS, prefersReducedMotion } from '../config'
 import type { WaterMeta } from '../lib/data'
-import { rainFrag, rainVert, waterFrag, waterVert } from './shaders'
+import { RainOverlay } from './RainOverlay'
+import { waterFrag, waterVert } from './shaders'
 
 const R = 20037508.342789244
 const JUNCTIONS: [number, number][] = [
@@ -25,15 +26,13 @@ export class WaterLayer implements CustomLayerInterface {
   private scene = new THREE.Scene()
   private camera = new THREE.Camera()
   private water!: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>
-  private rain!: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>
+  private rain: RainOverlay | null = null
   private texA!: THREE.DataTexture
   private texB!: THREE.DataTexture
   private bufA: Uint8Array
   private bufB: Uint8Array
   private anim: { from: number; to: number; t0: number; ms: number; key: 'mixT' | 'rise' }[] = []
   private t0 = performance.now()
-  private rainLevel = 0
-  private rainTarget = 0
   private lowPower = false
   terrainExag = 1.0
   private meta: WaterMeta
@@ -74,7 +73,7 @@ export class WaterLayer implements CustomLayerInterface {
     elevTex.needsUpdate = true
 
     // grid mesh: x east 0..1, y south 0..1 (uv.y = 0 at the north edge = texture row 0)
-    const step = this.lowPower ? 6 : 2
+    const step = this.lowPower ? 6 : 3   // ~135k vertices: plenty for 30 m data
     const sx = Math.round(W / step), sy = Math.round(H / step)
     const pos = new Float32Array((sx + 1) * (sy + 1) * 3)
     const uv = new Float32Array((sx + 1) * (sy + 1) * 2)
@@ -116,24 +115,8 @@ export class WaterLayer implements CustomLayerInterface {
     this.water.frustumCulled = false
     this.scene.add(this.water)
 
-    // rain: ~5k instanced streaks around the camera target
-    const N = 4000
-    const quad = new THREE.InstancedBufferGeometry()
-    quad.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-1, 0, 0, 1, 0, 0, -1, 1, 0, 1, 1, 0]), 3))
-    quad.setIndex([0, 1, 2, 1, 3, 2])
-    const off = new Float32Array(N * 3), spd = new Float32Array(N)
-    for (let i = 0; i < N; i++) { off[3 * i] = Math.random(); off[3 * i + 1] = Math.random(); off[3 * i + 2] = Math.random(); spd[i] = 0.6 + Math.random() * 0.5 }
-    quad.setAttribute('offset', new THREE.InstancedBufferAttribute(off, 3))
-    quad.setAttribute('speed', new THREE.InstancedBufferAttribute(spd, 1))
-    quad.instanceCount = N
-    this.rain = new THREE.Mesh(quad, new THREE.ShaderMaterial({
-      vertexShader: rainVert, fragmentShader: rainFrag, transparent: true, depthWrite: false,
-      blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
-      uniforms: { time: { value: 0 }, boxSize: { value: 0.001 }, center: { value: new THREE.Vector3() },
-        streak: { value: 0.00001 }, opacity: { value: 0 } },
-    }))
-    this.rain.frustumCulled = false
-    this.scene.add(this.rain)
+    // rain on its own canvas, so a still map does not redraw (none on software renderers)
+    if (!this.lowPower) this.rain = new RainOverlay(map)
 
     this.renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true })
     this.renderer.autoClear = false
@@ -160,7 +143,7 @@ export class WaterLayer implements CustomLayerInterface {
     this.animate('rise', this.water.material.uniforms.rise.value, to, ms)
   }
 
-  setRain(level: number) { this.rainTarget = level; this.map?.triggerRepaint() }
+  setRain(level: number) { this.rain?.setLevel(prefersReducedMotion() ? 0 : level) }
   setOpacity(o: number) { if (!this.water) return; this.water.material.uniforms.opacity.value = o; this.map?.triggerRepaint() }
   setTerrainExag(e: number) { this.terrainExag = e; if (this.water) this.water.material.uniforms.terrainExag.value = e }
 
@@ -187,28 +170,22 @@ export class WaterLayer implements CustomLayerInterface {
     const cp = (this.map as unknown as { transform?: { cameraPosition?: ArrayLike<number> } }).transform?.cameraPosition
     if (cp) u.camPos.value.set(cp[0], cp[1], cp[2])
 
-    // rain follows the camera target and fades out when zoomed out
-    this.rainLevel += (this.rainTarget - this.rainLevel) * 0.05
     const zoom = this.map.getZoom()
     u.minDepth.value = 0.04 + 0.11 * Math.min(1, Math.max(0, (14 - zoom) / 1.0))
-    const ru = this.rain.material.uniforms
-    const c = MercatorCoordinate.fromLngLat(this.map.getCenter())
-    const box = 2.2 / Math.pow(2, zoom)
-    ru.time.value = time
-    ru.center.value.set(c.x, c.y, 0)
-    ru.boxSize.value = box
-    ru.streak.value = box * 0.018
-    ru.opacity.value = this.rainLevel * Math.min(1, Math.max(0, (zoom - 9) / 3))
-    this.rain.visible = ru.opacity.value > 0.01
 
     // mainMatrix maps web-mercator 0..1 coordinates (z conformal) to clip space
-    this.camera.projectionMatrix = new THREE.Matrix4().fromArray(args.defaultProjectionData.mainMatrix as unknown as number[])
+    const mm = args.defaultProjectionData.mainMatrix as unknown as number[]
+    this.camera.projectionMatrix = new THREE.Matrix4().fromArray(mm)
+    this.rain?.setMatrix(mm)
     this.camera.projectionMatrixInverse.copy(this.camera.projectionMatrix).invert()
     this.renderer.resetState()
     this.renderer.render(this.scene, this.camera)
-    // ripples and rain animate continuously while visible (not on software renderers)
-    if (!this.lowPower || this.anim.length || ru.opacity.value > 0.01) {
-      if (!this.lowPower || this.anim.length) this.map.triggerRepaint()
-    }
+    // render on demand: repaint again only while the water rises or cross-fades; a still map costs nothing
+    if (this.anim.length) this.map.triggerRepaint()
+  }
+
+  onRemove() {
+    this.rain?.dispose()
+    this.rain = null
   }
 }

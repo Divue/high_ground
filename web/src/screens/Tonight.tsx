@@ -95,7 +95,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   // Depth frame for the current hour
   useEffect(() => {
     if (!scenario.mix.length) { mv.showMix([], 'max'); return }
-    mv.preload(scenario.mix, scenario.hours)
+    mv.preload(scenario.mix, scenario.hours, hour)
     mv.showMix(scenario.mix, hour, 450)
   }, [scenario, hour, mv])
 
