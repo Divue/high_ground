@@ -319,3 +319,7 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - v3 baseline (`data/out/decision_v3.json`): AUC 0.5364 [0.521, 0.557], GCC moderate-plus share 0.244, flooded share of odd-ward land 0.320.
 - Chain: `pipeline/v4_chain.sh`. Back up v3 → 01 → design_200_mean → ANUGA in parallel → remaining 15 runs → post_runs → decision. Log: `data/logs/v4_chain.log`. ETA about 07:30 IST.
 - Not done (minor): losses split into drains and infiltration in `info.json`.
+
+### v4 chain, first results (Sat 00:45)
+- Terrain rebuilt 00:23 (grey opening, datum restore +0.02 m). design_200_mean v4: 823 s, mass error 0.0000%. Places at 200 mm: Velachery 9.1%, T. Nagar 12.8%, Pallikaranai 35.3% (v3: 15 / 19 / 35). Drier overall, as the reviewer's sub-box predicted; adoption is decided only by the pre-registered rule on the 2015 replay.
+- ANUGA v4 started 00:37 in parallel. QA tester relaunched on the served build (v3 data with B1/B2) after the usage limit reset.
