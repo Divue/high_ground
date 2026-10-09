@@ -77,7 +77,9 @@ def write_alert(street, old, new, info, parking):
         text = r["output"]["message"]["content"][0]["text"].strip()
     except Exception as e:  # keep alerts flowing even if Bedrock is unavailable
         print("bedrock error", e)
-        text = (f"Tonight's forecast is about {facts['forecast_mm']} mm; {street} is now '{new['label']}' "
+        mm = facts["forecast_mm"]
+        mm = f"{mm:g}" if isinstance(mm, (int, float)) else mm
+        text = (f"Tonight's forecast is about {mm} mm; {street} is now '{new['label']}' "
                 f"with up to {facts['max_depth_cm']} cm of water"
                 + (f" by {facts['reaches_15cm_at']}." if facts["reaches_15cm_at"] else ".")
                 + (f" Move your car to {facts['dry_parking']} ({facts['dry_parking_m']} m away) before then."

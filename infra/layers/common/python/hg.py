@@ -95,7 +95,8 @@ def scenario_mix(sc: dict | None = None):
         return []
     if sc.get("run"):
         return [(sc["run"], 1.0)]
-    return [(sc["lower"], 1 - sc["w"]), (sc["upper"], sc["w"])]
+    mix = [(sc["lower"], 1 - sc["w"]), (sc["upper"], sc["w"])]
+    return [(r, w) for r, w in mix if w > 0]       # never fetch a run that carries no weight
 
 
 def segment_values(tile: str, index: int, mix):
