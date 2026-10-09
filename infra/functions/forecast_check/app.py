@@ -116,7 +116,10 @@ def handler(event, context):
         info = hg.street_risk(float(it["lat"]), float(it["lon"]), sc=None) if sc else {"max_depth_cm": 0}
         new = hg.band(info.get("max_depth_cm", 0))
         old = hg.band(float(it.get("last_cm", 0)))
-        if new["code"] != old["code"] or body.get("force_alert"):
+        # low ground the model already holds water on before any rain would flap between bands with every
+        # forecast; its card explains this, so it gets no change alerts
+        prewet = bool(info.get("already_wet_before_storm"))
+        if (new["code"] != old["code"] and not prewet) or body.get("force_alert"):
             parking = hg.dry_parking(float(it["lat"]), float(it["lon"]))["options"] if sc else []
             text, facts = write_alert(it.get("street", "Your street"), old, new, info, parking)
             sns.publish(TopicArn=os.environ["TOPIC_ARN"], Subject=f"HighGround: {it.get('street', 'your street')} — {new['label']}",

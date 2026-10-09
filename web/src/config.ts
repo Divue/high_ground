@@ -8,8 +8,8 @@ export const VELACHERY: [number, number] = [80.21951, 12.96762]   // same point 
 export const TOKENS = {
   stormSky: '#14303D',
   wetAsphalt: '#3E5560',
-  shallow: '#7FD3D8',
-  deep: '#1C6E9C',
+  shallow: '#86E6EC',      // brighter than the spec token so shallow water reads on the darker city
+  deep: '#1E7BC6',         // more saturated: deep water is the boldest element
   amber: '#F2A541',
   rainGrey: '#C9D4D8',
 }

@@ -24,7 +24,7 @@ import numpy as np
 from pyproj import Transformer
 from shapely.ops import substring
 
-from common import CFG, CRS, OUT, WORK, grid_spec, pre_wet, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, write_json
 
 ROADS = {
     "motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
@@ -71,7 +71,8 @@ def main():
     runs = json.loads((OUT / "runs.json").read_text())
     segs = segments()
     print(f"{len(segs)} segments")
-    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+    # lakes, channels and the sea are never a street sample (coastal roads read the tide otherwise: QA run 4)
+    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy") | np.load(WORK / "sea.npy")
 
     # sample cells
     samples, tiles = [], []
@@ -117,7 +118,8 @@ def main():
         t15 = np.load(d / "t15.npy")
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
         nh = snaps.shape[0]
-        standing = pre_wet(d)                     # land already wet at storm start: kept, but flagged
+        hs_f = d / "h_start.npy"
+        h_start = np.load(hs_f) if hs_f.exists() else np.zeros(hmax.shape, np.float32)   # water at storm start
         mx = np.zeros(len(segs), np.int32)
         pre = np.zeros(len(segs), np.uint8)
         tt = np.full(len(segs), -1.0)
@@ -126,7 +128,8 @@ def main():
             if segs[i][3] or len(r) == 0:          # bridge deck or outside grid
                 continue
             r2, c2 = r, c
-            pre[i] = int(standing[r, c].mean() > 0.5)
+            # flagged with the same statistic the card uses: p90 of the street's samples, >= 5 cm
+            pre[i] = int(np.percentile(h_start[r, c], 90) >= 0.05)
             # one statistic everywhere: p90 across the street's samples of each hourly depth;
             # the peak, the time to 15 cm and the hourly curve all come from this series
             ser = np.percentile(snaps[:, r2, c2], 90, axis=1)

@@ -110,6 +110,11 @@ void main() {
   float edge = smoothstep(minDepth, minDepth + 0.11, depth);
   // deeper water carries more weight: shallow is translucent, deep is opaque
   float a = opacity * edge * mix(0.45, 1.0, t);
+  // seen from afar (city zoom) the flood must still read: brighter and more solid, fading to the
+  // close-up treatment as you zoom in
+  float far = 1.0 - detail;
+  col = mix(col, col * 1.35 + vec3(0.02, 0.05, 0.06), far * 0.8);
+  a = max(a, opacity * edge * 0.82 * far);
   // one line on the water, where it passes 30 cm (cars stall), in the shallow tone so it never outshines the water
   float lines = 0.55 * iso(depth, 0.30) * detail;
   col = mix(col, shallow, lines);

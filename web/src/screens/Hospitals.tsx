@@ -21,7 +21,8 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
     }).catch(() => {})
   }, [])
   useEffect(() => {
-    mv.map.easeTo({ center: [80.22, 13.04], zoom: 11.2, pitch: 35, bearing: 0, duration: 1400 })
+    mv.map.flyTo({ center: [80.22, 13.04], zoom: 11.4, pitch: 45, bearing: 12, duration: 2400, curve: 1.3, essential: true })
+    mv.settleOrbit(-14, 14000)
     return () => { mv.setGeoJSON('hospitals', null); mv.setGeoJSON('route-safe', null) }
   }, [mv])
   useEffect(() => { if (runs[run]) mv.showMix([{ run, w: 1 }], 'max', 350) }, [run, runs, mv])
@@ -49,7 +50,8 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
     if (!data) return
     setSel(i)
     const h = data.hospitals[i]
-    mv.map.easeTo({ center: [h.lon, h.lat], zoom: 13.5, pitch: 50, duration: 1200 })
+    mv.map.flyTo({ center: [h.lon, h.lat], zoom: 14.2, pitch: 58, duration: 2000, curve: 1.4, essential: true })
+    mv.pulse([h.lon, h.lat])
     setMsg('Finding a dry route from the main road network…')
     const g = await loadGraph()
     const depth = await mixedDepth([{ run, w: 1 }])

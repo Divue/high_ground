@@ -1,0 +1,16 @@
+// Switching storms must replay the night for the NEW storm and end on its peak with water on the map.
+import { chromium } from '@playwright/test'
+const browser = await chromium.launch({ channel: 'chromium', args: ['--use-angle=gl-egl', '--use-gl=angle', '--enable-gpu', '--ignore-gpu-blocklist'] })
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+const errors = []; page.on('pageerror', (e) => errors.push(String(e)))
+await page.goto('http://127.0.0.1:5173/?replay=michaung2023')
+await page.waitForSelector('.readout', { timeout: 90_000 })
+await page.waitForTimeout(9000)
+const read = () => page.evaluate(() => ({ readout: document.querySelector('.readout')?.getAttribute('aria-label'), now: document.querySelector('.timeline .now')?.textContent, peak: document.querySelector('.when')?.textContent }))
+const before = await read()
+await page.getByRole('button', { name: '2015', exact: true }).click()
+await page.waitForTimeout(10000)
+const after = await read()
+await page.screenshot({ path: '../review/p5-dev/storm_switch_2015.png' })
+console.log(JSON.stringify({ before, after, errors }, null, 1))
+await browser.close()

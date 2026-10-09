@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { prefersReducedMotion } from '../config'
 
-/** Eases a displayed integer from its current value to `target` over `ms` (instant when ms is 0). */
-export function useTweened(target: number, ms: number): number {
+/** Eases a displayed integer from its current value to `target` over `ms` (instant when ms is 0).
+ *  A new `resetKey` (a new street or storm) starts again from 0 instead of the last street's number. */
+export function useTweened(target: number, ms: number, resetKey = ''): number {
   const [v, setV] = useState(target)
   const from = useRef(target)
   const cur = useRef(target)
+  const key = useRef(resetKey)
   useEffect(() => {
+    if (key.current !== resetKey) { key.current = resetKey; cur.current = 0 }
     if (ms <= 0 || prefersReducedMotion()) { cur.current = target; setV(target); return }
     from.current = cur.current
     let raf = 0
@@ -20,6 +23,6 @@ export function useTweened(target: number, ms: number): number {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [target, ms])
+  }, [target, ms, resetKey])
   return v
 }

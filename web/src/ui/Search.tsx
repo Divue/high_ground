@@ -49,6 +49,7 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
         placeholder="Search your street or area"
         value={q}
         onChange={(e) => { setQ(e.target.value); setActive(0) }}
+        onFocus={(e) => e.currentTarget.select()}        // typing replaces the last place
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') { setActive((a) => Math.min(a + 1, items.length - 1)); e.preventDefault() }
           if (e.key === 'ArrowUp') { setActive((a) => Math.max(a - 1, 0)); e.preventDefault() }

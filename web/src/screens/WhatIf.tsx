@@ -16,7 +16,9 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
 
   useEffect(() => { loadHospitals().then(setHosp).catch(() => {}) }, [])
   useEffect(() => {
-    mv.map.easeTo({ center: [80.215, 13.03], zoom: 11.3, pitch: 45, bearing: -10, duration: 1600 })
+    // a sweeping move out to the whole city, then a slow drift so it reads in 3D
+    mv.map.flyTo({ center: [80.215, 13.03], zoom: 11.6, pitch: 52, bearing: -24, duration: 2600, curve: 1.3, essential: true })
+    mv.settleOrbit(16, 14000)
     mv.water?.setRain(0.4)
     return () => { mv.water?.setRain(0) }
   }, [mv])
@@ -32,7 +34,7 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
   return (
     <div className="panel left">
       <h2>What if</h2>
-      <p className="muted small">Drag the rainfall. The city shows the deepest water each street reaches over a 24-hour storm.</p>
+      <p className="muted small">Drag to set how much rain falls in a day. The map shows the worst water each street sees.</p>
       <div className="stat" style={{ marginTop: 10 }}>{val} mm</div>
       <div className="muted small">in 24 hours</div>
       <input className="big-range" type="range" min={lo} max={hi} step={10} value={val} disabled={!avail.length}
@@ -47,21 +49,21 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
         <div>
           {wet != null ? <>
             <div className="stat">{Math.round(wet * 100)}%</div>
-            <div className="muted small">of the city’s land under at least 15 cm of water<span className="chip">from the model</span></div>
+            <div className="muted small">of the city too deep for scooters<span className="chip">from the model</span></div>
           </> : <div className="muted small">{avail.length ? 'This rainfall has not been computed yet.' : `The ${tide} tide storms are still being computed.`}</div>}
         </div>
         {computed && hr && hosp && (
           <div>
             <div className="stat">{hr.cut_off}<span className="muted" style={{ fontSize: 20 }}> of {hosp.hospitals.length}</span></div>
-            <div className="muted small">hospitals cut off at {runs[dom]?.total_mm} mm</div>
+            <div className="muted small">hospitals cars cannot reach at {runs[dom]?.total_mm} mm</div>
           </div>
         )}
       </div>
       <p className="muted small" style={{ marginTop: 10 }}>
         {!computed ? '' : blended && runs[sc.mix[0].run] && runs[sc.mix[1].run]
-          ? `Blended between the ${runs[sc.mix[0].run].total_mm} mm and ${runs[sc.mix[1].run].total_mm} mm model runs.`
-          : runs[dom] ? `The ${runs[dom].total_mm} mm model run.` : ''}
-        {' '}Storms are front-loaded: most rain falls in the first eight hours.
+          ? `In between our ${runs[sc.mix[0].run].total_mm} mm and ${runs[sc.mix[1].run].total_mm} mm storms.`
+          : runs[dom] ? `Our ${runs[dom].total_mm} mm storm.` : ''}
+        {' '}Most of the rain falls in the first eight hours.
       </p>
     </div>
   )

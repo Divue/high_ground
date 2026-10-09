@@ -170,7 +170,7 @@ def main():
     samp_r = np.concatenate(samp_r)
     samp_c = np.concatenate(samp_c)
     samp_e = np.concatenate(samp_e)
-    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy") | np.load(WORK / "sea.npy")
     keep_s = ~water[samp_r, samp_c]
     samp_r, samp_c, samp_e = samp_r[keep_s], samp_c[keep_s], samp_e[keep_s]
 

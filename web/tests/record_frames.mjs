@@ -137,6 +137,21 @@ const shots = {
     await page.mouse.up()
     await film(3)
   },
+  // a user's whole journey, for reviewing transitions frame by frame
+  async journey() {
+    const url = `${base}?replay=michaung2023`
+    if (process.env.WARM) await warm(url)
+    await startClock()
+    await page.goto(url)
+    await waitReady()
+    await film(20)                                   // opening
+    await search('Arumugam Road'); await film(8)     // change location
+    await page.getByRole('button', { name: '2015' }).click(); await film(8)   // change storm
+    await search('Anna Nagar'); await film(8)        // another place, far away
+    await page.getByRole('button', { name: 'What if' }).click(); await film(5)
+    await page.getByRole('button', { name: 'Proof' }).click(); await film(5)
+    await page.getByRole('button', { name: 'Tonight' }).click(); await film(5)
+  },
   // Proof: the split handle swept across
   async proof() {
     const url = `${base}#proof`

@@ -28,18 +28,18 @@ export function lapseEvents(run: RunInfo): LapseEvent[] {
   if (heavy >= 0) ev.push({ hour: heavy + 1, text: `${Math.round(rain[heavy])} mm fell in this one hour, the heaviest of this storm.` })
   if (run.reservoir && run.start_local) {
     const r = run.reservoir
-    ev.push({ hour: Math.max(1, hoursFrom(run.start_local, r.rising_from_local)), text: 'The Chembarambakkam release passes 10,000 cusecs where the Adyar enters the model (modelled from the CAG timeline).' })
-    ev.push({ hour: Math.max(1, hoursFrom(run.start_local, r.peak_from_local)), text: `The release reaches its peak, ${r.peak_cusecs.toLocaleString('en-IN')} cusecs (modelled).` })
+    ev.push({ hour: Math.max(1, hoursFrom(run.start_local, r.rising_from_local)), text: 'Chembarambakkam reservoir starts releasing water down the Adyar (10,000 cusecs; timing from the CAG audit).' })
+    ev.push({ hour: Math.max(1, hoursFrom(run.start_local, r.peak_from_local)), text: `The reservoir release peaks at ${r.peak_cusecs.toLocaleString('en-IN')} cusecs.` })
   }
   const w = run.wet_share_15cm_hourly
   if (w?.length) {
     const k = w.indexOf(Math.max(...w))
-    ev.push({ hour: k + 1, text: `The most land under water in this storm: ${pct(w[k])} of the modelled area passes 15 cm.` })
+    ev.push({ hour: k + 1, text: `The worst hour: ${pct(w[k])} of the city is too deep for scooters.` })
   }
   let last = -1
   rain.forEach((r, i) => { if (r >= 1) last = i })
   if (last >= 0 && last + 2 <= run.hours) ev.push({ hour: last + 2, text: 'The rain stops. Water keeps moving downhill and draining to the sea.' })
-  if (w?.length) ev.push({ hour: run.hours, text: `${run.hours} hours after the start, ${pct(w[w.length - 1])} of the land is still under 15 cm.` })
+  if (w?.length) ev.push({ hour: run.hours, text: `${run.hours} hours in, ${pct(w[w.length - 1])} of the city is still too deep for scooters.` })
   // every caption carries its own time, so it never reads as a claim about a later hour
   const start = run.start_local
   // events in the same hour share one caption (otherwise the later one hides the earlier)
@@ -64,7 +64,7 @@ export default function Timelapse({ run, hour, playing, onStop, onProof }: {
       {w !== undefined && (
         <div className="lapse-share">
           <span className="num">{pct(w)}</span>
-          <span className="small muted">of the modelled land under 15 cm <span className="chip">from the model</span></span>
+          <span className="small muted">of the city too deep for scooters <span className="chip">from the model</span></span>
         </div>
       )}
       <p className="lapse-event" aria-live="polite">{now?.text ?? 'The storm is about to begin.'}</p>

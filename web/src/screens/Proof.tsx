@@ -43,7 +43,7 @@ export default function Proof({ mv }: { mv: MapView }) {
 
   useEffect(() => {
     // city on screen below the headline card, centred on the split line
-    mv.map.easeTo({ center: [80.225, 13.03], zoom: 11.5, pitch: 0, bearing: 0, padding: { top: 240, bottom: 0, left: 0, right: 0 }, duration: 1200 })
+    mv.map.flyTo({ center: [80.225, 13.03], zoom: 11.5, pitch: 0, bearing: 0, padding: { top: 240, bottom: 0, left: 0, right: 0 }, duration: 2200, curve: 1.2, essential: true })
     mv.showMix([{ run: 'dec2015_reservoir', w: 1 }], 'max', 500)
     mv.water?.setRain(0)
     const style = baseStyle()
@@ -116,32 +116,33 @@ export default function Proof({ mv }: { mv: MapView }) {
       {!detail && <div className="proof-handle" style={{ left: `calc(${split * 100}% - 1px)` }} onPointerDown={drag}
         role="slider" aria-label="Swipe between model and citizen reports" aria-valuenow={Math.round(split * 100)} tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'ArrowLeft') setSplit((s) => Math.max(0.05, s - 0.05)); if (e.key === 'ArrowRight') setSplit((s) => Math.min(0.95, s + 0.05)) }} />}
-      {!detail && <div className="proof-label" style={{ left: 20 }}>Model: 1–2 Dec 2015 replay</div>}
+      {!detail && <div className="proof-label" style={{ left: 20 }}>Our model: the Dec 2015 flood</div>}
       {!detail && <div className="proof-label" style={{ right: 20 }}>Streets residents reported flooded in 2015</div>}
       {detail && <div className="proof-label" style={{ left: 20 }}>{detail === 'anuga' ? 'ANUGA' : 'Fast model'}: peak depth, 200 mm storm, Velachery and Pallikaranai</div>}
 
       {p && h && g && t && (
         <>
           {!detail && <div className="panel proof-center">
-            <p style={{ margin: '0 0 4px', fontFamily: 'var(--head)', fontSize: 17 }}>{t.question}</p>
+            <h2 className="proof-q">Did the model get 2015 right?</h2>
+            <p className="small" style={{ margin: '0 0 6px' }}>We took streets residents reported flooded in Dec 2015 and streets they did not, in neighbourhoods we never used to tune the model, and asked: does the model put more water on the reported one?</p>
             {/* all four on one shared scale: nothing is drawn bigger than a baseline that beats it */}
             <div className="strip" aria-label="Ranking test results">
-              {([['model', 'the model', t.model.auc], ['chance', 'chance', 0.5], ['elev', 'elevation alone', t.low_elevation.auc], ['chan', 'nearest channel', t.near_a_channel.auc]] as const)
+              {([['model', 'our model', t.model.auc], ['chance', 'a coin toss', 0.5], ['elev', 'just low ground', t.low_elevation.auc], ['chan', 'just near a canal', t.near_a_channel.auc]] as const)
                 .map(([k, label, v]) => (
                   <div key={k} className={`mk${k === 'model' ? ' model' : ''}`} style={{ left: `${(((v ?? 0.5) - 0.44) / 0.14) * 100}%` }}>
                     <b>{pct(v)}</b>{label}
                   </div>
                 ))}
             </div>
-            <p style={{ margin: '12px 0 4px' }}>On wards we never tuned on, the model is <b>{t.verdict}</b>{t.model.ci95 ? ` (95% range ${pct(t.model.ci95[0])}–${pct(t.model.ci95[1])})` : ''}.</p>
+            <p style={{ margin: '12px 0 4px' }}>It is right <b>{pct(t.model.auc)}</b> of the time, where a coin toss is right 50%: <b>{t.verdict}</b>. Simply asking "is it near a canal?" does a little better. Treat your street's number as a guide to how your area behaves, not a promise.</p>
             <p className="muted small" style={{ margin: 0 }}>
-              The 2015 reports mark where people reported, not every street that flooded, so they can only rank, not score. {p.sentence}
+              People reported where they were, not every street that flooded, so the reports can only rank streets, not score them.
             </p>
           </div>}
           <div className="panel proof-bottom" style={detail ? { width: 620 } : undefined}>
             {!detail && <>
             <details className="tests">
-            <summary>Every test we ran, on the {h.reported_segments} reported streets in the held-out wards</summary>
+            <summary>For experts: every test, on the {h.reported_segments} reported streets in the held-out wards{t.model.ci95 ? ` (95% range ${pct(t.model.ci95[0])}–${pct(t.model.ci95[1])})` : ''}</summary>
             <table className="proof-table">
               <thead><tr><th>How often a reported street ranks above an unreported one</th><th>All</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
               <tbody>
@@ -156,7 +157,8 @@ export default function Proof({ mv }: { mv: MapView }) {
             </details>
             </>}
             {!detail && <details className="tests">
-            <summary>Drain capacity and the limits of this test</summary>
+            <summary>For experts: drains, and the limits of this test</summary>
+            <p className="small muted" style={{ margin: '0 0 6px' }}>{p.sentence}</p>
             <p className="small" style={{ margin: 0 }}>
               {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${c.auc != null ? pct(c.auc) : pct(c.hit_rate)}`).join(' · ')}
               <span className="muted"> on the tuning half. Within the error bars these are the same, so we use {p.split.value_mm_h} mm/h as an assumption.</span>
@@ -166,7 +168,7 @@ export default function Proof({ mv }: { mv: MapView }) {
             </details>}
             {p.anuga && (
               <div className="small">
-                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: where either model puts 15 cm or more, they agree on {pct(p.anuga.csi)} of those cells (critical success index; depth correlation {p.anuga.depth_corr.toFixed(2)}; first 14 hours of the 200 mm storm). Same terrain, different numerics, so this checks the arithmetic, not the terrain.</p>
+                <p style={{ margin: '8px 0 6px' }}>A second, independent flood model (ANUGA, from Geoscience Australia) run over Velachery agrees with ours on {pct(p.anuga.csi)} of the flooded area. That checks our maths, not the terrain both use. <span className="muted">(Critical success index at 15 cm, depth correlation {p.anuga.depth_corr.toFixed(2)}, {p.anuga.triangles.toLocaleString()} triangles, first 14 hours of the 200 mm storm.)</span></p>
                 <div className="seg" role="group" aria-label="Velachery detail view">
                   <button aria-pressed={!detail} onClick={() => setDetail(null)}>2015 split view</button>
                   <button aria-pressed={detail === 'anuga'} onClick={() => setDetail('anuga')}>Detail: ANUGA</button>

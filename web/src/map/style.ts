@@ -1,30 +1,30 @@
 // Dark "Chennai at 2 AM" basemap from the Protomaps PMTiles extract, using the design tokens.
 import { layers, namedFlavor, type Flavor } from '@protomaps/basemaps'
 import type { StyleSpecification } from 'maplibre-gl'
-import { DATA_BASE, DOMAIN_BBOX, TOKENS } from '../config'
+import { DATA_BASE, DOMAIN_BBOX } from '../config'
 
 function flavor(): Flavor {
   const f = { ...namedFlavor('dark') }
-  const sky = TOKENS.stormSky
-  const asphalt = TOKENS.wetAsphalt
+  // Night palette v2: a near-black, blue-tinged city so the floodwater is the brightest thing on the map.
+  const ink = '#08141A'
   Object.assign(f, {
-    background: '#0B2029',   // same as water: no seam at the edge of the basemap extract
-    earth: sky,
-    park_a: '#16363F', park_b: '#16363F', wood_a: '#16363F', wood_b: '#16363F', scrub_a: '#163540', scrub_b: '#163540',
-    hospital: '#183843', industrial: '#152F3A', school: '#16343F', pedestrian: '#18343E', aerodrome: '#16333E',
-    zoo: '#16363F', military: '#152F3A', beach: '#1A3A44', sand: '#1A3A44', glacier: sky,
-    water: '#0B2029',
-    buildings: '#1C3A46',
-    minor_service: '#2A424D', minor_a: '#304A55', minor_b: '#304A55', link: '#344E59', other: '#2A424D',
-    major: asphalt, highway: '#4A626D',
-    minor_casing: sky, minor_service_casing: sky, link_casing: sky, major_casing_early: sky, major_casing_late: sky,
-    highway_casing_early: sky, highway_casing_late: sky,
-    bridges_minor: '#304A55', bridges_major: asphalt, bridges_highway: '#4A626D', bridges_link: '#344E59', bridges_other: '#2A424D',
-    railway: '#2C4550', boundaries: '#2C4550',
-    roads_label_minor: '#8FA2AA', roads_label_minor_halo: sky, roads_label_major: '#A9B8BE', roads_label_major_halo: sky,
-    subplace_label: '#6F8590', subplace_label_halo: sky, city_label: TOKENS.rainGrey, city_label_halo: sky,
-    runway: '#2A424D',
-    ocean_label: '#4E6A75', address_label: '#7D9099', address_label_halo: sky,
+    background: '#050D12',   // the sea and the edge of the basemap extract
+    earth: '#0A161C',
+    park_a: '#0C1C21', park_b: '#0C1C21', wood_a: '#0C1C21', wood_b: '#0C1C21', scrub_a: '#0C1B20', scrub_b: '#0C1B20',
+    hospital: '#0F1F26', industrial: '#0B181E', school: '#0E1D24', pedestrian: '#0F1E25', aerodrome: '#0D1B21',
+    zoo: '#0C1C21', military: '#0B181E', beach: '#111F25', sand: '#111F25', glacier: ink,
+    water: '#04090C',        // lakes and rivers darker than land, so they never read as flooding
+    buildings: '#15252C',
+    minor_service: '#16252C', minor_a: '#1C2D35', minor_b: '#1C2D35', link: '#2A3E48', other: '#16252C',
+    major: '#2F4652', highway: '#41606F',     // wet asphalt catching the street lights
+    minor_casing: ink, minor_service_casing: ink, link_casing: ink, major_casing_early: ink, major_casing_late: ink,
+    highway_casing_early: ink, highway_casing_late: ink,
+    bridges_minor: '#1C2D35', bridges_major: '#2F4652', bridges_highway: '#41606F', bridges_link: '#2A3E48', bridges_other: '#16252C',
+    railway: '#1F3039', boundaries: '#1F3039',
+    roads_label_minor: '#7C8E96', roads_label_minor_halo: ink, roads_label_major: '#9AABB2', roads_label_major_halo: ink,
+    subplace_label: '#66798280', subplace_label_halo: ink, city_label: '#C9D4D8', city_label_halo: ink,
+    runway: '#16252C',
+    ocean_label: '#3D525C', address_label: '#6E8088', address_label_halo: ink,
   })
   return f
 }
@@ -68,20 +68,24 @@ export function baseStyle(): StyleSpecification {
         paint: {
           'fill-extrusion-color': [
             'interpolate', ['linear'], ['coalesce', ['get', 'height'], 8],
-            4, '#1E3742', 12, '#24404C', 30, '#2B4753', 60, '#33505B',
+            4, '#17262D', 12, '#1D2F37', 30, '#253A44', 60, '#2E4652',
           ],
           'fill-extrusion-height': ['coalesce', ['get', 'height'], 8],
           'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],
-          'fill-extrusion-opacity': 0.85,
+          // the city rises in as you come down, instead of popping in
+          'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0, 14, 0.9],
           'fill-extrusion-vertical-gradient': true,
         },
       },
       // labels after the 3D buildings so names are never cut through
       ...base.filter((l) => l.type === 'symbol'),
     ],
+    // a storm night: dark sky over a misty horizon, so the far city fades into rain haze
     sky: {
-      'sky-color': '#0B2029', 'horizon-color': '#14303D', 'fog-color': '#0B2029',
-      'sky-horizon-blend': 0.7, 'horizon-fog-blend': 0.6, 'fog-ground-blend': 0.45, 'atmosphere-blend': 0.4,
+      'sky-color': '#02070A', 'horizon-color': '#1F3946', 'fog-color': '#0C1B22',
+      'sky-horizon-blend': 0.55, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.35, 'atmosphere-blend': 0.6,
     },
+    // a cool moonlight from the upper left: walls facing it read lighter, so buildings look solid
+    light: { anchor: 'viewport', color: '#DCEAF2', intensity: 0.5, position: [1.3, 210, 35] },
   } as StyleSpecification
 }

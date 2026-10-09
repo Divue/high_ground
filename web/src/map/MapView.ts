@@ -1,7 +1,7 @@
 import type * as GeoJSON from 'geojson'
 // Imperative wrapper around MapLibre: basemap, terrain, 3D buildings, water layer, overlays,
 // and the depth-frame controller (fetch hourly textures, blend runs, cross-fade).
-import { Map as MLMap, addProtocol, setWorkerUrl, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
+import { Map as MLMap, Marker, Popup, addProtocol, setWorkerUrl, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -100,6 +100,70 @@ export class MapView {
       paint: { 'circle-radius': 9, 'circle-color': TOKENS.stormSky, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3.5 } })
   }
 
+  /** A small card where you tapped: that street's depth, and a way to make it yours. */
+  private peekPopup: Popup | null = null
+  peek(at: [number, number], info: { name: string; feel: string; cm: number; from: string | null }, onPick: () => void) {
+    this.peekPopup?.remove()
+    const el = document.createElement('div')
+    el.className = 'peek'
+    const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!))
+    el.innerHTML = `<div class="peek-name">${esc(info.name)}</div>
+      <div class="peek-feel">${esc(info.feel)}<span> · ${info.cm} cm at its worst</span></div>
+      ${info.from ? `<div class="peek-when">Too deep for scooters from ${esc(info.from)}</div>` : ''}
+      <button class="btn small-btn">Make this my street</button>`
+    el.querySelector('button')!.addEventListener('click', () => { this.peekPopup?.remove(); onPick() })
+    this.peekPopup = new Popup({ closeButton: false, offset: 12, maxWidth: '260px', className: 'peek-popup' })
+      .setLngLat(at).setDOMContent(el).addTo(this.map)
+  }
+  clearPeek() { this.peekPopup?.remove(); this.peekPopup = null }
+
+  /** Rings that spread from the point you just landed on. */
+  pulse(at: [number, number]) {
+    if (prefersReducedMotion()) return
+    const el = document.createElement('div')
+    el.className = 'landing-pulse'
+    el.innerHTML = '<i></i><i></i><i></i>'
+    const m = new Marker({ element: el }).setLngLat(at).addTo(this.map)
+    window.setTimeout(() => m.remove(), 3600)
+  }
+
+  /** After landing, the camera drifts round the street once, slowly, so the city reads in 3D.
+   *  Any drag, zoom or click stops it (MapLibre ends camera animations on interaction). */
+  settleOrbit(deg = 24, ms = 9000) {
+    if (prefersReducedMotion()) return
+    const go = () => this.map.easeTo({ bearing: this.map.getBearing() + deg, duration: ms,
+      easing: (t) => 0.5 - Math.cos(Math.PI * t) / 2, essential: false })
+    if (this.map.isMoving()) this.map.once('moveend', go)
+    else go()
+  }
+
+  /** Draws a line in from its start over `ms` (the safe route "travels" to the dry place). */
+  private drawToken = 0
+  drawLine(id: string, coords: [number, number][] | null, ms = 1300) {
+    const token = ++this.drawToken
+    if (!coords || coords.length < 2 || prefersReducedMotion()) {
+      this.setGeoJSON(id, coords ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } } : null)
+      return
+    }
+    // cumulative length so the line grows at a steady speed
+    const cum = [0]
+    for (let i = 1; i < coords.length; i++) cum.push(cum[i - 1] + Math.hypot(coords[i][0] - coords[i - 1][0], coords[i][1] - coords[i - 1][1]))
+    const total = cum[cum.length - 1] || 1
+    const t0 = performance.now()
+    const step = (t: number) => {
+      if (token !== this.drawToken) return
+      const p = Math.min(1, (t - t0) / ms)
+      const target = total * (1 - Math.pow(1 - p, 2))
+      let k = cum.findIndex((c) => c >= target)
+      if (k < 1) k = 1
+      const f = (target - cum[k - 1]) / Math.max(cum[k] - cum[k - 1], 1e-12)
+      const tip: [number, number] = [coords[k - 1][0] + (coords[k][0] - coords[k - 1][0]) * f, coords[k - 1][1] + (coords[k][1] - coords[k - 1][1]) * f]
+      this.setGeoJSON(id, { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [...coords.slice(0, k), tip] } })
+      if (p < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }
+
   setGeoJSON(id: string, data: GeoJSON.FeatureCollection | GeoJSON.Feature | null) {
     const s = this.map.getSource(id) as GeoJSONSource | undefined
     s?.setData(data ?? EMPTY)
@@ -139,7 +203,8 @@ export class MapView {
 
   flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
     const reduced = prefersReducedMotion()
-    this.map.flyTo({ center, ...STREET_VIEW, padding: viewPadding(), duration: reduced ? 0 : 3200, essential: true, ...opts,
+    // a high arc between places: you see the city pass underneath, then come down on the street
+    this.map.flyTo({ center, ...STREET_VIEW, padding: viewPadding(), duration: reduced ? 0 : 3800, curve: 1.6, essential: true, ...opts,
       ...(reduced ? { duration: 0 } : {}) })
     return new Promise<void>((res) => {
       if (reduced) return res()
