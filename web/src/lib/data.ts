@@ -125,3 +125,27 @@ export async function loadPixels(path: string): Promise<{ data: Uint8ClampedArra
   }
   return cache.get(key) as Promise<{ data: Uint8ClampedArray; width: number; height: number }>
 }
+
+/** Greyscale depth frame: only the red channel is kept (4x less memory than RGBA). */
+export async function loadGray(path: string): Promise<Uint8Array> {
+  const key = `gray:${path}`
+  if (!cache.has(key)) {
+    cache.set(key, (async () => {
+      const blob = await fetch(`${DATA_BASE}/${path}`).then((r) => {
+        if (!r.ok || !(r.headers.get('content-type') ?? '').startsWith('image/')) throw new Error(`missing ${path}`)
+        return r.blob()
+      })
+      const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })
+      const c = new OffscreenCanvas(bmp.width, bmp.height)
+      const ctx = c.getContext('2d') as OffscreenCanvasRenderingContext2D
+      ctx.drawImage(bmp, 0, 0)
+      const rgba = ctx.getImageData(0, 0, bmp.width, bmp.height).data
+      const out = new Uint8Array(bmp.width * bmp.height)
+      for (let i = 0; i < out.length; i++) out[i] = rgba[4 * i]
+      bmp.close()
+      return out
+    })())
+    cache.get(key)!.catch(() => cache.delete(key))
+  }
+  return cache.get(key) as Promise<Uint8Array>
+}

@@ -6,7 +6,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TOKENS, VELACHERY, prefersReducedMotion } from '../config'
-import { loadPixels, loadWaterMeta, type WaterMeta } from '../lib/data'
+import { loadGray, loadPixels, loadWaterMeta, type WaterMeta } from '../lib/data'
 import type { MixPart } from '../lib/scenario'
 import { WaterLayer } from '../water/WaterLayer'
 import { baseStyle } from './style'
@@ -104,14 +104,14 @@ export class MapView {
     if (mix.length) {
       const frames = await Promise.all(mix.map(async ({ run }) => {
         const name = hour === 'max' ? 'max' : `h${String(Math.max(1, hour)).padStart(2, '0')}`
-        try { return await loadPixels(`water/${run}/${name}.png`) } catch { return null }
+        try { return await loadGray(`water/${run}/${name}.png`) } catch { return null }
       }))
       if (token !== this.frameToken) return
       const acc = new Float32Array(n)
       frames.forEach((f, k) => {
         if (!f) return
         const w = mix[k].w
-        for (let i = 0; i < n; i++) acc[i] += w * f.data[4 * i]
+        for (let i = 0; i < n; i++) acc[i] += w * f[i]
       })
       for (let i = 0; i < n; i++) out[i] = acc[i]
     }
@@ -120,7 +120,7 @@ export class MapView {
 
   /** Preload hourly frames for a mix so scrubbing is instant. */
   preload(mix: MixPart[], hours: number) {
-    for (const { run } of mix) for (let h = 1; h <= hours; h++) loadPixels(`water/${run}/h${String(h).padStart(2, '0')}.png`).catch(() => {})
+    for (const { run } of mix) for (let h = 1; h <= hours; h++) loadGray(`water/${run}/h${String(h).padStart(2, '0')}.png`).catch(() => {})
   }
 
   flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
