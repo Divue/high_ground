@@ -56,8 +56,9 @@ def find_dry_parking(lat: float, lon: float) -> dict:
 
 @tool
 def safe_route(from_lat: float, from_lon: float, to_lat: float, to_lon: float, mode: str = "car") -> dict:
-    """Whether a route exists that avoids flooded roads (car: >30 cm, two_wheeler: >15 cm), its length,
-    and the detour compared with the normal route."""
+    """Whether a route exists that avoids roads flooded at the storm's peak (car: >30 cm, two_wheeler: >15 cm),
+    its length, and the detour compared with the normal route. For the hour-by-hour 'leave by' time,
+    point the user to the answer card in the app."""
     out = hg.safe_route((from_lat, from_lon), (to_lat, to_lon), _sc(), mode)
     out = {k: v for k, v in out.items() if k != "safe_edges"}
     return _log("safe_route", {"from": [from_lat, from_lon], "to": [to_lat, to_lon], "mode": mode}, out)
