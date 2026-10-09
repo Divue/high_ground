@@ -1,5 +1,5 @@
 import { chromium } from '@playwright/test'
-const out = process.argv[3]
+const out = process.argv[3] ?? '../review/p5-dev/opening'
 const browser = await chromium.launch({ channel: 'chromium', args: ['--use-angle=gl-egl', '--use-gl=angle', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 const t0 = Date.now()
