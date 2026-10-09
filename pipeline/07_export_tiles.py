@@ -89,7 +89,9 @@ def main():
     for rid, info in runs.items():
         d = OUT / "runs" / rid
         full = json.loads((d / "info.json").read_text())
-        run_water = water_mask(d)
+        # the sea is never floodwater: at high tide it holds water above the DTM datum and would
+        # otherwise render as a "flooded Bay" in every hourly frame
+        run_water = water_mask(d) | sea
         od = WEB / "water" / rid
         od.mkdir(parents=True, exist_ok=True)
         hmax = np.where(run_water, 0, np.load(d / "hmax.npy"))
