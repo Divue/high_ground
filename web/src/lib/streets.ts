@@ -32,7 +32,7 @@ export async function nearestSegment(lon: number, lat: number): Promise<Segment 
     const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`)
     g.segs.forEach(([id, name, hw, br, flat], i) => {
       // Prefer named, non-service streets for an address answer
-      const penalty = (hw === 'service' ? 25 : 0) + (name ? 0 : 12)
+      const penalty = (hw === 'service' ? 25 : 0) + (name ? 0 : 40)
       for (let j = 0; j + 3 < flat.length; j += 2) {
         const d = pointSegM(lon, lat, flat[j], flat[j + 1], flat[j + 2], flat[j + 3]) + penalty
         if (!best || d < best.distanceM) {

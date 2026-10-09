@@ -8,7 +8,7 @@ function flavor(): Flavor {
   const sky = TOKENS.stormSky
   const asphalt = TOKENS.wetAsphalt
   Object.assign(f, {
-    background: '#0E2530',
+    background: '#0B2029',   // same as water: no seam at the edge of the basemap extract
     earth: sky,
     park_a: '#16363F', park_b: '#16363F', wood_a: '#16363F', wood_b: '#16363F', scrub_a: '#163540', scrub_b: '#163540',
     hospital: '#183843', industrial: '#152F3A', school: '#16343F', pedestrian: '#18343E', aerodrome: '#16333E',
