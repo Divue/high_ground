@@ -18,6 +18,7 @@ export default function About() {
       <ul>
         <li>Terrain is 30 m satellite elevation (Copernicus GLO-30). Buildings and trees were removed by approximation. A kerb, a raised gate or a dip under a bridge is invisible to it.</li>
         <li>Drains are not mapped pipe by pipe. They are one uniform capacity, so a blocked drain on your street will make things worse than shown.</li>
+        <li>That capacity was tuned on the extreme 2015 floods, where the best fit was drains adding nothing. For smaller storms the model probably shows more water than you will see.</li>
         <li>The 2015 Chembarambakkam reservoir release is modelled as an assumption, built from the release timeline in the CAG audit. Other tank surpluses that year are not included.</li>
         <li>Closed low pockets deeper than 1 m in the terrain are treated as errors or unseen culverts and partly filled. Small drains are represented as shallow channels on the 30 m grid.</li>
         <li>Storm surge from cyclones is not modelled. High tide is a fixed sea level 0.5 m above mean.</li>

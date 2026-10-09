@@ -147,6 +147,7 @@ def main():
             "Reports only say where it flooded, never where it stayed dry. 'Unreported' streets are used as a stand-in for dry, which they are not always.",
             "The reservoir release is modelled from the CAG/PWD timeline as an inflow at the Adyar's upstream edge; other tank surpluses are not included.",
             "Terrain is 30 m satellite elevation (Copernicus GLO-30) with buildings and trees removed by approximation.",
+            "Drain capacity was tuned on the extreme 2015 event; for smaller storms the model probably overstates depths.",
         ],
         sources=["OpenCity: Chennai 2015 Crowd-sourced Flooding Locations (osm-in/flood-map contributors)",
                  "OpenCity: Chennai Flood Hazard Zones Map (GCC)", "OpenCity: Chennai 2015 Floods Inundation Zone",

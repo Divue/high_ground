@@ -26,6 +26,7 @@ LIMITS = [
     "Scenarios are precomputed 24-hour storms (50–400 mm); tonight's forecast is matched to the two nearest and blended.",
     "The 2015 reservoir release is a documented assumption built from the CAG/PWD release timeline.",
     "Storm surge and blocked drains are not modelled.",
+    "Drain capacity was tuned on the extreme 2015 floods (best fit: drains add nothing); for smaller storms the model probably shows more water than residents will see.",
     "This is not an official warning. Follow GCC, IMD and Tamil Nadu SDMA advisories. In danger, call 112.",
 ]
 
