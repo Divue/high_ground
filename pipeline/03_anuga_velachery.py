@@ -91,7 +91,8 @@ def main(run_id="design_200_mean", max_area=900.0, core_area=350.0, hours=14):
     stage0 = elev.copy()
     wet0 = burn[rows, cols]
     bd = np.load(WORK / "burn_depth.npy")[rows, cols]
-    stage0[wet0] += bd[wet0]
+    dtm0 = np.load(WORK / "dtm_bare.npy")[rows, cols]
+    stage0[wet0] += np.clip(dtm0[wet0] - elev[wet0], 0.0, bd[wet0])   # measured water surface, as Stage A
     domain.set_quantity("stage", stage0, location="centroids")
 
     bt = anuga.Transmissive_stage_zero_momentum_boundary(domain)

@@ -74,3 +74,26 @@ export async function segmentValues(seg: Segment, mix: MixPart[]): Promise<Stree
 }
 
 export { distM }
+
+/** Share of street segments within `radiusM` that pass 15 cm at peak (same blend as the answer). */
+export async function nearbyShare(lon: number, lat: number, mix: MixPart[], radiusM = 500): Promise<{ wet: number; total: number }> {
+  const idx = await loadStreetIndex()
+  const pad = radiusM / 100_000 + 0.002
+  const tiles = Object.entries(idx.tile_bounds_lonlat)
+    .filter(([, [w, s, e, n]]) => lon >= w - pad && lon <= e + pad && lat >= s - pad && lat <= n + pad)
+    .map(([t]) => t)
+  let wet = 0, total = 0
+  for (const t of tiles) {
+    const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`)
+    const vals = await Promise.all(mix.map((m) => getJSON<StreetVals>(`streets/${m.run}/${t}.json`)))
+    g.segs.forEach(([, , hw, br, flat], i) => {
+      if (hw === 'service' || br) return
+      const mid = Math.floor(flat.length / 4) * 2
+      if (distM(lon, lat, flat[mid], flat[mid + 1]) > radiusM) return
+      total++
+      const v = vals.reduce((acc, vv, k) => acc + mix[k].w * vv.max[i], 0)
+      if (v >= 15) wet++
+    })
+  }
+  return { wet, total }
+}

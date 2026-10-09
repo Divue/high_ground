@@ -6,7 +6,7 @@ import { loadParking, type Current, type Parking, type Runs } from '../lib/data'
 import { distM, fmtDistance } from '../lib/geo'
 import { routePair, type Route } from '../lib/routing'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
-import { nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
+import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
 import Search, { type Place } from '../ui/Search'
@@ -35,6 +35,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [route, setRoute] = useState<{ normal: Route | null; safe: Route | null; to: string } | null>(null)
   const [routing, setRouting] = useState(false)
   const [error, setError] = useState('')
+  const [nearby, setNearby] = useState<{ wet: number; total: number } | null>(null)
   const flown = useRef<string>('')
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
@@ -59,6 +60,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       const a = await segmentValues(s, scenario.mix)
       if (dead) return
       setAns(a)
+      nearbyShare(place.lon, place.lat, scenario.mix).then((n) => { if (!dead) setNearby(n) }).catch(() => setNearby(null))
       setHour(a.peakHour ?? Math.min(scenario.hours, 8))
     })()
     return () => { dead = true }
@@ -168,6 +170,11 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <div className="muted small" style={{ marginTop: 6 }}>
               At {clockLabel(scenario.start, hour)}: {atHour} cm · {mixDescription(scenario.mix, runs)}
             </div>
+            {nearby && nearby.total > 0 && (
+              <div className="small" style={{ marginTop: 6 }}>
+                {nearby.wet} of {nearby.total} streets within 500 m pass 15 cm<span className="chip">from the model</span>
+              </div>
+            )}
 
             <div className="divider" />
             <h3>Park on dry ground</h3>

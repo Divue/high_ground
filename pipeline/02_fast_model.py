@@ -263,7 +263,11 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     # sea at tide. Then a 2-hour dry spin-up lets channels settle before the storm.
     h = np.zeros(z.shape)
     bd_file = WORK / "burn_depth.npy"
-    h[burn] = np.load(bd_file)[burn] if bd_file.exists() else CFG["conditioning"]["burn_depth_m"]
+    bd = np.load(bd_file) if bd_file.exists() else np.full(z.shape, CFG["conditioning"]["burn_depth_m"])
+    # Channels start at their measured water surface (the DSM/DTM level), never above it:
+    # filling them to the sink-filled spill level spilled water onto adjacent land before the storm.
+    dtm0 = np.load(WORK / "dtm_bare.npy").astype(np.float64)
+    h[burn] = np.clip(dtm0[burn] - z[burn], 0.0, bd[burn])
     outlet_h = np.zeros(z.shape)
     outlet_h[sea_only] = np.maximum(tide - z[sea_only], 0.0)
     h[sea] = outlet_h[sea]
@@ -302,6 +306,8 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     rain = sc["rain_mm_h"]
     storm_s = len(rain) * 3600.0
     total_s = spinup_s + storm_s + sc["tail_h"] * 3600.0
+    if os.environ.get("HG_MAXHOURS"):          # quick checks only
+        total_s = min(total_s, spinup_s + float(os.environ["HG_MAXHOURS"]) * 3600.0)
     nsnap = int((storm_s + sc["tail_h"] * 3600.0) // scfg["snapshot_every_s"])
 
     qx = np.zeros((H, W - 1), np.float32)
