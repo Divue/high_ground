@@ -214,3 +214,17 @@ Majors fixed:
 
 Minors: ripples fade when zoomed out and water under 15 cm is hidden below zoom 13; "peak Sun 3 PM"; "No rain forecast tonight"; route cleared when leaving Tonight; timeline and About clear the credits; panels opaque.
 QA tester #1 was cut off by a usage limit (re-run).
+
+### QA tester #1 (Fri ~17:50) → acted on
+Blockers fixed and verified with the tester's repro scripts:
+1. "Tonight" after a replay crashed the app (`mixDescription([])`). Now guarded; the answer block renders only for a scenario with runs.
+2. **Terrain was never loading**: `new URL()` percent-encoded `{z}/{x}/{y}`, so the water floated over flat ground and hid at the hero pitch. Fixed; 33 terrain tiles now load with real elevations. Water now drapes properly (`review/qa/72_arumugam_pitch62.png`).
+
+Majors fixed:
+- The depth number vs hourly series could disagree: the street JSON predated the new 04, and the series was capped at 255 cm. The series is now uint16 (`series_bytes: 2` in the index; frontend and Lambda decode both widths).
+- The hospitals layer was rejected by MapLibre (nested zoom interpolate). Fixed.
+- The alert email paired the peak depth with the 15 cm time. Facts now carry `peak_at` and `reaches_15cm_at` separately, the prompt forbids mixing them, and the fallback text is corrected.
+- Absurd dry routes (56 km for a 1 km trip) are now "no practical dry route" (> 3× or > +4 km of the normal route), in both browser and Lambda.
+- Speed: measured at load average 7–12 while the model runs. Re-measure on an idle machine.
+
+Minors fixed: no leave-by marker for dry streets (a quiet "your street stays dry, dry route …" line instead); What if hides the hospital stat when the run is missing; search says "no matching place"; "T Nagar" alias; unnamed flyovers called "Unnamed flyover"; default Velachery = the search box's Velachery; weekday shown after the first 12 hours; nav "About"; out-of-area wording.

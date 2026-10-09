@@ -283,7 +283,8 @@ export async function leaveByPlan(fromLL: [number, number], toLL: [number, numbe
     const f = await frameAt(h)
     if (!f) break
     const r = astar(g, s, t, await edgeDepthFromFrame(g, meta, f), limitCm)
-    if (!r) break
+    // a 56 km loop for a 1 km trip is not a dry route anyone would take
+    if (!r || (normal && r.lengthM > Math.max(3 * normal.lengthM, normal.lengthM + 4000))) break
     best = r
     bestH = h
   }

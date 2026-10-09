@@ -12,7 +12,7 @@ import Assistant from './ui/Assistant'
 import type { Place } from './ui/Search'
 
 type Screen = 'tonight' | 'whatif' | 'proof' | 'hospitals' | 'about' | 'admin'
-const NAV: [Screen, string][] = [['tonight', 'Tonight'], ['whatif', 'What if'], ['proof', 'Proof'], ['hospitals', 'Hospitals'], ['about', 'About the model']]
+const NAV: [Screen, string][] = [['tonight', 'Tonight'], ['whatif', 'What if'], ['proof', 'Proof'], ['hospitals', 'Hospitals'], ['about', 'About']]
 
 function screenFromHash(): Screen {
   const h = window.location.hash.replace('#', '') as Screen

@@ -73,7 +73,7 @@ export class MapView {
     m.addLayer({ id: 'street', type: 'line', source: 'street', layout: { 'line-cap': 'round' },
       paint: { 'line-color': TOKENS.rainGrey, 'line-width': 6, 'line-opacity': 0.9, 'line-blur': 1 } })
     m.addLayer({ id: 'hospitals', type: 'circle', source: 'hospitals',
-      paint: { 'circle-radius': ['case', ['==', ['get', 'reach'], 1], ['interpolate', ['linear'], ['zoom'], 10, 2.5, 15, 5], ['interpolate', ['linear'], ['zoom'], 10, 6, 15, 10]],
+      paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, ['case', ['==', ['get', 'reach'], 1], 2.5, 6], 15, ['case', ['==', ['get', 'reach'], 1], 5, 10]],
         'circle-color': ['case', ['==', ['get', 'reach'], 1], TOKENS.rainGrey, 'rgba(0,0,0,0)'],
         'circle-stroke-color': ['case', ['==', ['get', 'reach'], 1], TOKENS.stormSky, '#ffffff'],
         'circle-stroke-width': ['case', ['==', ['get', 'reach'], 1], 1, 2.5] } })

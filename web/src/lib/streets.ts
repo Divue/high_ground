@@ -46,20 +46,23 @@ export async function nearestSegment(lon: number, lat: number): Promise<Segment 
   return best
 }
 
-function decode(b64: string): number[] {
+function decode(b64: string, bytes: number): number[] {
+  // hourly depth in cm: uint16 little-endian (current exports) or uint8 (older ones)
   const s = atob(b64)
-  const out = new Array<number>(s.length)
-  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i)
+  if (bytes === 1) return Array.from(s, (c) => c.charCodeAt(0))
+  const out = new Array<number>(s.length >> 1)
+  for (let i = 0; i < out.length; i++) out[i] = s.charCodeAt(2 * i) | (s.charCodeAt(2 * i + 1) << 8)
   return out
 }
 
 export async function segmentValues(seg: Segment, mix: MixPart[]): Promise<StreetAnswer> {
+  const bytes = (await loadStreetIndex()).series_bytes ?? 1
   let max = 0
   let series: number[] | null = null
   for (const { run, w } of mix) {
     const v = await getJSON<StreetVals>(`streets/${run}/${seg.tile}.json`)
     max += w * v.max[seg.index]
-    const s = decode(v.series[seg.index])
+    const s = decode(v.series[seg.index], bytes)
     series = series ? series.map((x, i) => x + w * (s[i] ?? 0)) : s.map((x) => w * x)
   }
   const sc = (series ?? []).map((x) => Math.round(x))

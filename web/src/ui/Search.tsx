@@ -27,7 +27,7 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
       const local = places.filter(([n]) => n.toLowerCase().includes(ql))
         .sort((a, b) => rank(a) - rank(b) || a[0].length - b[0].length).slice(0, 6)
         .map(([n, lon, lat]) => ({ label: `${n}, Chennai`, lon, lat }))
-      if (my === seq.current) { setItems(local); setSource(local.length ? 'Places and streets from OpenStreetMap' : '') }
+      if (my === seq.current) { setItems(local); setSource(local.length ? 'Places and streets from OpenStreetMap' : (API_BASE ? '' : 'No matching place or street. Try a street name or a neighbourhood.')) }
       if (!API_BASE) return
       setBusy(true)
       try {

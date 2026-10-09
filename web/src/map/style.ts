@@ -46,7 +46,8 @@ export function baseStyle(): StyleSpecification {
       },
       terrain: {
         type: 'raster-dem',
-        tiles: [new URL(`${DATA_BASE}/terrain/{z}/{x}/{y}.png`, window.location.href).href],
+        // keep the {z}/{x}/{y} braces literal (new URL() would percent-encode them)
+        tiles: [`${new URL(`${DATA_BASE}/terrain/`, window.location.href).href}{z}/{x}/{y}.png`],
         tileSize: 256, encoding: 'mapbox', minzoom: 8, maxzoom: 14, bounds: DOMAIN_BBOX,
         attribution: 'Copernicus DEM GLO-30 © DLR e.V. 2010–2014 and © Airbus 2014–2018, provided under COPERNICUS by the EU and ESA',
       },

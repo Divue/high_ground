@@ -54,7 +54,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       if (dead) return
       if (!s || s.distanceM > 600) {
         setSeg(null); setAns(null)
-        setError('That place is outside the area HighGround models (Greater Chennai Corporation).')
+        setError('No street within 600 m of that point in the area HighGround models. Try a nearby street name.')
         return
       }
       setSeg(s)
@@ -178,7 +178,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
         {error && <p className="small" role="alert">{error}</p>}
 
-        {seg && ans && band && (
+        {seg && ans && band && scenario.mix.length > 0 && (
           <>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
             <Readout cm={ans.maxCm} />
@@ -219,6 +219,11 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                 </div>
               </div>
             ))}
+            {route && !route.streetFloods && (
+              <p className="small muted" style={{ margin: '2px 0 6px' }}>
+                {route.safe ? <>Your street stays dry. Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}.</> : <>No practical dry route to {route.to} at the storm’s peak.</>}
+              </p>
+            )}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
             <div className="divider" />
             <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />
@@ -230,7 +235,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         </div>
       </div>
       {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={setHour}
-        marker={route?.leaveBy ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
+        marker={route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
     </>
   )
 }

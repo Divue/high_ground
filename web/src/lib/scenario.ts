@@ -69,13 +69,14 @@ export function whatIf(mm: number, tide: 'mean' | 'high', runs: Runs): Scenario 
   }
 }
 
-export function clockLabel(start: Date, hours: number, withDay = hours >= 18): string {
+export function clockLabel(start: Date, hours: number, withDay = hours > 12): string {
   const t = new Date(start.getTime() + hours * 3600_000)
   const time = t.toLocaleTimeString('en-IN', { hour: 'numeric', hour12: true }).replace(' ', '\u202f').toUpperCase()
   return withDay ? `${t.toLocaleDateString('en-IN', { weekday: 'short' })} ${time}` : time
 }
 
 export function mixDescription(mix: MixPart[], runs: Runs): string {
+  if (!mix.length) return ''
   if (mix.length === 1) return runs[mix[0].run]?.label ?? mix[0].run
   const [a, b] = mix
   return `blend of ${runs[a.run]?.total_mm} mm and ${runs[b.run]?.total_mm} mm runs`

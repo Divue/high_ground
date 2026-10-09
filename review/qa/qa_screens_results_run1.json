@@ -1,0 +1,179 @@
+{
+ "console": [
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: Error: layers.hospitals.paint.circle-radius: Only one zoom-based \"step\" or \"interpolate\" subexpression may be used in an expression.\n    at il (http://127.0.0.1:5173/node_modules/.vite/deps/maplibre-gl.js?v=038de1e9:9287:16)\n    at al (http://127.0.0.1:5173/node_modules/.vite/deps/maplibre-gl",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "error: InvalidStateError: The source image could not be decoded.",
+  "warning: %s\n\n%s\n An error occurred in the <Tonight> component. Consider adding an error boundary to your tree to customize error handling behavior.\nVisit https://react.dev/link/error-boundaries to learn more about error boundaries."
+ ],
+ "page_errors": [
+  "TypeError: Cannot read properties of undefined (reading 'run')"
+ ],
+ "failed_requests": [
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png"
+ ],
+ "http_errors": [],
+ "default_ms": 13865,
+ "default_panel": "Tonight\n2015\nMichaung 2023\nFengal 2024\nTonight looks dry\nNo rain forecast tonight\n\nReplay a past storm to see what HighGround shows on a bad night.\n\nSee Cyclone Michaung as if it were tonight\n\nNot an official warning. Follow GCC and IMD advisories. In danger, call 112.",
+ "default_has_timeline": 0,
+ "red_default": [
+  "span.emergency:color:112",
+  "span.emergency:borderTopColor:112"
+ ],
+ "after_primary_replay": {
+  "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
+  "street": "Velachery Main Road",
+  "readout": "93 centimetres",
+  "when": "Reaches 15 cm by 6 AM · peak Sun 11 AM",
+  "band": "Unsafe for cars",
+  "decision": "Move your car to Velachery Upper Flyover by 5 AM.",
+  "at": "At Sun 11 AM: 93 cm · Cyclone Michaung, Dec 2023",
+  "marker": "leave by 5 AM",
+  "now": "Sun 11 AM",
+  "slider_max": "54",
+  "ticks": "Fri 6 PMSat 8 AMSat 9 PMSun 11 AMMon 12 AM",
+  "pressed": [
+   "Michaung 2023"
+  ]
+ },
+ "replays": {
+  "dec2015": {
+   "scenario": "Replay: 1–2 Dec 2015 with Chembarambakkam release, running as if it started at 6 PM tonight",
+   "street": "Arumugam Road",
+   "readout": "158 centimetres",
+   "when": "Reaches 15 cm by 8 PM · peak 4 AM",
+   "band": "Unsafe for cars",
+   "decision": "Move your car to Velachery MRTS Bridge by 7 PM.",
+   "at": "At 4 AM: 158 cm · 1–2 Dec 2015 with Chembarambakkam release",
+   "marker": "leave by 7 PM",
+   "now": "4 AM",
+   "slider_max": "36",
+   "ticks": "Fri 6 PMSat 3 AMSat 12 PMSat 9 PMSun 6 AM",
+   "pressed": [
+    "2015"
+   ],
+   "panel_tail": "Places and streets from OpenStreetMap\nTonight\n2015\nMichaung 2023\nFengal 2024\nReplay: 1–2 Dec 2015 with Chembarambakkam release, running as if it started at 6 PM tonight\nArumugam Road\n158cm\nReaches 15 cm by 8 PM · peak 4 AM\nUnsafe for carsfrom the model\nMove your car to Velachery MRTS Bridge by 7 PM.\nAt 4 AM: 158 cm · 1–2 Dec 2015 with Chembarambakkam release\n111 of 182 streets within 500 m pass 15"
+  },
+  "michaung": {
+   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
+   "street": "Arumugam Road",
+   "readout": "154 centimetres",
+   "when": "Reaches 15 cm by 11 PM · peak Sun 3 PM",
+   "band": "Unsafe for cars",
+   "decision": "Move your car to Velachery MRTS Bridge by 10 PM.",
+   "at": "At Sun 3 PM: 154 cm · Cyclone Michaung, Dec 2023",
+   "marker": "leave by 10 PM",
+   "now": "Sun 3 PM",
+   "slider_max": "54",
+   "ticks": "Fri 6 PMSat 8 AMSat 9 PMSun 11 AMMon 12 AM",
+   "pressed": [
+    "Michaung 2023"
+   ],
+   "panel_tail": "Places and streets from OpenStreetMap\nTonight\n2015\nMichaung 2023\nFengal 2024\nReplay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight\nArumugam Road\n154cm\nReaches 15 cm by 11 PM · peak Sun 3 PM\nUnsafe for carsfrom the model\nMove your car to Velachery MRTS Bridge by 10 PM.\nAt Sun 3 PM: 154 cm · Cyclone Michaung, Dec 2023\n110 of 182 streets within 500 m pass 15 cmfrom the model\nPa"
+  },
+  "fengal": {
+   "scenario": "Replay: Cyclone Fengal, Nov 2024, running as if it started at 6 PM tonight",
+   "street": "Arumugam Road",
+   "readout": "63 centimetres",
+   "when": "Reaches 15 cm by 1 AM · peak 10 AM",
+   "band": "Unsafe for cars",
+   "decision": "Move your car to Velachery MRTS Bridge by 12 AM.",
+   "at": "At 10 AM: 63 cm · Cyclone Fengal, Nov 2024",
+   "marker": "leave by 12 AM",
+   "now": "10 AM",
+   "slider_max": "36",
+   "ticks": "Fri 6 PMSat 3 AMSat 12 PMSat 9 PMSun 6 AM",
+   "pressed": [
+    "Fengal 2024"
+   ],
+   "panel_tail": "Places and streets from OpenStreetMap\nTonight\n2015\nMichaung 2023\nFengal 2024\nReplay: Cyclone Fengal, Nov 2024, running as if it started at 6 PM tonight\nArumugam Road\n63cm\nReaches 15 cm by 1 AM · peak 10 AM\nUnsafe for carsfrom the model\nMove your car to Velachery MRTS Bridge by 12 AM.\nAt 10 AM: 63 cm · Cyclone Fengal, Nov 2024\n53 of 182 streets within 500 m pass 15 cmfrom the model\nPark on dry grou"
+  },
+  "tonight": {
+   "street": null,
+   "readout": null,
+   "when": null,
+   "band": null,
+   "decision": null,
+   "at": null,
+   "marker": null,
+   "now": null,
+   "slider_max": null,
+   "ticks": null,
+   "pressed": []
+  }
+ },
+ "red_tonight": [],
+ "assistant_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.panel.right.collapsed')\u001b[22m\n",
+ "search_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.seg.tight button:has-text(\"Michaung 2023\")')\u001b[22m\n",
+ "whatif_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('nav button:has-text(\"What if\")')\u001b[22m\n",
+ "proof_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('nav button:has-text(\"Proof\")')\u001b[22m\n",
+ "hospitals_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('nav button:has-text(\"Hospitals\")')\u001b[22m\n",
+ "about_error": "TimeoutError: page.click: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('nav button:has-text(\"About the model\")')\u001b[22m\n",
+ "reduced_motion_answer_ms": 12796,
+ "mobile": {
+  "scrollW": 390,
+  "panel": [
+   12,
+   368,
+   366,
+   464
+  ],
+  "nav": [
+   131,
+   247
+  ]
+ }
+}

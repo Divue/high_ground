@@ -4,7 +4,7 @@ Roads (OSM highway=*) are split into pieces of at most 120 m and sampled every
 10 m. For each scenario and segment:
   max_cm   : depth exceeded on the deepest 10% of the segment (p90 of samples), cm
   t15_h    : hours after the storm starts when 10% of the segment reaches 15 cm (-1 never)
-  series   : hourly p90 depth, cm, capped at 255 (base64 uint8)
+  series   : hourly p90 depth, cm (base64 uint16 little-endian)
 Bridges and flyovers sample nothing from the channel/ground beneath and are reported
 as deck (0 cm) with `bridge` = 1.
 
@@ -120,7 +120,7 @@ def main():
         standing = water_mask(d) & ~water          # land already wet at storm start in this run
         mx = np.zeros(len(segs), np.int32)
         tt = np.full(len(segs), -1.0)
-        series = np.zeros((len(segs), nh), np.uint8)
+        series = np.zeros((len(segs), nh), np.uint16)
         for i, (r, c) in enumerate(samples):
             if segs[i][3] or len(r) == 0:          # bridge deck or outside grid
                 continue
@@ -131,7 +131,7 @@ def main():
             # one statistic everywhere: p90 across the street's samples of each hourly depth;
             # the peak, the time to 15 cm and the hourly curve all come from this series
             ser = np.percentile(snaps[:, r2, c2], 90, axis=1)
-            series[i] = np.clip(np.round(ser), 0, 255).astype(np.uint8)
+            series[i] = np.clip(np.round(ser), 0, 65535).astype(np.uint16)
             mx[i] = int(round(float(ser.max())))
             hit = np.nonzero(ser >= CFG["solver"]["wet_threshold_m"] * 100)[0]
             tt[i] = float(hit[0] + 1) if len(hit) else -1.0
@@ -140,16 +140,16 @@ def main():
         for t, idx in by_tile.items():
             write_json(WEB / "streets" / rid / f"{t}.json", {
                 "max": mx[idx].tolist(), "t15": tt[idx].tolist(),
-                "series": [base64.b64encode(series[i].tobytes()).decode() for i in idx]})
+                "series": [base64.b64encode(series[i].astype("<u2").tobytes()).decode() for i in idx]})
         wet = (mx >= 15).mean()
         print(f"{rid}: {wet*100:.1f}% of segments >= 15 cm")
 
     write_json(WEB / "streets" / "index.json", {
         "crs": CRS, "origin": [x0, y1], "tile_m": TILE_M, "tiles": sorted(by_tile),
         "tile_bounds_lonlat": tile_bounds,
-        "segments": len(segs), "runs": list(runs),
+        "segments": len(segs), "runs": list(runs), "series_bytes": 2,
         "fields": {"max": "peak of the hourly series, cm", "t15": "first hour the series reaches 15 cm (-1 never)",
-                   "series": "hourly p90 depth cm, uint8 base64, capped 255"},
+                   "series": "hourly p90 depth cm, uint16 little-endian, base64"},
     }, indent=1)
     np.savez_compressed(WORK / "street_samples.npz", max=np.stack([seg_max[r] for r in runs]),
                         runs=np.array(list(runs)))

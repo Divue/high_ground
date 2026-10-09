@@ -214,7 +214,7 @@ def main():
     for i in np.nonzero(brg & (cls <= 3) & (lengths > 150))[0]:
         gg = geoms[i]
         mid = gg[len(gg) // 2]
-        nm = names[i] or "Flyover"
+        nm = names[i] or "Unnamed flyover"
         # one candidate per name per ~2 km cell (the longest piece); unnamed ones per ~1 km cell
         key = (nm, round(mid[0] * 50), round(mid[1] * 50)) if names[i] else (nm, round(mid[0], 2), round(mid[1], 2))
         if key not in fly or lengths[i] > fly[key]["length"]:
@@ -307,6 +307,8 @@ def main():
     for p in sorted(h.places, key=lambda p: p[3] == "station"):
         by_name.setdefault(p[0], p)
     aliases = {"Thyagaraya Nagar": "T. Nagar", "Thiruvanmiyur": "Tiruvanmiyur"}
+    if "Thyagaraya Nagar" in by_name:
+        by_name["T Nagar"] = ["T Nagar"] + by_name["Thyagaraya Nagar"][1:]
     for full, short in aliases.items():
         if full in by_name and short not in by_name:
             by_name[short] = [short] + by_name[full][1:]

@@ -45,7 +45,7 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
             <div className="muted small">of the city’s land under at least 15 cm of water<span className="chip">from the model</span></div>
           </> : <div className="muted small">This rainfall has not been computed yet.</div>}
         </div>
-        {hr && hosp && (
+        {computed && hr && hosp && (
           <div>
             <div className="stat">{hr.cut_off}<span className="muted" style={{ fontSize: 20 }}> of {hosp.hospitals.length}</span></div>
             <div className="muted small">hospitals cut off at {runs[dom]?.total_mm} mm</div>
@@ -53,7 +53,7 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
         )}
       </div>
       <p className="muted small" style={{ marginTop: 10 }}>
-        {blended && runs[sc.mix[0].run] && runs[sc.mix[1].run]
+        {!computed ? '' : blended && runs[sc.mix[0].run] && runs[sc.mix[1].run]
           ? `Blended between the ${runs[sc.mix[0].run].total_mm} mm and ${runs[sc.mix[1].run].total_mm} mm model runs.`
           : runs[dom] ? `The ${runs[dom].total_mm} mm model run.` : ''}
         {' '}Storms are front-loaded: most rain falls in the first eight hours.

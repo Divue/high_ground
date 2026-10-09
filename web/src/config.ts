@@ -3,7 +3,7 @@ export const DATA_BASE: string = (import.meta.env.VITE_DATA_BASE as string | und
 export const API_BASE: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 
 export const DOMAIN_BBOX: [number, number, number, number] = [80.1, 12.85, 80.33, 13.24]
-export const VELACHERY: [number, number] = [80.2209, 12.9791]
+export const VELACHERY: [number, number] = [80.21951, 12.96762]   // same point the search box returns for 'Velachery'
 
 export const TOKENS = {
   stormSky: '#14303D',

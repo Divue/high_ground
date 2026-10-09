@@ -62,13 +62,16 @@ def choose(total):
 
 def write_alert(street, old, new, info, parking):
     """Bedrock turns model numbers into two sentences. Fallback text uses the same numbers."""
-    facts = dict(street=street, old_band=old["label"], new_band=new["label"], max_depth_cm=info["max_depth_cm"],
-                 reaches_15cm_at=info.get("reaches_15cm_at"), forecast_mm=info.get("forecast", {}).get("mean_24h_mm"),
+    facts = dict(street=street, old_band=old["label"], new_band=new["label"], peak_depth_cm=info["max_depth_cm"],
+                 peak_at=info.get("peak_at"), reaches_15cm_at=info.get("reaches_15cm_at"),
+                 forecast_mm=info.get("forecast", {}).get("mean_24h_mm"),
                  dry_parking=parking[0]["name"] if parking else None,
                  dry_parking_m=parking[0]["straight_line_m"] if parking else None)
     prompt = (
         "Write a flood alert for a Chennai resident in exactly two short sentences: what changed, then what to do. "
-        "Use only these facts and numbers; do not add any other number. If dry_parking is null, do not mention parking. "
+        "Use only these facts and numbers; do not add any other number. The peak depth happens at peak_at; the street "
+        "first reaches 15 cm at reaches_15cm_at: never attach the peak depth to the 15 cm time. "
+        "If dry_parking is null, do not mention parking. "
         "If the new band is Dry, say the risk has dropped. Facts: " + json.dumps(facts))
     try:
         r = bedrock.converse(modelId=os.environ["MODEL_ID"],
@@ -79,11 +82,11 @@ def write_alert(street, old, new, info, parking):
         print("bedrock error", e)
         mm = facts["forecast_mm"]
         mm = f"{mm:g}" if isinstance(mm, (int, float)) else mm
-        text = (f"Tonight's forecast is about {mm} mm; {street} is now '{new['label']}' "
-                f"with up to {facts['max_depth_cm']} cm of water"
-                + (f" by {facts['reaches_15cm_at']}." if facts["reaches_15cm_at"] else ".")
-                + (f" Move your car to {facts['dry_parking']} ({facts['dry_parking_m']} m away) before then."
-                   if facts["dry_parking"] else ""))
+        text = (f"Tonight's forecast is about {mm} mm; {street} is now '{new['label']}'"
+                + (f": it passes 15 cm by {facts['reaches_15cm_at']}" if facts["reaches_15cm_at"] else "")
+                + (f" and peaks at about {facts['peak_depth_cm']} cm around {facts['peak_at']}." if facts["peak_at"] else ".")
+                + (f" Move your car to {facts['dry_parking']} ({facts['dry_parking_m']} m away) before {facts['reaches_15cm_at']}."
+                   if facts["dry_parking"] and facts["reaches_15cm_at"] else ""))
     return text, facts
 
 

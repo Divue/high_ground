@@ -54,7 +54,7 @@ const cardBrief = () => page.evaluate(() => {
 })
 
 // ---------------------------------------------------------------- default (live, dry) view
-await step('default', async () => {
+if (!process.env.SKIP_DEFAULT) await step('default', async () => {
   const t0 = Date.now()
   await page.goto(base, { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('.panel.left', { timeout: 180_000 })
@@ -71,11 +71,12 @@ await step('default', async () => {
 })
 
 // ---------------------------------------------------------------- replay switch on Arumugam Road
-await step('replays', async () => {
+await page.goto(base + '?replay=michaung2023', { waitUntil: 'domcontentloaded' }); await page.waitForSelector('.readout', { timeout: 180_000 })
+if (!process.env.SKIP_REPLAYS) await step('replays', async () => {
   await pickSearch('Arumugam Road')
   await settle()
   R.replays = {}
-  for (const [btn, key] of [['2015', 'dec2015'], ['Michaung 2023', 'michaung'], ['Fengal 2024', 'fengal'], ['Tonight', 'tonight']]) {
+  for (const [btn, key] of [['2015', 'dec2015'], ['Michaung 2023', 'michaung'], ['Fengal 2024', 'fengal']]) {
     await page.click(`.seg.tight button:has-text("${btn}")`)
     await settle()
     R.replays[key] = await cardBrief()

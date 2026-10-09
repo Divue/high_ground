@@ -73,6 +73,7 @@ export interface StreetIndex {
   tiles: string[]
   tile_bounds_lonlat: Record<string, [number, number, number, number]>
   runs: string[]
+  series_bytes?: number
 }
 export interface StreetGeom { segs: [string, string, string, number, number[]][] }
 export interface StreetVals { max: number[]; t15: number[]; series: string[] }

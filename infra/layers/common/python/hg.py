@@ -105,7 +105,9 @@ def segment_values(tile: str, index: int, mix):
     for rid, w in mix:
         v = s3_json(f"streets/{rid}/{tile}.json")
         mx += w * v["max"][index]
-        s = list(base64.b64decode(v["series"][index]))
+        raw = base64.b64decode(v["series"][index])
+        nb = s3_json("streets/index.json").get("series_bytes", 1)
+        s = list(struct.unpack(f"<{len(raw) // 2}H", raw)) if nb == 2 else list(raw)
         series = [w * x for x in s] if series is None else [a + w * x for a, x in zip(series, s)]
     series = [round(x) for x in (series or [])]
     t15 = next((h + 1 for h, x in enumerate(series) if x >= 15), None)
@@ -240,6 +242,9 @@ def safe_route(frm, to, sc: dict | None = None, mode: str = "car") -> dict:
 
     normal = run(False)
     safe = run(True)
+    # a huge loop is not a practical dry route
+    if safe and normal and safe[0] > max(3 * normal[0], normal[0] + 4000):
+        safe = None
     flooded_on_normal = 0
     if normal:
         flooded_on_normal = sum(1 for e in normal[1] if sum(w * d[e] for d, w in deps) >= limit)
