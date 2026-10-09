@@ -277,3 +277,27 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - `web/tests/record_frames.mjs <shot>` (opening | search | timelapse | whatif | proof). Playwright's clock is pinned (6:30 PM) and paused, so app time advances exactly 1/FPS per frame. Before each frame it waits in real time until `map.areTilesLoaded()`. Frames are encoded with ffmpeg OpenH264 (Fedora's ffmpeg has no libx264); the PNGs are kept as a lossless master.
 - Smoke test at 5 fps: starts over the Bay, flies in, the card counts up while the night plays to the peak, every frame fully drawn, no errors. Final 1080p/30 fps footage to be recorded after the v3 rebuild.
 - Design critic: the first run was cut off by a usage limit (resets 22:10 IST) after capturing `review/design/r2/`; relaunched.
+
+### v3 rebuild complete (Fri 21:50–22:40)
+- All 16 v3 runs finished at 21:50; mass error is 0.000% on every run. `post_runs.sh` finished at 22:01. One failure: `write_current_local.py` had a DNS failure at that moment; the retry at 22:30 succeeded (tonight's forecast is 0 mm, so the default view is dry with the replay offer).
+- Gate p2: mass balance PASS ×16, depth maps PASS ×16, Pallikaranai wet PASS (35%), T. Nagar mostly dry PASS (19%). **Still FAIL: Velachery wet at 200 mm is 15% (threshold 25%), and Velachery is not wetter than T. Nagar.** v2 was 23%; removing the sloshing peaks lowered it. Sent to the model reviewer.
+- Gate p3: PASS. Ranking test 53.2% [51.8, 54.4] vs elevation 46.9%, channel 56.2%, random 49.3%.
+- Web data checks: 16 runs; hourly land wet share in every run; release facts for 2015; 0 sea cells ≥15 cm in any h01 or max frame; ANUGA cross-check back on Proof (93.8% cell agreement, depth correlation 0.90). Design-storm land wet share ≥15 cm: 50 mm 0.2%, 100 mm 1.5%, 150 mm 8.4%, 200 mm 15.9%, 300 mm 23.7%, 400 mm 29.0% (mean tide).
+
+### Design critic r2 → acted on (Fri 20:05–22:45)
+- The critic run was interrupted twice: first by a usage limit, then by an interactive rebase on `main` that rewrote commit authors (done outside this session; contents verified identical to `backup-before-author-fix`; commits now authored `sept1st2c`). Its screenshots are in `review/design/r2/`.
+- Fixed:
+  1. **First 5 s.** A title line over the empty sky ("Chennai, 6 PM. Cyclone Michaung, 2023, replayed as if it were tonight.", set from the URL straight away); dark first paint (inline background in `index.html`); no water over the sea (shader sea mask as well as the export).
+  2. **Water "drains then rises".** The rise starts 2 s before landing (`openingSequence` hands over early; `isFraming` knows the flight target).
+  3. **Contour rings.** One 30 cm line in the shallow tone at 0.55; the 15 cm line is now only in the labelled glyph; the legend is updated.
+  4. **Number vs hour.** While the night plays, the readout is the street's series at the hour shown (tweened), then it settles "at the peak". The "At {hour}" line shows only after scrubbing away from the peak.
+  5. **Email above the fold at 1440×900.** "Watch the whole storm" moved into the timeline panel; one-line replay sentence; one parking place plus "1 more dry place nearby"; search spellcheck off.
+  6. **Deep-water colour.** Fresnel 0.35 → 0.12; no ×1.12 brightening; alpha 0.45 → 1; glints only zoomed in.
+  7. **Time-lapse.** Every caption carries its own time; one clock format (U+00A0, minutes when not on the hour); same-hour events merged (the release peak was hidden); "on its real dates" while playing; end buttons on one row.
+  8. **What if.** The slider spans computed storms only.
+  9. **Basemap.** Dimmer neighbourhood labels, no highway shields, darker runways; the street lands in the open map (padding left 380, bottom 120; responsive).
+  10. **Mobile.** The nav has its own row; the Proof strip is a 2×2 grid.
+
+  Minors: Copernicus notice on the Proof comparison map (licence); Proof labels on one baseline; a step-through scooter and a water-surface line in the glyph; 6 px radii; capitalised hospital names.
+- Hero test updated: it expands "1 more dry place nearby" before "when to leave". 9/9 OK on v3 data.
+- Model reviewer (v3) and QA tester (post-rebuild, with frame rates on an idle machine) are running.
