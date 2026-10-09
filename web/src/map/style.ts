@@ -32,6 +32,8 @@ export function baseStyle(): StyleSpecification {
   const base = layers('protomaps', flavor(), { lang: 'en' })
     // our own 3D buildings replace the flat ones; POI icons stay off for a quiet map
     .filter((l) => l.id !== 'buildings' && !l.id.startsWith('pois'))
+    // sentence case everywhere: no all-caps neighbourhood labels
+    .map((l) => (l.type === 'symbol' ? { ...l, layout: { ...(l.layout ?? {}), 'text-transform': 'none' } } : l)) as ReturnType<typeof layers>
   return {
     version: 8,
     glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
