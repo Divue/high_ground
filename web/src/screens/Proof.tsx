@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getJSON } from '../lib/data'
 import type { MapView } from '../map/MapView'
 import { baseStyle } from '../map/style'
-import { TOKENS } from '../config'
+import { DATA_BASE, TOKENS } from '../config'
 
 interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number; matched_baseline_hit_rate?: number; gain?: number; flooded_share?: number }
 interface ProofJ {
@@ -28,6 +28,7 @@ const pct = (x: number | null | undefined) => (x == null ? '–' : `${Math.round
 export default function Proof({ mv }: { mv: MapView }) {
   const [p, setP] = useState<ProofJ | null>(null)
   const [split, setSplit] = useState(0.5)
+  const [detail, setDetail] = useState<null | 'anuga' | 'fast'>(null)
   const right = useRef<HTMLDivElement>(null)
   const rmap = useRef<MLMap | null>(null)
 
@@ -55,6 +56,35 @@ export default function Proof({ mv }: { mv: MapView }) {
     return () => { mv.map.off('move', sync); m.remove() }
   }, [mv])
 
+  // ANUGA detail view: the Velachery box, peak depth from both models with identical styling
+  useEffect(() => {
+    const m = mv.map
+    const clear = () => { if (m.getLayer('detail')) m.removeLayer('detail'); if (m.getSource('detail')) m.removeSource('detail') }
+    if (!detail) {
+      clear()
+      mv.water?.setOpacity(1)
+      return
+    }
+    let dead = false
+    getJSON<{ coordinates: [number, number][] }>('proof/anuga_200mm.json').then((meta) => {
+      if (dead) return
+      clear()
+      const url = new URL(`${DATA_BASE}/proof/${detail === 'anuga' ? 'anuga' : 'fast'}_200mm.png`, window.location.href).href
+      m.addSource('detail', { type: 'image', url, coordinates: meta.coordinates as [[number, number], [number, number], [number, number], [number, number]] })
+      m.addLayer({ id: 'detail', type: 'raster', source: 'detail', paint: { 'raster-opacity': 0.95, 'raster-fade-duration': 0 } }, 'buildings-3d')
+      mv.water?.setOpacity(0)
+      const lons = meta.coordinates.map((c) => c[0]), lats = meta.coordinates.map((c) => c[1])
+      m.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: 80, pitch: 0, duration: 1200 })
+    }).catch(() => setDetail(null))
+    return () => { dead = true }
+  }, [detail, mv])
+  useEffect(() => () => {
+    const m = mv.map
+    if (m.getLayer('detail')) m.removeLayer('detail')
+    if (m.getSource('detail')) m.removeSource('detail')
+    mv.water?.setOpacity(1)
+  }, [mv])
+
   const drag = (e: React.PointerEvent) => {
     const el = e.currentTarget as HTMLElement
     el.setPointerCapture(e.pointerId)
@@ -68,12 +98,13 @@ export default function Proof({ mv }: { mv: MapView }) {
   const g = p?.by_group
   return (
     <>
-      <div ref={right} style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: `inset(0 0 0 ${split * 100}%)` }} />
-      <div className="proof-handle" style={{ left: `calc(${split * 100}% - 1px)` }} onPointerDown={drag}
+      <div ref={right} style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: `inset(0 0 0 ${detail ? 100 : split * 100}%)` }} />
+      {!detail && <div className="proof-handle" style={{ left: `calc(${split * 100}% - 1px)` }} onPointerDown={drag}
         role="slider" aria-label="Swipe between model and citizen reports" aria-valuenow={Math.round(split * 100)} tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'ArrowLeft') setSplit((s) => Math.max(0.05, s - 0.05)); if (e.key === 'ArrowRight') setSplit((s) => Math.min(0.95, s + 0.05)) }} />
-      <div className="proof-label" style={{ left: 20 }}>Model: 1–2 Dec 2015 replay</div>
-      <div className="proof-label" style={{ right: 20 }}>Streets residents reported flooded in 2015</div>
+        onKeyDown={(e) => { if (e.key === 'ArrowLeft') setSplit((s) => Math.max(0.05, s - 0.05)); if (e.key === 'ArrowRight') setSplit((s) => Math.min(0.95, s + 0.05)) }} />}
+      {!detail && <div className="proof-label" style={{ left: 20 }}>Model: 1–2 Dec 2015 replay</div>}
+      {!detail && <div className="proof-label" style={{ right: 20 }}>Streets residents reported flooded in 2015</div>}
+      {detail && <div className="proof-label" style={{ left: 20 }}>{detail === 'anuga' ? 'ANUGA' : 'Fast model'}: peak depth, 200 mm storm, Velachery and Pallikaranai</div>}
 
       {p && h && g && (
         <>
@@ -116,7 +147,16 @@ export default function Proof({ mv }: { mv: MapView }) {
               GCC hazard zones: {pct(p.zones.rain_plus_reservoir?.share_in_moderate_high_veryhigh)} of the model’s flooded area falls in moderate, high or very high zones, which cover {pct(p.zones.rain_plus_reservoir?.city_share_moderate_or_higher)} of the zoned city.
               {p.nrsc_2015.rain_plus_reservoir && <> Satellite (NRSC) 2015 inundation: the model covers {pct(p.nrsc_2015.rain_plus_reservoir.hit)} of it.</>}
             </p>
-            {p.anuga && <p className="small">Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm. Same terrain, different numerics.</p>}
+            {p.anuga && (
+              <div className="small">
+                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics.</p>
+                <div className="seg" role="group" aria-label="Velachery detail view">
+                  <button aria-pressed={!detail} onClick={() => setDetail(null)}>2015 split view</button>
+                  <button aria-pressed={detail === 'anuga'} onClick={() => setDetail('anuga')}>Detail: ANUGA</button>
+                  <button aria-pressed={detail === 'fast'} onClick={() => setDetail('fast')}>Detail: fast model</button>
+                </div>
+              </div>
+            )}
             <h3>Tuning, on the other half of the wards</h3>
             <p className="small" style={{ margin: 0 }}>
               {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${pct(c.hit_rate)} vs ${pct(c.matched_baseline_hit_rate)}`).join(' · ')}

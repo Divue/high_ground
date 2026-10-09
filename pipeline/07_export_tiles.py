@@ -110,6 +110,47 @@ def main():
         elev_encoding="elev_m = (R*256+G)/100 - 10", depth_encoding="depth_cm = R (capped at 255)",
         note="Textures are for rendering only. Numbers shown to users come from streets/*.json."), indent=1)
     write_json(WEB / "runs.json", web_runs, indent=1)
+    # ANUGA detail view: peak depth in the Velachery box as a coloured, georeferenced image
+    ag = OUT / "anuga" / "design_200_mean"
+    if (ag / "hmax_grid.npy").exists():
+        g = np.load(ag / "hmax_grid.npy")
+        g = np.where(perm_water, np.nan, g)
+        rr, cc = np.nonzero(np.isfinite(g))
+        r0, r1, c0, c1 = rr.min(), rr.max() + 1, cc.min(), cc.max() + 1
+        sub = g[r0:r1, c0:c1]
+        sub_t = transform * transform.translation(c0, r0)
+        from rasterio.transform import array_bounds
+        l_, bt, r_, tp = array_bounds(sub.shape[0], sub.shape[1], sub_t)   # west, south, east, north (UTM)
+        lw, ls, le, ln = transform_bounds(CRS, "EPSG:4326", l_, bt, r_, tp)
+        mt2 = from_bounds(*transform_bounds(CRS, "EPSG:3857", l_, bt, r_, tp), sub.shape[1], sub.shape[0])
+        d2 = np.zeros(sub.shape, np.float32)
+        reproject(np.nan_to_num(sub).astype(np.float32), d2, src_transform=sub_t, src_crs=CRS, dst_transform=mt2,
+                  dst_crs="EPSG:3857", resampling=Resampling.bilinear)
+        def colour(d2):
+            t = np.clip((d2 - 0.04) / 1.2, 0, 1)
+            sh, dp = np.array([0x7F, 0xD3, 0xD8]), np.array([0x1C, 0x6E, 0x9C])
+            rgb = (sh[None, None, :] * (1 - t[..., None]) + dp[None, None, :] * t[..., None]).astype(np.uint8)
+            alpha = (np.clip((d2 - 0.04) / 0.11, 0, 1) * (150 + 90 * t)).astype(np.uint8)
+            return Image.fromarray(np.dstack([rgb, alpha]), "RGBA")
+
+        def to_box(arr):
+            out = np.zeros(sub.shape, np.float32)
+            reproject(np.nan_to_num(arr).astype(np.float32), out, src_transform=sub_t, src_crs=CRS, dst_transform=mt2,
+                      dst_crs="EPSG:3857", resampling=Resampling.bilinear)
+            return out
+
+        (WEB / "proof").mkdir(parents=True, exist_ok=True)
+        colour(d2).save(WEB / "proof" / "anuga_200mm.png", optimize=True)
+        hours = json.loads((ag / "agreement.json").read_text()).get("hours_simulated", 14)
+        snaps = np.load(OUT / "runs" / "design_200_mean" / "snapshots_cm.npy", mmap_mode="r")
+        fast = np.asarray(snaps[:hours]).max(axis=0)[r0:r1, c0:c1] / 100.0
+        fast = np.where(np.isfinite(sub), fast, np.nan)
+        colour(to_box(fast)).save(WEB / "proof" / "fast_200mm.png", optimize=True)
+        write_json(WEB / "proof" / "anuga_200mm.json", dict(coordinates=[[lw, ln], [le, ln], [le, ls], [lw, ls]],
+                                                            hours=hours,
+                                                            note=f"Peak depth, 200 mm storm, first {hours} h, both models"), indent=1)
+        print("anuga detail image", sub.shape)
+
     src = OUT / "basemap" / "chennai.pmtiles"
     if src.exists():
         (WEB / "basemap").mkdir(parents=True, exist_ok=True)
