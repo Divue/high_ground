@@ -267,3 +267,8 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - **All numbers come from `runs.json`.** `07_export_tiles.py` now writes `wet_share_15cm_hourly` (land only, same masks as `wet_share_15cm`) and `reservoir` (from the config assumption). The served `runs.json` was patched for development with v3 values; the full re-export tonight replaces it.
 - Test `web/tests/timelapse.mjs`: 2015 plays in 31 s, no errors, captions match `runs.json`. Frames are in `review/p5-dev/timelapse/`.
 - **To re-check after the v3 export:** the framing. The served v2 frames under-show the release (v2 leaked it out of the west edge). In v3 the release floods land mainly along the upper Adyar (lon 80.10–80.19), so the camera now looks north-west from Pallikaranai.
+
+### Human scale in the answer card (Fri ~19:45)
+- `ui/DepthGlyph.tsx` draws the street's peak depth against an adult (1.65 m), a scooter with its rider and a small hatchback at typical sizes, in metres, with lines at 15 and 30 cm and the caption "Typical sizes, for scale". Outlines are drawn above the water so submerged figures stay readable.
+- The readout and the glyph count up together (`ui/useCountUp.ts`, 2.8 s ease-out, starting when the camera arrives); reduced motion shows the final value. The readout's width and weight now ease over 0–150 cm (they saturated at 90 cm, so 93 and 154 cm looked the same).
+- Screens: `review/p5-dev/cards_glyph.png`, `glyph_zoom.png`. Hero test 9/9 OK.

@@ -10,6 +10,8 @@ import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
 import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
+import DepthGlyph from '../ui/DepthGlyph'
+import { useCountUp } from '../ui/useCountUp'
 import Search, { type Place } from '../ui/Search'
 import Subscribe from '../ui/Subscribe'
 import Timeline from '../ui/Timeline'
@@ -204,6 +206,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
   const atHour = ans?.seriesCm[hour - 1] ?? 0
   const band = ans ? bandFor(ans.maxCm) : null
+  // the number climbs with the water once the camera has arrived
+  const shownCm = useCountUp(ans?.maxCm ?? 0, `${arrived}|${ans?.maxCm ?? ''}|${scenario.label}`)
   const dryTonight = scenario.kind === 'dry'
 
   return (
@@ -242,12 +246,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         {lapse === 'off' && seg && ans && band && scenario.mix.length > 0 && (
           <>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
-            <Readout cm={ans.maxCm} />
+            <Readout cm={ans.maxCm} shown={shownCm} />
             <div className="when">
               {ans.hoursTo15 ? <>Reaches 15 cm by {clockLabel(scenario.start, ans.hoursTo15)}</> :
                 ans.maxCm >= 5 ? <>Stays under 15 cm</> : <>Stays dry</>}
               {ans.peakHour && ans.maxCm >= 5 ? <span className="muted"> · peak {clockLabel(scenario.start, ans.peakHour)}</span> : null}
             </div>
+            {ans.maxCm >= 5 && <DepthGlyph cm={shownCm} />}
             <span className={`band ${band.code}`}>{band.label}</span>
             <span className="chip">from the model</span>
             {ans.hoursTo15 && (
