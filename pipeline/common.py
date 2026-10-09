@@ -60,9 +60,25 @@ def load_grid(name: str):
     return np.load(WORK / f"{name}.npy")
 
 
+def permanent_water():
+    """Lakes, ponds and burnt channels: never reported as flooded land."""
+    import numpy as np
+    return (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+
+
+def pre_wet(run_dir, threshold_m=0.05):
+    """Land already standing in >= 5 cm when the storm starts (channel spill during spin-up, marsh).
+    Not masked from residents' answers (it hid the model's deepest riverside streets); flagged instead."""
+    import numpy as np
+    f = Path(run_dir) / "h_start.npy"
+    if not f.exists():
+        return np.zeros(np.load(WORK / "landcover.npy").shape, bool)
+    return (np.load(f) >= threshold_m) & ~permanent_water()
+
+
 def water_mask(run_dir=None):
-    """Cells that are not 'flooded land': lakes/ponds, burnt channels, and (per run) land already
-    standing in >= 5 cm of water when the storm starts (antecedent channel spill, marsh)."""
+    """Validation mask: permanent water plus (per run) land already wet at storm start.
+    The resident-facing outputs (04, 05, 07) use permanent_water() only."""
     import numpy as np
     m = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
     if run_dir is not None:

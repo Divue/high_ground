@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { REPLAYS, bandFor, prefersReducedMotion } from '../config'
 import { loadGray, loadParking, type Current, type Parking, type Runs } from '../lib/data'
 import { distM, fmtDistance } from '../lib/geo'
-import { blendedFrame, frameName } from '../lib/frames'
+import { frameName } from '../lib/frames'
 import { leaveByPlan, type Route } from '../lib/routing'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
 import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
@@ -198,9 +198,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       // than the hour your own street passes 15 cm.
       const streetFloods = !!ans?.hoursTo15
       const until = ans?.hoursTo15 ? Math.max(1, ans.hoursTo15 - 1) : (ans?.peakHour ?? Math.min(scenario.hours, 12))
-      const n = mv.meta.width * mv.meta.height
-      const plan = await leaveByPlan([place.lon, place.lat], [o.lon, o.lat], mv.meta,
-        (h) => blendedFrame(scenario.mix, h, n), until, 30)
+      const plan = await leaveByPlan([place.lon, place.lat], [o.lon, o.lat], scenario.mix, until, 30)
       setRoute({ normal: plan.normal, safe: plan.route, to: o.name, leaveBy: plan.leaveByHour, until, streetFloods })
       // the map stays at the peak the card describes; the leave-by hour is marked on the timeline
       mv.setGeoJSON('route-normal', plan.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.normal.coords } } : null)
@@ -266,6 +264,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                 ans.maxCm >= 5 ? <>Stays under 15 cm</> : <>Stays dry</>}
               {ans.peakHour && ans.maxCm >= 5 ? <span className="muted"> · peak {clockLabel(scenario.start, ans.peakHour)}</span> : null}
             </div>
+            {ans.preWet && <p className="muted small" style={{ margin: '4px 0 0' }}>Low ground beside a channel: the model already holds water here before the storm starts.</p>}
             {ans.maxCm >= 5 && <DepthGlyph cm={shownCm} />}
             <span className={`band ${band.code}`}>{band.label}</span>
             <span className="chip">from the model</span>

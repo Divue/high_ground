@@ -49,8 +49,8 @@ box(2, 25.5, 44, 29, "Flood model", [
     "Local-inertial 2D solver (numba), 30 m,",
     "  1.2 M cells, mass error < 0.01%",
     "12 design storms + 2015, Michaung, Fengal",
-    "Drain capacity calibrated on odd wards,",
-    "  validated on even wards (2015 reports)",
+    "Drain capacity: stated assumption;",
+    "  tested on held-out even wards (2015)",
     "ANUGA cross-check for Velachery"], edge=DEEP)
 box(2, 1.5, 44, 19.7, "Outputs", [
     "Depth textures (hourly), terrain-RGB tiles",

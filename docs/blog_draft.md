@@ -37,7 +37,7 @@ We tested the model against 7,924 street segments that residents reported floode
 
 So at street level the 2015 reports put the model only slightly above chance. The reports mark where people reported, not every street that flooded. And 30 m satellite terrain cannot see the kerbs, culverts and drains that decide which street floods. We say this on the Proof screen in the same type size as the result.
 
-A second hydraulic model, ANUGA from Geoscience Australia, run on a triangular mesh over Velachery and Pallikaranai, agrees with ours on about nine in ten cells about whether water passes 15 cm. That checks the arithmetic, not the terrain.
+A second hydraulic model, ANUGA from Geoscience Australia, run on a triangular mesh over Velachery and Pallikaranai, agrees with ours on 73% of the cells where either model puts 15 cm or more (the critical success index; counting cells both leave dry would inflate it to 94%). That checks the arithmetic, not the terrain.
 
 ## What fought back
 

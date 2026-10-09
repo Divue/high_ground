@@ -55,12 +55,24 @@ def auc_reported_vs_unreported(grid, data, filt, group=None, boots=200, seed=0):
     if len(a) < 20 or len(b) < 20:
         return dict(auc=None, ci95=None, n_reported=int(len(a)))
     auc = stats.mannwhitneyu(a, b).statistic / (len(a) * len(b))
+    # streets in one ward are not independent: resample whole wards (block bootstrap)
+    wa, wb = data["c_ward"][cm], data["u_ward"][um]
+    wards = np.unique(np.concatenate([wa, wb]))
+    ia_by = {w: np.nonzero(wa == w)[0] for w in wards}
+    ib_by = {w: np.nonzero(wb == w)[0] for w in wards}
     rng = np.random.default_rng(seed)
     bs = []
     for _ in range(boots):
-        ia = rng.integers(0, len(a), len(a)); ib = rng.integers(0, len(b), min(len(b), 4000))
+        pick = rng.choice(wards, len(wards), replace=True)
+        ia = np.concatenate([ia_by[w] for w in pick])
+        ib = np.concatenate([ib_by[w] for w in pick])
+        if len(ia) < 20 or len(ib) < 20:
+            continue
+        if len(ib) > 4000:
+            ib = rng.choice(ib, 4000, replace=False)
         bs.append(stats.mannwhitneyu(a[ia], b[ib]).statistic / (len(ia) * len(ib)))
-    return dict(auc=float(auc), ci95=[float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))], n_reported=int(len(a)))
+    return dict(auc=float(auc), ci95=[float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))],
+                ci_method="ward block bootstrap", n_reported=int(len(a)))
 
 
 def point_auc(grid, pts_rc, rnd_rc):
@@ -258,11 +270,12 @@ def main():
                         river_buffer_m=V["river_buffer_m"]),
         caveats=[
             "Citizen reports are cumulative over Nov–Dec 2015, not one night, and come mostly from areas with more internet users.",
-            "At street level the 2015 reports barely separate the model from chance, and elevation alone does no better; distance to a channel is the strongest single signal.",
+            "At street level the 2015 reports barely separate the model from chance. Elevation alone does no better on the reports, but it does better than the model on GCC's own 2015 flood hotspots; distance to a channel is the strongest single signal.",
+            "The model does not reproduce GCC's hazard map finding that Velachery floods far more than T. Nagar; its flooding follows small closed hollows in the 30 m terrain.",
             "Reports only say where it flooded, never where it stayed dry. 'Unreported' streets are used as a stand-in for dry, which they are not always.",
             "The reservoir release is modelled from the CAG/PWD timeline as an inflow at the Adyar's upstream edge; other tank surpluses are not included.",
             "Terrain is 30 m satellite elevation (Copernicus GLO-30) with buildings and trees removed by approximation.",
-            "Drain capacity was tuned on the extreme 2015 event; for smaller storms the model probably overstates depths.",
+            "Drain capacity (10 mm/h) is an assumption; with it, storms under about 100 mm barely flood in the model, which is probably too little.",
         ],
         sources=["OpenCity: Chennai 2015 Crowd-sourced Flooding Locations (osm-in/flood-map contributors)",
                  "OpenCity: Chennai Flood Hazard Zones Map (GCC)", "OpenCity: Chennai 2015 Floods Inundation Zone",

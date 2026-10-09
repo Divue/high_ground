@@ -71,7 +71,7 @@ def main():
         f"  - One sentence: \"{proof['sentence']}\"",
     ]
     if an:
-        lines.append(f"  - ANUGA (Geoscience Australia) cross-check in Velachery: {pct(an['cell_agreement'])} of cells agree on ≥15 cm, depth correlation {an['depth_corr']:.2f}.")
+        lines.append(f"  - ANUGA (Geoscience Australia) cross-check in Velachery: where either model has ≥15 cm, they agree on {pct(an['csi'])} of those cells (critical success index), depth correlation {an['depth_corr']:.2f}. Same terrain, so it checks the arithmetic, not the terrain.")
     lines += [
         "- **2:30–3:00 Architecture + limits:** `docs/architecture.png`; read two limits from *About the model*; end on the What-if slider dragged back to 50 mm (water recedes).",
         "",

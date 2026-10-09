@@ -25,7 +25,7 @@ conditioning:
   building_obstacle_fraction: 0.55 # cell raised as an obstacle above this footprint share (never on road cells)
   building_obstacle_m: 3.0
   tree_tags: ["landuse=forest", "natural=wood", "natural=scrub", "landuse=orchard"]
-  percentile_filter: {percentile: 5, size: 3}
+  percentile_filter: {percentile: 5, size: 3, method: opening}   # v4: grey opening; the 5th percentile grew low noise into 90 m square pits (review/model/v3/a8_square_pits.json)
   burn_depth_m: 2.0                # rivers and river polygons
   burn_depth_by_type: {river: 2.0, canal: 1.5, stream: 0.6, drain: 0.4}   # a 30 m cell stands in for the channel
   max_depression_m: 1.0            # deeper closed pits are treated as DSM artefacts / unseen culverts
@@ -52,6 +52,8 @@ solver:
   max_dt_s: 10.0
   snapshot_every_s: 3600
   wet_threshold_m: 0.15            # time-to-15cm
+  channel_level: bank              # v4: channels start no higher than their lowest bank (they spilled onto land during spin-up)
+  tide_hold_max_dist_m: 3000       # v4: land-edge outlets hold the tide only near the coast
 
 tide:
   # Sea cells held at a fixed level (m above EGM2008 ~ MSL).

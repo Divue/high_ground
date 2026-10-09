@@ -78,7 +78,7 @@ export interface StreetIndex {
   series_bytes?: number
 }
 export interface StreetGeom { segs: [string, string, string, number, number[]][] }
-export interface StreetVals { max: number[]; t15: number[]; series: string[] }
+export interface StreetVals { max: number[]; t15: number[]; series: string[]; pre?: number[] }
 
 export interface Parking {
   note: string

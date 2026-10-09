@@ -22,7 +22,7 @@ from rasterio.enums import Resampling
 from rasterio.transform import from_bounds
 from rasterio.warp import reproject, transform_bounds
 
-from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, permanent_water, write_json
 
 WEB = OUT / "web"
 TERRAIN_Z = range(8, 15)
@@ -102,8 +102,9 @@ def main():
         d = OUT / "runs" / rid
         full = json.loads((d / "info.json").read_text())
         # the sea is never floodwater: at high tide it holds water above the DTM datum and would
-        # otherwise render as a "flooded Bay" in every hourly frame
-        run_water = water_mask(d) | sea
+        # otherwise render as a "flooded Bay" in every hourly frame. Land already wet before the storm
+        # is shown (hiding it hid the model's deepest riverside streets).
+        run_water = permanent_water() | sea
         od = WEB / "water" / rid
         od.mkdir(parents=True, exist_ok=True)
         hmax = np.where(run_water, 0, np.load(d / "hmax.npy"))

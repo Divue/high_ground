@@ -19,7 +19,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial import cKDTree
 
-from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, permanent_water, write_json
 
 WEB = OUT / "web"
 DRIVE = {
@@ -237,9 +237,13 @@ def main():
         return (int(np.clip((y - transform.f) / transform.e, 0, H - 1)),
                 int(np.clip((x - transform.c) / transform.a, 0, W - 1)))
 
-    park_runs, hosp_runs = {}, {}
+    park_runs, hosp_runs, hourly_meta = {}, {}, {}
+    perm = permanent_water()
     for rid in runs:
-        hmax = np.where(water_mask(OUT / "runs" / rid), 0.0, np.load(OUT / "runs" / rid / "hmax.npy"))
+        hraw = np.load(OUT / "runs" / rid / "hmax.npy")
+        # only lakes and channels are masked; land already wet before the storm counts (it is often the
+        # deepest riverside ground)
+        hmax = np.where(perm, 0.0, hraw)
         # p90 of the edge's samples: the same statistic the answer card uses for a street
         import pandas as pd
         vals = pd.Series(hmax[samp_r, samp_c]).groupby(samp_e).quantile(0.9)
@@ -249,11 +253,26 @@ def main():
         dcm = np.clip(np.round(dep * 100), 0, 65535).astype(np.uint16)
         dcm.tofile(g / f"depth_{rid}.bin")
 
+        # hour by hour, same samples and p90, for the "leave by" planner: only edges that ever reach
+        # 15 cm (all others stay under every routing limit). ids uint32, then uint8 cm, hour-major.
+        sel = np.nonzero(dcm >= CFG["routing"]["two_wheeler_impassable_cm"])[0].astype(np.uint32)
+        snaps = np.load(OUT / "runs" / rid / "snapshots_cm.npy", mmap_mode="r")
+        m = np.isin(samp_e, sel)
+        sr, sc, se = samp_r[m], samp_c[m], samp_e[m]
+        hourly = np.zeros((snaps.shape[0], len(sel)), np.uint8)
+        for k in range(snaps.shape[0]):
+            v = pd.Series(np.asarray(snaps[k][sr, sc], np.float32)).groupby(se).quantile(0.9).reindex(sel, fill_value=0)
+            hourly[k] = np.clip(np.round(v.values), 0, 255).astype(np.uint8)
+        sel.tofile(g / f"hourly_{rid}_ids.bin")
+        hourly.tofile(g / f"hourly_{rid}.bin")
+        hourly_meta[rid] = dict(edges=int(len(sel)), hours=int(snaps.shape[0]))
+
         # parking: dry flags
         flags = []
         for c in cand:
             if c["kind"] == "flyover":
-                ends = [hmax[cell(*pt)] for pt in c["ends"]]
+                # unmasked: an approach that lands on a channel cell is not "dry" because it is a channel
+                ends = [hraw[cell(*pt)] for pt in c["ends"]]
                 flags.append(int(min(ends) * 100 < CAR_CM))
             elif c["kind"] == "multi-storey":
                 flags.append(int(hmax[cell(c["lon"], c["lat"])] * 100 < CAR_CM))
@@ -284,7 +303,7 @@ def main():
         print(f"{rid}: {int((dcm >= CAR_CM).sum())} edges impassable for cars, {cut}/{len(hosp)} hospitals cut off, "
               f"{sum(park_runs[rid])}/{len(cand)} parking dry")
 
-    write_json(g / "meta.json", dict(nodes=int(len(nodes)), edges=int(len(edges)), runs=list(runs),
+    write_json(g / "meta.json", dict(nodes=int(len(nodes)), edges=int(len(edges)), runs=list(runs), hourly=hourly_meta,
                                      car_impassable_cm=CAR_CM,
                                      two_wheeler_impassable_cm=CFG["routing"]["two_wheeler_impassable_cm"],
                                      classes={"0": "motorway/trunk", "1": "primary", "2": "secondary",

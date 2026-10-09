@@ -271,11 +271,26 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     # Channels start at their measured water surface (the DSM/DTM level), never above it:
     # filling them to the sink-filled spill level spilled water onto adjacent land before the storm.
     dtm0 = np.load(WORK / "dtm_bare.npy").astype(np.float64)
-    h[burn] = np.clip(dtm0[burn] - z[burn], 0.0, bd[burn])
+    level = dtm0.copy()
+    if CFG["solver"].get("channel_level") == "bank":
+        # no channel cell starts above its lowest bank: propagate the lowest adjacent land level up to
+        # ~240 m into the channel, so wide channels cannot spill onto land during spin-up either
+        from scipy import ndimage as ndi
+        land_lvl = np.where(burn | sea_only, np.inf, dtm0)
+        for _ in range(8):
+            nb = ndi.minimum_filter(np.where(burn, level, land_lvl), size=3)
+            level = np.where(burn, np.minimum(level, nb), level)
+    h[burn] = np.clip(level[burn] - z[burn], 0.0, bd[burn])
     outlet_h = np.zeros(z.shape)
     # every outlet (sea and the free-outfall land edge) holds the tide level where its bed is below it,
     # so a channel crossing the edge below sea level cannot drain the sea through the city
     outlet_h[sea] = np.maximum(tide - z[sea], 0.0)
+    dmax = CFG["solver"].get("tide_hold_max_dist_m")
+    if dmax:
+        # v4: an inland edge outlet 20 km from the sea is a free outfall, not a tide gauge
+        from scipy import ndimage as ndi
+        far = ndi.distance_transform_edt(~sea_only) * float(CFG["domain"]["cell_m"]) > dmax
+        outlet_h[edge_out & far] = 0.0
     h[sea] = outlet_h[sea]
     if CFG["solver"].get("antecedent", "dry") == "full" or os.environ.get("HG_ANTECEDENT") == "full":
         # Wet antecedent: closed pockets and tanks already full to their spill level (monsoon season)

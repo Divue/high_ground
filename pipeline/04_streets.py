@@ -24,7 +24,7 @@ import numpy as np
 from pyproj import Transformer
 from shapely.ops import substring
 
-from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, pre_wet, write_json
 
 ROADS = {
     "motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
@@ -117,17 +117,16 @@ def main():
         t15 = np.load(d / "t15.npy")
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
         nh = snaps.shape[0]
-        standing = water_mask(d) & ~water          # land already wet at storm start in this run
+        standing = pre_wet(d)                     # land already wet at storm start: kept, but flagged
         mx = np.zeros(len(segs), np.int32)
+        pre = np.zeros(len(segs), np.uint8)
         tt = np.full(len(segs), -1.0)
         series = np.zeros((len(segs), nh), np.uint16)
         for i, (r, c) in enumerate(samples):
             if segs[i][3] or len(r) == 0:          # bridge deck or outside grid
                 continue
-            keep = ~standing[r, c]
-            if not keep.any():
-                continue
-            r2, c2 = r[keep], c[keep]
+            r2, c2 = r, c
+            pre[i] = int(standing[r, c].mean() > 0.5)
             # one statistic everywhere: p90 across the street's samples of each hourly depth;
             # the peak, the time to 15 cm and the hourly curve all come from this series
             ser = np.percentile(snaps[:, r2, c2], 90, axis=1)
@@ -139,17 +138,18 @@ def main():
         (WEB / "streets" / rid).mkdir(parents=True, exist_ok=True)
         for t, idx in by_tile.items():
             write_json(WEB / "streets" / rid / f"{t}.json", {
-                "max": mx[idx].tolist(), "t15": tt[idx].tolist(),
+                "max": mx[idx].tolist(), "t15": tt[idx].tolist(), "pre": pre[idx].tolist(),
                 "series": [base64.b64encode(series[i].astype("<u2").tobytes()).decode() for i in idx]})
         wet = (mx >= 15).mean()
-        print(f"{rid}: {wet*100:.1f}% of segments >= 15 cm")
+        print(f"{rid}: {wet*100:.1f}% of segments >= 15 cm, {int(pre.sum())} already wet at storm start")
 
     write_json(WEB / "streets" / "index.json", {
         "crs": CRS, "origin": [x0, y1], "tile_m": TILE_M, "tiles": sorted(by_tile),
         "tile_bounds_lonlat": tile_bounds,
         "segments": len(segs), "runs": list(runs), "series_bytes": 2,
         "fields": {"max": "peak of the hourly series, cm", "t15": "first hour the series reaches 15 cm (-1 never)",
-                   "series": "hourly p90 depth cm, uint16 little-endian, base64"},
+                   "series": "hourly p90 depth cm, uint16 little-endian, base64",
+                   "pre": "1 if most of the street is low ground the model already holds water on before the storm"},
     }, indent=1)
     np.savez_compressed(WORK / "street_samples.npz", max=np.stack([seg_max[r] for r in runs]),
                         runs=np.array(list(runs)))

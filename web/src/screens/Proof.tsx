@@ -166,7 +166,7 @@ export default function Proof({ mv }: { mv: MapView }) {
             </details>}
             {p.anuga && (
               <div className="small">
-                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics, so this checks the arithmetic, not the terrain.</p>
+                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: where either model puts 15 cm or more, they agree on {pct(p.anuga.csi)} of those cells (critical success index; depth correlation {p.anuga.depth_corr.toFixed(2)}; first 14 hours of the 200 mm storm). Same terrain, different numerics, so this checks the arithmetic, not the terrain.</p>
                 <div className="seg" role="group" aria-label="Velachery detail view">
                   <button aria-pressed={!detail} onClick={() => setDetail(null)}>2015 split view</button>
                   <button aria-pressed={detail === 'anuga'} onClick={() => setDetail('anuga')}>Detail: ANUGA</button>

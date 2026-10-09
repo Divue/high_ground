@@ -19,6 +19,7 @@ export interface StreetAnswer {
   seriesCm: number[]
   hoursTo15: number | null
   peakHour: number | null
+  preWet: boolean        // low ground the model already holds water on before the storm starts
 }
 
 export async function nearestSegment(lon: number, lat: number): Promise<Segment | null> {
@@ -59,9 +60,11 @@ export async function segmentValues(seg: Segment, mix: MixPart[]): Promise<Stree
   const bytes = (await loadStreetIndex()).series_bytes ?? 1
   let max = 0
   let series: number[] | null = null
+  let pre = 0
   for (const { run, w } of mix) {
     const v = await getJSON<StreetVals>(`streets/${run}/${seg.tile}.json`)
     max += w * v.max[seg.index]
+    pre += w * (v.pre?.[seg.index] ?? 0)
     const s = decode(v.series[seg.index], bytes)
     series = series ? series.map((x, i) => x + w * (s[i] ?? 0)) : s.map((x) => w * x)
   }
@@ -73,6 +76,7 @@ export async function segmentValues(seg: Segment, mix: MixPart[]): Promise<Stree
     seriesCm: sc,
     hoursTo15: t15 >= 0 ? t15 + 1 : null,
     peakHour: peak > 0 ? sc.indexOf(peak) + 1 : null,
+    preWet: pre >= 0.5,
   }
 }
 

@@ -301,3 +301,21 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
   Minors: Copernicus notice on the Proof comparison map (licence); Proof labels on one baseline; a step-through scooter and a water-surface line in the glyph; 6 px radii; capitalised hospital names.
 - Hero test updated: it expands "1 more dry place nearby" before "when to leave". 9/9 OK on v3 data.
 - Model reviewer (v3) and QA tester (post-rebuild, with frame rates on an idle machine) are running.
+
+### Model reviewer on v3 (Fri 23:15) → acted on
+- **B1 (fixed, no rerun).** The standing-water mask hid the model's deepest riverside streets: 946 segments read "stays dry", MIOT's 2015 cut-off was hidden, and 2,234 deep edges counted as dry. 04, 05 and 07 now mask only permanent water (`common.permanent_water`). Streets already wet at storm start carry a `pre` flag; the card says "Low ground beside a channel: the model already holds water here before the storm starts", and the assistant gets `already_wet_before_storm`. Flyover ends use unmasked depth.
+- **B2 (fixed).** "Leave by" was planned on display textures that miss 28% of deep roads. 05 now writes `graph/hourly_<run>{_ids}.bin`: same samples and p90 as the card, only for edges that ever reach 15 cm, uint8 cm, hour-major. `routing.leaveByPlan` uses `edgeDepthAtHour`; the texture-sampling code is removed.
+- **M1 (disclosed, not tuned).** The place gate failure is a model defect (GCC: Velachery 49% vs T. Nagar 2% at moderate-plus hazard; NRSC 60% vs 33%). My earlier argument that the crowd reports show the two places equal is **withdrawn**: that source is dominated by reporting bias. About, the Proof caveats and the assistant limits now say the model does not reproduce it and that its flooding follows small hollows in the 30 m terrain. The gate stays visibly failing.
+- **M4 (wording, fixed).** The proof caveat no longer says "drain capacity was tuned". Architecture diagram regenerated ("stated assumption; tested on held-out even wards"). ANUGA is reported as CSI 73% (cell agreement 94% is inflated by shared dry cells) on Proof, in the README, the demo guide and the blog. The elevation caveat now adds "but it does better on GCC's 2015 hotspots". The AUC interval is a ward block bootstrap. Gate p3 now tests the ranking (ward-bootstrap lower bound > 0.5 and above elevation); the spec hit rate is information only. README burn depths are listed by type.
+- v3 outputs were regenerated with B1/B2 (04, 05, 07) as the fallback.
+
+### v4 overnight rerun: pre-registered rule (written Sat 00:30, before any v4 run)
+- Changes:
+  - **M2:** a 3×3 grey opening replaces the 5th-percentile filter (it grew noise into 90 m square pits; 95% of "unsafe for cars" streets sat in closed pits).
+  - **M3:** the west edge is closed further south (`erow+140`; 14% of the release still leaked).
+  - **B1 root:** channels start no higher than their lowest bank, propagated about 240 m in. A 1-hour test cut land already wet at storm start from 11,657 to 1,614 cells (≥15 cm: 6,166 → 119).
+  - **Minor:** land-edge outlets hold the tide only within 3 km of the sea.
+- **Rule (odd wards = tuning half, 2015 replay with release, `pipeline/v4_decision.py`):** adopt v4 only if (1) ranking AUC ≥ v3 − 0.005 **and** (2) the share of model-flooded land inside GCC moderate-or-higher zones ≥ v3. Otherwise keep v3; `v4_chain.sh` restores it automatically.
+- v3 baseline (`data/out/decision_v3.json`): AUC 0.5364 [0.521, 0.557], GCC moderate-plus share 0.244, flooded share of odd-ward land 0.320.
+- Chain: `pipeline/v4_chain.sh`. Back up v3 → 01 → design_200_mean → ANUGA in parallel → remaining 15 runs → post_runs → decision. Log: `data/logs/v4_chain.log`. ETA about 07:30 IST.
+- Not done (minor): losses split into drains and infiltration in `info.json`.

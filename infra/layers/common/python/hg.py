@@ -26,6 +26,7 @@ LIMITS = [
     "Scenarios are precomputed 24-hour storms (50–400 mm); tonight's forecast is matched to the two nearest and blended.",
     "The 2015 reservoir release is a documented assumption built from the CAG/PWD release timeline.",
     "Storm surge and blocked drains are not modelled.",
+    "The model does not reproduce GCC's hazard map finding that Velachery floods far more than T. Nagar; its flooding follows small closed hollows in the 30 m terrain.",
     "Tested on the 2015 floods on wards held out from any tuning, the model ranks reported-flooded streets deeper than unreported ones only slightly more often than chance; street-level answers are indicative, not precise.",
     "This is not an official warning. Follow GCC, IMD and Tamil Nadu SDMA advisories. In danger, call 112.",
 ]
@@ -101,10 +102,11 @@ def scenario_mix(sc: dict | None = None):
 
 
 def segment_values(tile: str, index: int, mix):
-    mx, series = 0.0, None
+    mx, series, pre = 0.0, None, 0.0
     for rid, w in mix:
         v = s3_json(f"streets/{rid}/{tile}.json")
         mx += w * v["max"][index]
+        pre += w * (v.get("pre") or [0] * (index + 1))[index]
         raw = base64.b64decode(v["series"][index])
         nb = s3_json("streets/index.json").get("series_bytes", 1)
         s = list(struct.unpack(f"<{len(raw) // 2}H", raw)) if nb == 2 else list(raw)
@@ -112,7 +114,7 @@ def segment_values(tile: str, index: int, mix):
     series = [round(x) for x in (series or [])]
     t15 = next((h + 1 for h, x in enumerate(series) if x >= 15), None)
     peak_h = (series.index(max(series)) + 1) if series and max(series) > 0 else None
-    return dict(max_cm=round(mx), series_cm=series, hours_to_15cm=t15, peak_hour=peak_h)
+    return dict(max_cm=round(mx), series_cm=series, hours_to_15cm=t15, peak_hour=peak_h, pre_wet=pre >= 0.5)
 
 
 def clock(start_iso: str | None, hours: float | None):
@@ -139,6 +141,7 @@ def street_risk(lat: float, lon: float, sc: dict | None = None) -> dict:
                 max_depth_cm=v["max_cm"], band=band(v["max_cm"]), hours_to_15cm=v["hours_to_15cm"],
                 reaches_15cm_at=clock(start, v["hours_to_15cm"]), peak_hour=v["peak_hour"],
                 peak_at=clock(start, v["peak_hour"]), hourly_depth_cm=v["series_cm"], start_local=start,
+                already_wet_before_storm=v["pre_wet"],
                 source="HighGround model output (streets/*.json)")
 
 

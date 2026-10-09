@@ -166,7 +166,11 @@ def main():
           f"trees {tree_m.mean()*100:.1f}%, bridges {bridge_m.mean()*100:.1f}%, tall {tall.mean()*100:.1f}%)")
     filled = fillnodata(np.nan_to_num(dsm, nan=0).copy(), mask=valid, max_search_distance=200, smoothing_iterations=2)
     p = ccfg["percentile_filter"]
-    dtm = ndi.percentile_filter(filled, percentile=p["percentile"], size=p["size"]).astype(np.float32)
+    if p.get("method") == "opening":
+        # grey opening removes clutter narrower than 3x3 without growing low noise into square pits
+        dtm = ndi.grey_opening(filled, size=(p["size"], p["size"])).astype(np.float32)
+    else:
+        dtm = ndi.percentile_filter(filled, percentile=p["percentile"], size=p["size"]).astype(np.float32)
     # The percentile filter is a clutter filter; it should not move the city relative
     # to the sea. Restore the median open-ground level (unmasked, non-water cells).
     open_ground = valid.astype(bool) & (wc_water < 0.5) & (dsm > 0.5)
@@ -198,7 +202,8 @@ def main():
     elon, elat = CFG["replays"]["dec2015_reservoir"]["reservoir"]["entry_lonlat"]
     ex, ey = Transformer.from_crs("EPSG:4326", CRS, always_xy=True).transform(elon, elat)
     erow = int((ey - transform.f) / transform.e)
-    edge[max(erow - 65, 0):erow + 66, 0] = False
+    # v4: closed further south too: 14% of the release still left ~1 km south of the old stretch
+    edge[max(erow - 65, 0):erow + 140, 0] = False
     outlet = sea | (edge & ~sea)
     from skimage.morphology import reconstruction
     seed = np.where(outlet, dtm_bare, dtm_bare.max())
