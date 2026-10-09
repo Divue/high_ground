@@ -238,3 +238,21 @@ Intent was always smooth (60 fps on an integrated GPU). Measured, not guessed:
 - **The real cost was rain.** Rain was drawn inside the map's custom layer, so every rain frame forced MapLibre to redraw terrain, 3D buildings and water. Rain is now its own transparent canvas (`src/water/RainOverlay.ts`, pixel ratio 1) using the last map camera matrix, and the map is render-on-demand. A still map redraws 1–2 times a second, against continuous redraws before (9.2/s measured while the GPU was starved, ~60/s on a free GPU). Rain still animates: 5.6% of pixels change between frames 150 ms apart (`tests/rain_diff.mjs` + `.py`). Ripples freeze when the camera is still, which matches the spec ("nothing else animates on its own"). Reduced motion turns rain off.
 - Also: pixel ratio capped at 1.5, water mesh step 2 → 3 (about 135k vertices), single-run frames skip the blend arithmetic, leave-by planning binary-searches the hours and yields between searches, and hourly frames preload nearest-first in idle time.
 - **The lag the user saw is mostly the machine.** Per-process GPU accounting (`/proc/*/fdinfo`) showed the user's Firefox tab on the app using 86–99.6% of the Vega 3 (clocked at 640 MHz), and the model run takes about 2.2 of 4 CPU threads. Even a flat basemap with all our layers off ran at about 10 fps in a second browser. Our page (new code) idles at 5.3% GPU in Chromium. **Re-measure fps after the model runs finish, with only one browser tab open.**
+
+### Creative research (Fri ~19:00, user request) → `docs/ideas/creative_research.md`
+A research agent read the spec, progress, screenshots and code, and surveyed flood, water and night-city visualisation. Verified findings and actions:
+- **Bug (verified): the high-tide replays drew the sea as floodwater.** In the served (v2) Michaung and Fengal hourly frames, all 236,530 sea cells were ≥15 cm. `07_export_tiles.py` now masks the sea explicitly; the v3 runs were already clean through the `h_start` mask. The fix lands with tonight's re-export.
+- **Done: water truth pass.**
+  - 15 cm (thin) and 30 cm (bold) contour lines drawn on the water when zoomed in.
+  - Deep water opaque, shallow water translucent (alpha 0.5 → 1.0 with depth, was 0.72 → 1.0).
+  - B-spline (4-tap) shoreline smoothing when zoomed in, display only.
+  - A map key (`ui/Legend.tsx`) on Tonight, What if and Hospitals.
+  - Screens: `review/qa/72_arumugam_pitch62.png`, `72_arumugam_pitch0.png`. Hero test: all 9 steps OK, no errors.
+- Performance items 1, 2 and 4 of the report were already done in the lag pass above.
+- **Next from its shortlist, in order:**
+  1. Model-timed rise: play the hourly frames up to the peak instead of a uniform multiplier, which is also more honest.
+  2. A "Watch the whole storm" 2015 time-lapse, with captions from pipeline JSON only.
+  3. "Stand in your street": human-scale figures, only if time allows.
+
+  Skipped as infeasible or off-licence: photogrammetry and Google 3D tiles. Open Buildings 2.5D heights (CC BY 4.0) are optional, last.
+- Design-critic and qa-tester run once after tonight's v3 rebuild, covering these frontend changes too.

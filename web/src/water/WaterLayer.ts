@@ -107,6 +107,7 @@ export class WaterLayer implements CustomLayerInterface {
         shallow: { value: new THREE.Color(TOKENS.shallow) }, deep: { value: new THREE.Color(TOKENS.deep) },
         amber: { value: new THREE.Color(TOKENS.amber) }, camPos: { value: new THREE.Vector3() },
         lights: { value: lights }, opacity: { value: 1 }, minDepth: { value: 0.04 },
+        detail: { value: 0 }, texSize: { value: new THREE.Vector2(W, H) },
       },
     })
     this.water = new THREE.Mesh(geo, mat)
@@ -172,6 +173,7 @@ export class WaterLayer implements CustomLayerInterface {
 
     const zoom = this.map.getZoom()
     u.minDepth.value = 0.04 + 0.11 * Math.min(1, Math.max(0, (14 - zoom) / 1.0))
+    u.detail.value = Math.min(1, Math.max(0, (zoom - 13.2) / 0.8))
 
     // mainMatrix maps web-mercator 0..1 coordinates (z conformal) to clip space
     const mm = args.defaultProjectionData.mainMatrix as unknown as number[]

@@ -11,6 +11,7 @@ import Proof from './screens/Proof'
 import Tonight from './screens/Tonight'
 import WhatIf from './screens/WhatIf'
 import Assistant from './ui/Assistant'
+import { Legend } from './ui/Legend'
 import type { Place } from './ui/Search'
 
 type Screen = 'tonight' | 'whatif' | 'proof' | 'hospitals' | 'about' | 'admin'
@@ -103,6 +104,7 @@ export default function App() {
           {screen === 'about' && <About />}
           {screen === 'admin' && <Admin onDone={() => loadCurrent().then(setCurrent)} />}
           {screen !== 'proof' && screen !== 'about' && <Assistant place={place} scenario={scenario} />}
+          {(screen === 'tonight' || screen === 'whatif' || screen === 'hospitals') && <Legend />}
         </>
       )}
     </>
