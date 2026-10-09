@@ -89,6 +89,7 @@ curl -s -X POST "$API/admin/run" -H 'content-type: application/json' -d "{\"toke
 echo "== build + deploy web (Amplify Hosting)"
 cd "$ROOT/web"
 VITE_DATA_BASE="https://$CDN/data" VITE_API_BASE="$API" npx vite build >/dev/null
+rm -rf dist/data          # model data is served from CloudFront, not bundled with the site
 rm -f "$ROOT/data/site.zip"; (cd dist && zip -qr "$ROOT/data/site.zip" .)
 DEP=$(aws amplify create-deployment --app-id "$APP" --branch-name main --output json)
 JOB=$(echo "$DEP" | python3 -c 'import json,sys; print(json.load(sys.stdin)["jobId"])')
