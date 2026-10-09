@@ -18,7 +18,7 @@ import numpy as np
 from rasterio.features import rasterize
 
 import scoring
-from common import CFG, CRS, OUT, RAW, WORK, grid_spec, review_dir, write_json
+from common import CFG, CRS, OUT, RAW, WORK, grid_spec, review_dir, water_mask, write_json
 
 V = CFG["validation"]
 WEB = OUT / "web"
@@ -31,6 +31,43 @@ def r3(x):
 
 def clean(d):
     return {k: (clean(v) if isinstance(v, dict) else (r3(v) if isinstance(v, float) else v)) for k, v in d.items()}
+
+
+def _seg_mean(grid, data, p):
+    f = grid.ravel().astype(float)
+    s = np.bincount(data[f"{p}_seg"], weights=f[data[f"{p}_cell"]], minlength=int(data[f"{p}_n"]))
+    c = np.bincount(data[f"{p}_seg"], minlength=int(data[f"{p}_n"]))
+    return np.where(c > 0, s / np.maximum(c, 1), np.nan)
+
+
+def auc_reported_vs_unreported(grid, data, filt, group=None, boots=200, seed=0):
+    """P(a reported street scores higher than an unreported one) for a continuous per-street score.
+    Rank-based: flooding more, or a patchier map, does not raise it. 0.5 = chance."""
+    from scipy import stats
+    cs, us = _seg_mean(grid, data, "c"), _seg_mean(grid, data, "u")
+    cm = filt(data["c_ward"]) & np.isfinite(cs)
+    um = filt(data["u_ward"]) & np.isfinite(us)
+    if group == "river_driven":
+        cm &= data["c_river"]; um &= data["u_river"]
+    elif group == "rain_driven":
+        cm &= ~data["c_river"]; um &= ~data["u_river"]
+    a, b = cs[cm], us[um]
+    if len(a) < 20 or len(b) < 20:
+        return dict(auc=None, ci95=None, n_reported=int(len(a)))
+    auc = stats.mannwhitneyu(a, b).statistic / (len(a) * len(b))
+    rng = np.random.default_rng(seed)
+    bs = []
+    for _ in range(boots):
+        ia = rng.integers(0, len(a), len(a)); ib = rng.integers(0, len(b), min(len(b), 4000))
+        bs.append(stats.mannwhitneyu(a[ia], b[ib]).statistic / (len(ia) * len(ib)))
+    return dict(auc=float(auc), ci95=[float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))], n_reported=int(len(a)))
+
+
+def point_auc(grid, pts_rc, rnd_rc):
+    from scipy import ndimage as ndi, stats
+    g = ndi.maximum_filter(grid, size=5)       # 60 m tolerance for point geolocation
+    a = g[pts_rc]; b = g[rnd_rc]
+    return float(stats.mannwhitneyu(a, b).statistic / (len(a) * len(b)))
 
 
 def main():
@@ -48,7 +85,9 @@ def main():
     gcc_land = (ward_grid > 0) & ~sea & ~perm_water
 
     runs = {"rain_only": "dec2015_rain", "rain_plus_reservoir": "dec2015_reservoir"}
-    wet = {k: (np.load(OUT / "runs" / rid / "hmax.npy") >= V["hit_depth_m"]) & ~perm_water for k, rid in runs.items()}
+    run_water = {k: water_mask(OUT / "runs" / rid) for k, rid in runs.items()}
+    peak = {k: np.where(run_water[k], 0.0, np.load(OUT / "runs" / rid / "hmax.npy")) for k, rid in runs.items()}
+    wet = {k: peak[k] >= V["hit_depth_m"] for k in runs}
 
     thr20 = np.percentile(dtm[gcc_land], 100 * V["baseline_lowest_share"])
     base20 = (dtm <= thr20) & ~sea & ~perm_water
@@ -102,6 +141,72 @@ def main():
     nrsc_m = {k: areal(w) for k, w in wet.items()}
     nrsc_m["baseline_lowest_20pct"] = areal(base20)
 
+    # ---- honest skill tests (independent model review, Fri 15:50) --------------------------------
+    from scipy import ndimage as ndi, stats
+    import geopandas as gpd
+    rng = np.random.default_rng(1)
+    head_k = "rain_plus_reservoir"
+    share = share_model[head_k]
+    random_map = (rng.random(dtm.shape) < share) & gcc_land
+    near_channel = -ndi.distance_transform_edt(~burn)
+    scores = {"model": peak[head_k], "model_rain_only": peak["rain_only"], "low_elevation": -dtm,
+              "near_a_channel": near_channel, "random": rng.random(dtm.shape)}
+    auc = {k: {g: auc_reported_vs_unreported(v, data, scoring.even, None if g == "all" else g)
+               for g in ("all", "rain_driven", "river_driven")} for k, v in scores.items()}
+    nulls = dict(
+        random_speckle_same_share=scoring.evaluate(random_map, data, scoring.even),
+        model_shifted_4km=scoring.evaluate(np.roll(np.roll(wet[head_k], 130, 0), 0, 1) & gcc_land, data, scoring.even))
+    nrsc_matched = dict(model=areal(wet[head_k]), elevation_same_share=areal(matched[head_k]), random_same_share=areal(random_map))
+    # official GCC points vs random road points
+    def pts_rc(gdf):
+        x = gdf.geometry.x.values; y = gdf.geometry.y.values
+        c = ((x - transform.c) / transform.a).astype(int); r = ((y - transform.f) / transform.e).astype(int)
+        ok = (r >= 2) & (r < H - 2) & (c >= 2) & (c < W - 2)
+        r, c = r[ok], c[ok]
+        k = gcc_land[r, c] | ndi.binary_dilation(gcc_land, iterations=2)[r, c]
+        return r[k], c[k]
+    lines = gpd.read_file(WORK / "osm.gpkg", layer="lines")
+    roads = lines[lines["highway"].isin(scoring.ROADS)].to_crs(CRS).sample(6000, random_state=7)
+    rnd_pts = gpd.GeoDataFrame(geometry=roads.geometry.interpolate(rng.random(6000), normalized=True), crs=CRS)
+    rr, rc = pts_rc(rnd_pts)
+    points = {}
+    for label, fn in (("GCC 2015 flood hotspots", "gcc_hotspots_2015.kml"), ("GCC 2015 stagnation points", "gcc_stagnation_2015.kml")):
+        g = scoring._read_kml(RAW / "validation" / fn).to_crs(CRS)
+        g = g[g.geometry.geom_type == "Point"]
+        pr, pc = pts_rc(g)
+        points[label] = dict(n=int(len(pr)), **{k: point_auc(v, (pr, pc), (rr, rc)) for k, v in
+                             (("model", peak[head_k]), ("low_elevation", -dtm), ("near_a_channel", near_channel),
+                              ("random", rng.random(dtm.shape)))})
+    # ward level: share of road length reported vs model's share of road samples >= 15 cm (validation wards)
+    cl = np.bincount(data["c_seg"], minlength=int(data["c_n"])).astype(float)
+    ul = np.bincount(data["u_seg"], minlength=int(data["u_n"])).astype(float)
+    f = wet[head_k].ravel()
+    cwet = np.bincount(data["c_seg"], weights=f[data["c_cell"]], minlength=int(data["c_n"]))
+    uwet = np.bincount(data["u_seg"], weights=f[data["u_cell"]], minlength=int(data["u_n"]))
+    rep, mod = [], []
+    for w in sorted(set(data["c_ward"][data["c_ward"] > 0]) | set(data["u_ward"][data["u_ward"] > 0])):
+        if w % 2:
+            continue
+        L = cl[data["c_ward"] == w].sum() + ul[data["u_ward"] == w].sum()
+        if L < 200:
+            continue
+        rep.append(cl[data["c_ward"] == w].sum() / L)
+        mod.append((cwet[data["c_ward"] == w].sum() + uwet[data["u_ward"] == w].sum()) / L)
+    wsp = stats.spearmanr(rep, mod)
+    ward_level = dict(spearman=float(wsp.statistic), p=float(wsp.pvalue), wards=len(rep))
+
+    m_all = auc["model"]["all"]
+    lo = m_all["ci95"][0]
+    verdict = ("slightly better than chance" if lo > 0.5 else "not distinguishable from chance")
+    honest = dict(
+        question="Pick one street residents reported flooded and one they did not. How often does the model say the reported one gets deeper water?",
+        model=m_all, low_elevation=auc["low_elevation"]["all"], random=auc["random"]["all"],
+        near_a_channel=auc["near_a_channel"]["all"], verdict=verdict,
+        plain=(f"{round(m_all['auc'] * 100)}% of the time (chance is 50%; elevation alone {round(auc['low_elevation']['all']['auc'] * 100)}%, "
+               f"distance to the nearest channel {round(auc['near_a_channel']['all']['auc'] * 100)}%). "
+               "The 2015 reports mostly show where people reported, not only where it flooded, so at street level "
+               "this test can only say the model is " + verdict + "."))
+
     anuga = None
     af = OUT / "anuga" / "design_200_mean" / "agreement.json"
     if af.exists():
@@ -120,16 +225,25 @@ def main():
                 reported_segments=by_group[head_run]["all"]["reported_segments"])
 
     proof = dict(
+        honest_test=honest,
+        auc_even_wards=auc,
+        null_maps=nulls,
+        nrsc_matched_share=nrsc_matched,
+        gcc_points_auc=points,
+        ward_level=ward_level,
         headline=head,
-        sentence=(f"We tuned one number, storm-drain capacity ({cal['drainage_mm_h']:g} mm/h), on half of "
+        sentence=(f"Storm-drain capacity ({cal['drainage_mm_h']:g} mm/h) is a stated assumption: on the tuning half of "
+                  f"the wards, every value from 0 to 30 mm/h scored the same within its error bars."
+                  if cal.get("method") == "assumption" else
+                  f"We tuned one number, storm-drain capacity ({cal['drainage_mm_h']:g} mm/h), on half of "
                   f"Chennai's wards and tested on the other half."),
-        calibration_note=(None if cal["drainage_mm_h"] > min(c["drainage_mm_h"] for c in cal["candidates"]) else
-                          "The best fit sits at the low edge of the range tried: for the 2015 floods the model needs all "
-                          "the water it has, consistent with overwhelmed drains and tank surpluses the model does not include."),
-        metric_note=("Citizen reports only say where it flooded. A map that floods everything would catch every report, "
-                     "so the fair comparison is a map that floods the same amount of land, chosen by elevation alone."),
+        calibration_note=None,
+        metric_note=("The share of reported streets a map floods is easy to inflate: a random speckle of the same size "
+                     "scores higher than the model, because reports are spread wherever people live. We show it, but we "
+                     "lead with the ranking test above, which flooding more cannot game."),
         split=dict(rule=V["split"], parameter=cal["parameter"], value_mm_h=cal["drainage_mm_h"],
-                   objective=cal["objective"], why=cal.get("why"), candidates=cal["candidates"]),
+                   method=cal.get("method", "calibrated"), why=cal.get("why"),
+                   candidates=cal.get("candidates_auc_odd_wards_2015_replay", cal.get("candidates"))),
         by_group=by_group,
         calibration_half=calib_half,
         outside_gcc=outside,
@@ -144,6 +258,7 @@ def main():
                         river_buffer_m=V["river_buffer_m"]),
         caveats=[
             "Citizen reports are cumulative over Nov–Dec 2015, not one night, and come mostly from areas with more internet users.",
+            "At street level the 2015 reports barely separate the model from chance, and elevation alone does no better; distance to a channel is the strongest single signal.",
             "Reports only say where it flooded, never where it stayed dry. 'Unreported' streets are used as a stand-in for dry, which they are not always.",
             "The reservoir release is modelled from the CAG/PWD timeline as an inflow at the Adyar's upstream edge; other tank surpluses are not included.",
             "Terrain is 30 m satellite elevation (Copernicus GLO-30) with buildings and trees removed by approximation.",

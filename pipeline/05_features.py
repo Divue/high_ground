@@ -19,7 +19,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial import cKDTree
 
-from common import CFG, CRS, OUT, WORK, grid_spec, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
 
 WEB = OUT / "web"
 DRIVE = {
@@ -238,9 +238,12 @@ def main():
 
     park_runs, hosp_runs = {}, {}
     for rid in runs:
-        hmax = np.load(OUT / "runs" / rid / "hmax.npy")
+        hmax = np.where(water_mask(OUT / "runs" / rid), 0.0, np.load(OUT / "runs" / rid / "hmax.npy"))
+        # p90 of the edge's samples: the same statistic the answer card uses for a street
+        import pandas as pd
+        vals = pd.Series(hmax[samp_r, samp_c]).groupby(samp_e).quantile(0.9)
         dep = np.zeros(len(edges), np.float32)
-        np.maximum.at(dep, samp_e, hmax[samp_r, samp_c])
+        dep[vals.index.values] = vals.values
         dep[brg] = 0.0
         dcm = np.clip(np.round(dep * 100), 0, 65535).astype(np.uint16)
         dcm.tofile(g / f"depth_{rid}.bin")

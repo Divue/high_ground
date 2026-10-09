@@ -58,3 +58,15 @@ def load_grid(name: str):
     import numpy as np
 
     return np.load(WORK / f"{name}.npy")
+
+
+def water_mask(run_dir=None):
+    """Cells that are not 'flooded land': lakes/ponds, burnt channels, and (per run) land already
+    standing in >= 5 cm of water when the storm starts (antecedent channel spill, marsh)."""
+    import numpy as np
+    m = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+    if run_dir is not None:
+        f = Path(run_dir) / "h_start.npy"
+        if f.exists():
+            m = m | (np.load(f) >= 0.05)
+    return m

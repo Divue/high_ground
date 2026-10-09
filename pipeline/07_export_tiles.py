@@ -22,7 +22,7 @@ from rasterio.enums import Resampling
 from rasterio.transform import from_bounds
 from rasterio.warp import reproject, transform_bounds
 
-from common import CFG, CRS, OUT, WORK, grid_spec, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
 
 WEB = OUT / "web"
 TERRAIN_Z = range(8, 15)
@@ -89,15 +89,16 @@ def main():
     for rid, info in runs.items():
         d = OUT / "runs" / rid
         full = json.loads((d / "info.json").read_text())
+        run_water = water_mask(d)
         od = WEB / "water" / rid
         od.mkdir(parents=True, exist_ok=True)
-        hmax = np.where(perm_water, 0, np.load(d / "hmax.npy"))
-        wet_share = float((hmax[land] >= CFG["validation"]["hit_depth_m"]).mean())
+        hmax = np.where(run_water, 0, np.load(d / "hmax.npy"))
+        wet_share = float((hmax[land & ~run_water] >= CFG["validation"]["hit_depth_m"]).mean())
         m = to_merc(hmax * 100, transform, mt, Wm, Hm)
         Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / "max.png", optimize=True)
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
         for k in range(snaps.shape[0]):
-            m = to_merc(np.where(perm_water, 0, np.asarray(snaps[k], np.float32)), transform, mt, Wm, Hm)
+            m = to_merc(np.where(run_water, 0, np.asarray(snaps[k], np.float32)), transform, mt, Wm, Hm)
             Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / f"h{k+1:02d}.png", optimize=True)
         web_runs[rid] = dict(label=info["label"], kind=info["kind"], total_mm=info["total_mm"], tide=info["tide"],
                              hours=int(snaps.shape[0]), start_local=info["start_local"],

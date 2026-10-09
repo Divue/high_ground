@@ -55,6 +55,10 @@ def p3():
                 v["model_hit_rate"] > v["matched_baseline_hit_rate"],
                 f"model {v['model_hit_rate']:.3f} vs matched {v['matched_baseline_hit_rate']:.3f}")
     ok &= check("rain vs river split reported", {"rain_driven", "river_driven"} <= set(p["by_group"]["rain_only"]))
+    t = p.get("honest_test")
+    if t:   # reported, not gated: the spec's gate is the hit-rate one above
+        print(f"[INFO] ranking test (AUC, even wards): model {t['model']['auc']:.3f} {t['model']['ci95']}, "
+              f"elevation {t['low_elevation']['auc']:.3f}, random {t['random']['auc']:.3f}, channel {t['near_a_channel']['auc']:.3f} -> {t['verdict']}")
     ok &= check("both runs reported", {"rain_only", "rain_plus_reservoir"} <= set(p["by_group"]))
     return ok
 

@@ -24,7 +24,7 @@ import numpy as np
 from pyproj import Transformer
 from shapely.ops import substring
 
-from common import CFG, CRS, OUT, WORK, grid_spec, write_json
+from common import CFG, CRS, OUT, WORK, grid_spec, water_mask, write_json
 
 ROADS = {
     "motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential",
@@ -117,18 +117,24 @@ def main():
         t15 = np.load(d / "t15.npy")
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
         nh = snaps.shape[0]
+        standing = water_mask(d) & ~water          # land already wet at storm start in this run
         mx = np.zeros(len(segs), np.int32)
         tt = np.full(len(segs), -1.0)
         series = np.zeros((len(segs), nh), np.uint8)
         for i, (r, c) in enumerate(samples):
             if segs[i][3] or len(r) == 0:          # bridge deck or outside grid
                 continue
-            mx[i] = int(round(np.percentile(hmax[r, c], 90) * 100))
-            tv = t15[r, c]
-            tv = np.where(tv < 0, np.inf, tv)
-            q = np.percentile(tv, 10)
-            tt[i] = round(float(q), 2) if np.isfinite(q) else -1.0
-            series[i] = np.clip(np.percentile(snaps[:, r, c], 90, axis=1), 0, 255).astype(np.uint8)
+            keep = ~standing[r, c]
+            if not keep.any():
+                continue
+            r2, c2 = r[keep], c[keep]
+            # one statistic everywhere: p90 across the street's samples of each hourly depth;
+            # the peak, the time to 15 cm and the hourly curve all come from this series
+            ser = np.percentile(snaps[:, r2, c2], 90, axis=1)
+            series[i] = np.clip(np.round(ser), 0, 255).astype(np.uint8)
+            mx[i] = int(round(float(ser.max())))
+            hit = np.nonzero(ser >= CFG["solver"]["wet_threshold_m"] * 100)[0]
+            tt[i] = float(hit[0] + 1) if len(hit) else -1.0
         seg_max[rid] = mx
         (WEB / "streets" / rid).mkdir(parents=True, exist_ok=True)
         for t, idx in by_tile.items():
@@ -142,7 +148,7 @@ def main():
         "crs": CRS, "origin": [x0, y1], "tile_m": TILE_M, "tiles": sorted(by_tile),
         "tile_bounds_lonlat": tile_bounds,
         "segments": len(segs), "runs": list(runs),
-        "fields": {"max": "p90 depth along segment, cm", "t15": "hours after storm start (-1 never)",
+        "fields": {"max": "peak of the hourly series, cm", "t15": "first hour the series reaches 15 cm (-1 never)",
                    "series": "hourly p90 depth cm, uint8 base64, capped 255"},
     }, indent=1)
     np.savez_compressed(WORK / "street_samples.npz", max=np.stack([seg_max[r] for r in runs]),
