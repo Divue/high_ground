@@ -228,3 +228,6 @@ Majors fixed:
 - Speed: measured at load average 7–12 while the model runs. Re-measure on an idle machine.
 
 Minors fixed: no leave-by marker for dry streets (a quiet "your street stays dry, dry route …" line instead); What if hides the hospital stat when the run is missing; search says "no matching place"; "T Nagar" alias; unnamed flyovers called "Unnamed flyover"; default Velachery = the search box's Velachery; weekday shown after the first 12 hours; nav "About"; out-of-area wording.
+
+### v3 check: Michaung spikes gone (Fri ~18:30)
+Land cells whose recorded peak exceeds the hourly maximum by more than 20 cm: **v2 4,952 → v3 0** (largest excess 3.3 m → 0.06 m). Mass error 3e-13 %. Outflow 30.8 Mm³ to sea, 9.5 Mm³ through land edges. Wet share ≥15 cm: 24.0% → 21.9%.
