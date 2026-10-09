@@ -33,6 +33,7 @@ void main() {
 export const waterFrag = /* glsl */ `
 uniform sampler2D depthA;
 uniform sampler2D depthB;
+uniform sampler2D seaTex;
 uniform float mixT;
 uniform float rise;
 uniform float time;
@@ -85,6 +86,7 @@ float iso(float d, float level) {
 
 void main() {
   // depth sampled per pixel so shorelines follow the data, not mesh triangles
+  if (texture2D(seaTex, vUv).r > 0.5) discard;   // the Bay is not floodwater
   float depth = mix(sampleDepth(depthA, vUv), sampleDepth(depthB, vUv), mixT) * 2.55 * rise;
   if (depth < minDepth) discard;
   float t = smoothstep(0.03, 1.2, depth);
@@ -97,22 +99,21 @@ void main() {
   vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35 * rip, (n2 - 0.5) * 0.35 * rip, 1.0));
   vec3 view = normalize(camPos - vWorld);
   float fres = pow(1.0 - clamp(dot(nrm, view), 0.0, 1.0), 3.0);
-  col = mix(col, vec3(0.78, 0.86, 0.9), fres * 0.35);
+  col = mix(col, vec3(0.78, 0.86, 0.9), fres * 0.12);   // a hint of sky, not a haze over deep water
   // amber glints from street lights at junctions
   float glint = 0.0;
   for (int i = 0; i < 12; i++) {
     float d = distance(vUv, lights[i]);
     glint += exp(-d * d * 9000.0) * (0.6 + 0.4 * n1);
   }
-  col += amber * glint * 0.55;
+  col += amber * glint * 0.55 * detail;   // street-light glints only up close; at city zoom they read as stains
   float edge = smoothstep(minDepth, minDepth + 0.11, depth);
   // deeper water carries more weight: shallow is translucent, deep is opaque
-  float a = opacity * edge * mix(0.5, 1.0, t);
-  col *= 1.12;
-  // the two safety thresholds drawn on the water: thin 15 cm (two-wheelers), bold 30 cm (cars)
-  float lines = max(0.5 * iso(depth, 0.15), 0.95 * iso(depth, 0.30)) * detail;
-  col = mix(col, vec3(0.79, 0.83, 0.85), lines);
-  a = max(a, opacity * lines * 0.9);
+  float a = opacity * edge * mix(0.45, 1.0, t);
+  // one line on the water, where it passes 30 cm (cars stall), in the shallow tone so it never outshines the water
+  float lines = 0.55 * iso(depth, 0.30) * detail;
+  col = mix(col, shallow, lines);
+  a = max(a, opacity * lines * 0.6);
   gl_FragColor = vec4(col * a, a);  // premultiplied
 }
 `

@@ -82,6 +82,7 @@ a { color: var(--grey); }
 /* answer */
 .street { font-family: var(--head); font-size: 15px; color: var(--grey-dim); margin-top: 14px; }
 .readout { font-family: var(--head); line-height: 0.95; margin: 4px 0 2px; color: var(--grey); transition: font-variation-settings 600ms ease; }
+.readout .note { font-family: var(--body); font-size: 15px; margin-left: 8px; color: var(--grey-dim); font-weight: 400; font-variation-settings: normal; }
 .readout .unit { font-size: 0.42em; margin-left: 4px; color: var(--grey-dim); font-weight: 400; font-variation-settings: 'wdth' 100; }
 .when { font-family: var(--head); font-size: 19px; font-variation-settings: 'wdth' 100; }
 .band { display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 999px; font-size: 13px; border: 1px solid var(--line); }
@@ -200,8 +201,7 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .legend .ramp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .legend .ramp { flex: 1; height: 8px; border-radius: 2px; background: linear-gradient(90deg, rgba(127, 211, 216, 0.55), #1C6E9C); }
 .legend .key-row { display: flex; align-items: center; gap: 8px; line-height: 1.7; }
-.legend .iso { display: inline-block; width: 22px; border-top: 1px solid var(--grey); }
-.legend .iso.bold { border-top-width: 2.5px; }
+.legend .iso { display: inline-block; width: 22px; border-top: 2px solid var(--shallow, #7FD3D8); }
 .legend .dot { display: inline-block; width: 9px; height: 9px; margin: 0 6.5px; border-radius: 50%; background: var(--amber); }
 @media (max-width: 900px) { .legend { display: none; } }
 
@@ -223,3 +223,12 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .glyph .iso.bold { stroke-width: 0.03; }
 .glyph .ground { stroke: rgba(201, 212, 216, 0.35); stroke-width: 0.02; }
 .glyph figcaption { margin-top: 2px; font-size: 11.5px; }
+
+/* opening line over the empty sky */
+.intro-title {
+  position: absolute; z-index: 3; top: 38%; left: 0; right: 0; margin: 0 auto; max-width: 760px; padding: 0 24px;
+  text-align: center; font-family: var(--head); font-size: 28px; font-weight: 560; line-height: 1.3;
+  color: rgba(201, 212, 216, 0.85); pointer-events: none; transition: opacity 600ms ease;
+}
+.intro-title.out { opacity: 0; }
+@media (max-width: 480px) { .intro-title { font-size: 21px; } }

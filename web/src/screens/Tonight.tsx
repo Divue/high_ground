@@ -11,7 +11,7 @@ import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAn
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
 import DepthGlyph from '../ui/DepthGlyph'
-import { useCountUp } from '../ui/useCountUp'
+import { useTweened } from '../ui/useTweened'
 import Search, { type Place } from '../ui/Search'
 import Subscribe from '../ui/Subscribe'
 import Timeline from '../ui/Timeline'
@@ -45,6 +45,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const played = useRef('')                       // place+scenario whose night has been played
   const playToken = useRef(0)
   const fadeMs = useRef(450)
+  const [rising, setRising] = useState(false)    // the night is playing to the peak
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -88,20 +89,31 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
   // The water rises the way the model says it does: the timeline plays the night from 6 PM to
   // this street's peak through the model's own hourly frames (cross-faded), once per place and storm.
+  const nightKey = place ? `${place.lon},${place.lat}|${scenario.mix.map((m) => `${m.run}:${m.w}`).join()}` : ''
+  // a new answer resets the night to 6 PM straight away, so number, water and timeline climb together
+  useEffect(() => {
+    if (!ans || !scenario.mix.length || prefersReducedMotion() || played.current === nightKey) return
+    fadeMs.current = 450
+    setRising(true)
+    setHour(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ans])
   useEffect(() => {
     if (!place || !ans || !scenario.mix.length || arrived !== `${place.lon},${place.lat}`) return
-    const key = `${arrived}|${scenario.mix.map((m) => `${m.run}:${m.w}`).join()}`
+    const key = nightKey
     if (played.current === key) return
     played.current = key
     const peak = ans.peakHour ?? Math.min(scenario.hours, 8)
     const token = ++playToken.current
-    if (prefersReducedMotion() || peak <= 1) { setHour(peak); return }
+    if (prefersReducedMotion() || peak <= 1) { setHour(peak); setRising(false); return }
     const steps = Math.min(8, peak)
     const hours = Array.from({ length: steps }, (_, k) => Math.max(1, Math.round(((k + 1) * peak) / steps)))
     const stepMs = Math.round(3000 / steps)
     ;(async () => {
       // the keyframes decode in a worker while the card appears
       await Promise.all(hours.flatMap((h) => scenario.mix.map(({ run }) => loadGray(`water/${run}/${frameName(h)}.png`).catch(() => null))))
+      if (playToken.current !== token) return
+      setRising(true)
       for (const h of hours) {
         if (playToken.current !== token) return
         fadeMs.current = stepMs
@@ -109,12 +121,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         await new Promise((r) => setTimeout(r, stepMs))
       }
       fadeMs.current = 450
+      if (playToken.current === token) setRising(false)
     })()
   }, [place, ans, arrived, scenario])
 
   // scrubbing by hand stops the playback
   const scrub = useCallback((h: number) => {
-    playToken.current++; fadeMs.current = 450; setHour(h)
+    playToken.current++; fadeMs.current = 450; setHour(h); setRising(false)
     setLapse((l) => (l === 'playing' ? 'done' : l))
   }, [])
 
@@ -206,8 +219,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
   const atHour = ans?.seriesCm[hour - 1] ?? 0
   const band = ans ? bandFor(ans.maxCm) : null
-  // the number climbs with the water once the camera has arrived
-  const shownCm = useCountUp(ans?.maxCm ?? 0, `${arrived}|${ans?.maxCm ?? ''}|${scenario.label}`)
+  // while the night plays, the number is the model's depth at the hour shown; then it settles on the peak
+  const shownCm = useTweened(ans ? (rising ? ans.seriesCm[hour - 1] ?? 0 : ans.maxCm) : 0, rising ? 320 : 0)
   const dryTonight = scenario.kind === 'dry'
 
   return (
@@ -246,7 +259,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         {lapse === 'off' && seg && ans && band && scenario.mix.length > 0 && (
           <>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
-            <Readout cm={ans.maxCm} shown={shownCm} />
+            <Readout cm={ans.maxCm} shown={shownCm} note={!rising && ans.maxCm >= 5 ? 'at the peak' : undefined} />
             <div className="when">
               {ans.hoursTo15 ? <>Reaches 15 cm by {clockLabel(scenario.start, ans.hoursTo15)}</> :
                 ans.maxCm >= 5 ? <>Stays under 15 cm</> : <>Stays dry</>}
@@ -262,9 +275,11 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                     : route ? <>No dry way out to {route.to} before your street floods.</> : null}
               </div>
             )}
-            <div className="muted small" style={{ marginTop: 6 }}>
-              At {clockLabel(scenario.start, hour)}: {atHour} cm · {mixDescription(scenario.mix, runs)}
-            </div>
+            {!rising && hour !== ans.peakHour && (
+              <div className="muted small" style={{ marginTop: 6 }}>
+                At {clockLabel(scenario.start, hour)}: {atHour} cm · {mixDescription(scenario.mix, runs)}
+              </div>
+            )}
             {nearby && nearby.total > 0 && (
               <div className="small" style={{ marginTop: 6 }}>
                 {nearby.wet} of {nearby.total} streets within 500 m pass 15 cm<span className="chip">from the model</span>

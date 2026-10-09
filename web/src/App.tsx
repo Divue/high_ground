@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { API_BASE, VELACHERY } from './config'
+import { API_BASE, REPLAYS, VELACHERY, prefersReducedMotion } from './config'
 import { loadCurrent, loadParking, loadRuns, postAPI, type Current, type Runs } from './lib/data'
 import { loadGraph } from './lib/routing'
 import { nearestSegment, segmentValues } from './lib/streets'
@@ -31,6 +31,13 @@ export default function App() {
   const [replayRun, setReplayRun] = useState<string | null>(new URLSearchParams(location.search).get('replay'))
   const [place, setPlace] = useState<Place | null>(null)
   const [intro, setIntro] = useState(true)
+  // one line over the empty sky while Chennai loads; fades as the descent begins
+  const [title, setTitle] = useState(() => {
+    // a replay link names its storm straight away, before any data loads
+    const rp = REPLAYS.find((x) => x.run === new URLSearchParams(location.search).get('replay'))
+    return rp ? `Chennai, 6 PM. ${rp.label}, replayed as if it were tonight.` : 'Chennai, tonight.'
+  })
+  const [titleOn, setTitleOn] = useState(true)
 
   useEffect(() => {
     let alive = true
@@ -52,7 +59,13 @@ export default function App() {
       nearestSegment(VELACHERY[0], VELACHERY[1]).then((sg) => { if (sg && mix.length) segmentValues(sg, mix) }).catch(() => {})
       loadParking().catch(() => {})
       if (mix.length) loadGraph().catch(() => {})
+      const rp = REPLAYS.find((x) => x.run === mix[0]?.run && mix.length === 1)
+      setTitle(rp ? `Chennai, 6 PM. ${rp.label}, replayed as if it were tonight.`
+        : mix.length ? `Chennai, tonight. Forecast: about ${Math.round(c?.forecast.mean_24h_mm ?? 0)} mm of rain in the next 24 hours.`
+        : 'Chennai, tonight. No heavy rain in the forecast.')
       if (screenFromHash() === 'tonight') {
+        window.setTimeout(() => setTitleOn(false), prefersReducedMotion() ? 0 : 1800)
+        // resolves about 2 s before the camera lands, so the water starts rising during the descent
         await v.openingSequence()
         setPlace((p) => p ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
       }
@@ -92,6 +105,7 @@ export default function App() {
         </nav>
       </header>
       {intro && !mv && <div className="loading" aria-live="polite"><span className="sr-only">Loading Chennai</span></div>}
+      {intro && screen === 'tonight' && <p className={`intro-title${titleOn ? '' : ' out'}`} aria-live="polite">{title}</p>}
       {mv && runs && scenario && !intro && (
         <>
           {screen === 'tonight' && <Tonight mv={mv} runs={runs} current={current} scenario={scenario} replayRun={replayRun}

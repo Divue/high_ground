@@ -53,8 +53,10 @@ export class MapView {
         const ev = await loadPixels('water/elev.png')
         const elev = new Float32Array(meta.width * meta.height)
         for (let i = 0; i < elev.length; i++) elev[i] = (ev.data[4 * i] * 256 + ev.data[4 * i + 1]) / 100 - 10
+        // the sea is never floodwater (also masked in the export; this keeps old exports honest too)
+        const sea = await loadGray('water/sea.png').catch(() => new Uint8Array(meta.width * meta.height))
         if (this.map.getLayer('flood-water')) return resolve()
-        this.water = new WaterLayer(meta, elev)
+        this.water = new WaterLayer(meta, elev, sea)
         this.water.setTerrainExag(1.5)
         this.map.addLayer(this.water, 'buildings-3d')
         this.addOverlays()
@@ -152,12 +154,19 @@ export class MapView {
 
   /** True when the camera already shows this point at street view (no second flight needed). */
   isFraming(p: [number, number]) {
+    if (this.flightTarget) {
+      const [lon, lat] = this.flightTarget
+      return Math.hypot((lon - p[0]) * 108_500, (lat - p[1]) * 110_500) < 80
+    }
     const c = this.map.getCenter()
     const dx = (c.lng - p[0]) * 108_500, dy = (c.lat - p[1]) * 110_500
     return Math.hypot(dx, dy) < 80 && Math.abs(this.map.getZoom() - STREET_VIEW.zoom) < 0.3 && !this.map.isMoving()
   }
 
   /** The one orchestrated moment: high over the Bay of Bengal, descend to Velachery. */
+  /** Where the camera is flying to, until it lands (lets Tonight skip a second flight). */
+  private flightTarget: [number, number] | null = null
+
   async openingSequence() {
     if (prefersReducedMotion()) {
       this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW })
@@ -165,8 +174,13 @@ export class MapView {
     }
     await new Promise((r) => setTimeout(r, 300))
     // land on the street view itself, so the hero flow needs no second flight
-    this.map.flyTo({ center: VELACHERY, ...STREET_VIEW, duration: 5000, curve: 1.2, essential: true })
-    await new Promise<void>((r) => this.map.once('moveend', () => r()))
+    const duration = 5000
+    this.flightTarget = VELACHERY
+    this.map.flyTo({ center: VELACHERY, ...STREET_VIEW, duration, curve: 1.2, essential: true })
+    this.map.once('moveend', () => { this.flightTarget = null })
+    // hand over 2 s before landing: the night starts playing while the camera settles
+    await new Promise((r) => setTimeout(r, duration - 2000))
   }
+
 
 }

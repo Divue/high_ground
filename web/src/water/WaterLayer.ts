@@ -37,10 +37,12 @@ export class WaterLayer implements CustomLayerInterface {
   terrainExag = 1.0
   private meta: WaterMeta
   private elev: Float32Array
+  private sea: Uint8Array
 
-  constructor(meta: WaterMeta, elev: Float32Array) {
+  constructor(meta: WaterMeta, elev: Float32Array, sea: Uint8Array) {
     this.meta = meta
     this.elev = elev
+    this.sea = sea
     this.bufA = new Uint8Array(meta.width * meta.height)
     this.bufB = new Uint8Array(meta.width * meta.height)
   }
@@ -67,6 +69,8 @@ export class WaterLayer implements CustomLayerInterface {
     }
     this.texA = mk(this.bufA)
     this.texB = mk(this.bufB)
+    const seaTex = new THREE.DataTexture(this.sea, W, H, THREE.RedFormat, THREE.UnsignedByteType)
+    seaTex.needsUpdate = true
     const elevTex = new THREE.DataTexture(this.elev, W, H, THREE.RedFormat, THREE.FloatType)
     elevTex.magFilter = THREE.NearestFilter
     elevTex.minFilter = THREE.NearestFilter
@@ -101,7 +105,7 @@ export class WaterLayer implements CustomLayerInterface {
       vertexShader: waterVert, fragmentShader: waterFrag, transparent: true, depthWrite: false,
       blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
       uniforms: {
-        elevTex: { value: elevTex }, depthA: { value: this.texA }, depthB: { value: this.texB },
+        elevTex: { value: elevTex }, seaTex: { value: seaTex }, depthA: { value: this.texA }, depthB: { value: this.texB },
         mixT: { value: 1 }, rise: { value: 1 }, zPerMeter: { value: zPerMeter },
         terrainExag: { value: this.terrainExag }, depthExag: { value: 1.5 }, time: { value: 0 },
         shallow: { value: new THREE.Color(TOKENS.shallow) }, deep: { value: new THREE.Color(TOKENS.deep) },
