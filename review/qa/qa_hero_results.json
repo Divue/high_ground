@@ -1,5 +1,5 @@
 {
- "console_errors": [
+ "console": [
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
@@ -9,47 +9,7 @@
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
-  "error: InvalidStateError: The source image could not be decoded.",
+  "error: Error: layers.hospitals.paint.circle-radius: Only one zoom-based \"step\" or \"interpolate\" subexpression may be used in an expression.\n    at il (http://127.0.0.1:5173/node_modules/.vite/deps/maplibre-gl.js?v=038de1e9:9287:16)\n    at al (http://127.0.0.1:5173/node_modules/.vite/deps/maplibre-gl",
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
   "error: InvalidStateError: The source image could not be decoded.",
@@ -210,13 +170,6 @@
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
@@ -225,53 +178,70 @@
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
-  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/basemap/chennai.pmtiles",
+  "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png",
   "net::ERR_ABORTED http://127.0.0.1:5173/data/terrain/%7Bz%7D/%7Bx%7D/%7By%7D.png"
  ],
  "http_errors": [],
- "t_domcontentloaded_ms": 1206,
- "t_map_ready_ms": 3670,
- "t_panel_ms": 13737,
- "t_answer_ms": 18125,
+ "t_domcontentloaded_ms": 1526,
+ "t_canvas_ms": 2228,
+ "t_panel_ms": 14504,
+ "t_answer_card_ms": 18830,
  "paint": {
-  "fcp": 1300,
-  "lcp": 17808
+  "fcp": 1672,
+  "lcp": 12268
  },
  "fps_load_sequence": {
-  "fps": 21.9,
-  "frames": 392,
-  "long_frames_gt50ms": 74,
-  "worst_ms": 450
+  "fps": 17.5,
+  "frames": 324,
+  "long_frames_gt50ms": 86,
+  "worst_ms": 1083,
+  "span_s": 18.8
  },
  "renderer": "ANGLE (AMD, AMD Radeon Vega 3 Graphics (radeonsi raven2 ACO), OpenGL ES 3.2)",
  "default": {
   "street": "Velachery Main Road",
   "readout": "93 centimetres",
-  "when": "Reaches 15 cm by 6 AM · deepest around Sun 11 AM",
+  "when": "Reaches 15 cm by 6 AM · peak Sun 11 AM",
   "band": "Unsafe for cars",
   "decision": "Move your car to Velachery Upper Flyover by 5 AM.",
-  "at": "At 5 AM: 14 cm · Cyclone Michaung, Dec 2023",
+  "at": "At Sun 11 AM: 93 cm · Cyclone Michaung, Dec 2023",
   "nearby": "66 of 280 streets within 500 m pass 15 cmfrom the model",
   "parking": [
    "Velachery Upper Flyover, 350 m (flyover)",
    "Velachery Lower Flyover, 400 m (flyover)when to leave"
   ],
-  "route": "Dry route to Velachery Upper Flyover: 350 m. Leave by 5 AM.",
   "no_parking": null,
+  "flyover_note": true,
   "alert": null,
-  "timeline_now": "5 AM",
-  "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight"
+  "timeline_now": "Sun 11 AM",
+  "marker": "leave by 5 AM",
+  "marker_left": "18.8679%",
+  "slider": {
+   "v": "41",
+   "max": "54"
+  },
+  "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
+  "subscribe_btn": true,
+  "route_safe_pts": 24,
+  "route_normal_pts": 24,
+  "camera": {
+   "c": [
+    80.2209,
+    12.9791
+   ],
+   "z": 15.2
+  }
  },
  "places": [
   {
@@ -284,53 +254,49 @@
     "Velachery Bypass Road, Chennai",
     "Velachery MRTS Bridge, Chennai"
    ],
-   "ms_to_settle": 6203,
+   "ms_to_card": 1728,
+   "ms_to_decision": 2635,
    "street": "Velachery MRTS",
    "readout": "29 centimetres",
-   "when": "Reaches 15 cm by 4 AM · deepest around Sun 1 AM",
+   "when": "Reaches 15 cm by 4 AM · peak Sun 1 AM",
    "band": "Unsafe for two-wheelers",
    "decision": "Move your car to Velachery MRTS Bridge by 3 AM.",
-   "at": "At 3 AM: 14 cm · Cyclone Michaung, Dec 2023",
+   "at": "At Sun 1 AM: 29 cm · Cyclone Michaung, Dec 2023",
    "nearby": "72 of 158 streets within 500 m pass 15 cmfrom the model",
    "parking": [
     "Velachery MRTS Bridge, 450 m (flyover)",
     "Velachery Lower Flyover, 850 m (flyover)when to leave"
    ],
-   "route": "Dry route to Velachery MRTS Bridge: 1.1 km. Leave by 3 AM.",
    "no_parking": null,
+   "flyover_note": true,
    "alert": null,
-   "timeline_now": "3 AM",
-   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight"
-  },
-  {
-   "q": "Arumugam Road",
-   "suggestions": [
-    "Arumugam Road, Chennai"
-   ],
-   "ms_to_settle": 6255,
-   "street": "Arumugam Road",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM",
-   "band": "Unsafe for cars",
-   "decision": "Move your car to Velachery MRTS Bridge by 10 PM.",
-   "at": "At 10 PM: 13 cm · Cyclone Michaung, Dec 2023",
-   "nearby": "110 of 182 streets within 500 m pass 15 cmfrom the model",
-   "parking": [
-    "Velachery MRTS Bridge, 350 m (flyover)",
-    "Major Mukund Varadharajan Road Flyover, 1.4 km (flyover)when to leave"
-   ],
-   "route": "Dry route to Velachery MRTS Bridge: 1.1 km. Leave by 10 PM.",
-   "no_parking": null,
-   "alert": null,
-   "timeline_now": "10 PM",
-   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight"
+   "timeline_now": "Sun 1 AM",
+   "marker": "leave by 3 AM",
+   "marker_left": "15.0943%",
+   "slider": {
+    "v": "31",
+    "max": "54"
+   },
+   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
+   "subscribe_btn": true,
+   "route_safe_pts": 40,
+   "route_normal_pts": 40,
+   "camera": {
+    "c": [
+     80.2195,
+     12.9676
+    ],
+    "z": 15.2
+   },
+   "at_leave_by": "At 3 AM: 14 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "3 AM"
   },
   {
    "q": "Pallikaranai",
    "suggestions": [
     "Pallikaranai, Chennai"
    ],
-   "ms_to_settle": 6072,
+   "ms_to_card": 1536,
    "street": "Unnamed street",
    "readout": "2 centimetres",
    "when": "Stays dry",
@@ -342,13 +308,39 @@
     "Major Mukund Varadharajan Road Flyover, 1.7 km (flyover)when to leave",
     "Medavakkam Flyover, 2.1 km (flyover)when to leave"
    ],
-   "route": null,
    "no_parking": null,
+   "flyover_note": true,
    "alert": null,
    "timeline_now": "Sun 1 AM",
+   "marker": null,
+   "marker_left": null,
+   "slider": {
+    "v": "31",
+    "max": "54"
+   },
    "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
-   "route_after_click": "Dry route to Major Mukund Varadharajan Road Flyover: 2.3 km, 250 m longer than the usual way (grey). Leave by Sun 1 AM.",
-   "at_after_route": "At Sun 1 AM: 2 cm · Cyclone Michaung, Dec 2023"
+   "subscribe_btn": true,
+   "route_safe_pts": 0,
+   "route_normal_pts": 0,
+   "camera": {
+    "c": [
+     80.2078,
+     12.9305
+    ],
+    "z": 15.2
+   },
+   "after_when_to_leave": {
+    "ms": 3658,
+    "route_safe_pts": 56,
+    "marker": "leave by Sun 1 AM",
+    "decision": null,
+    "parking": [
+     "Major Mukund Varadharajan Road Flyover, 1.7 km (flyover)",
+     "Medavakkam Flyover, 2.1 km (flyover)when to leave"
+    ]
+   },
+   "at_leave_by": "At Sun 1 AM: 2 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "Sun 1 AM"
   },
   {
    "q": "Kotturpuram",
@@ -358,7 +350,7 @@
     "Kotturpuram 1st Main Road, Chennai",
     "Kotturpuram 4th Main Road, Chennai"
    ],
-   "ms_to_settle": 6493,
+   "ms_to_card": 1478,
    "street": "3rd Loop Street",
    "readout": "0 centimetres",
    "when": "Stays dry",
@@ -370,48 +362,46 @@
     "Kotturpuram Bridge, 550 m (flyover)when to leave",
     "Govindaswamy Karuppiah Moopanar Flyover, 1.1 km (flyover)when to leave"
    ],
-   "route": null,
    "no_parking": null,
+   "flyover_note": true,
    "alert": null,
    "timeline_now": "2 AM",
+   "marker": null,
+   "marker_left": null,
+   "slider": {
+    "v": "8",
+    "max": "54"
+   },
    "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
-   "route_after_click": "Dry route to Kotturpuram Bridge: 750 m. Leave by 6 AM.",
-   "at_after_route": "At 6 AM: 0 cm · Cyclone Michaung, Dec 2023"
-  },
-  {
-   "q": "Saidapet",
-   "suggestions": [
-    "Saidapet, Chennai",
-    "Saidapet MTC Terminus, Chennai",
-    "Saidapet Road, Chennai",
-    "West Saidapet, Chennai"
-   ],
-   "ms_to_settle": 6183,
-   "street": "Jeenis Road",
-   "readout": "0 centimetres",
-   "when": "Stays dry",
-   "band": "Dry",
-   "decision": null,
-   "at": "At 2 AM: 0 cm · Cyclone Michaung, Dec 2023",
-   "nearby": "56 of 208 streets within 500 m pass 15 cmfrom the model",
-   "parking": [
-    "Maraimalai Adigal Bridge, 450 m (flyover)when to leave",
-    "Abraham Bridge, 750 m (flyover)when to leave"
-   ],
-   "route": null,
-   "no_parking": null,
-   "alert": null,
-   "timeline_now": "2 AM",
-   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
-   "route_after_click": "Dry route to Maraimalai Adigal Bridge: 700 m. Leave by 6 AM.",
-   "at_after_route": "At 6 AM: 0 cm · Cyclone Michaung, Dec 2023"
+   "subscribe_btn": true,
+   "route_safe_pts": 0,
+   "route_normal_pts": 0,
+   "camera": {
+    "c": [
+     80.2436,
+     13.0194
+    ],
+    "z": 15.2
+   },
+   "after_when_to_leave": {
+    "ms": 2510,
+    "route_safe_pts": 21,
+    "marker": "leave by 6 AM",
+    "decision": null,
+    "parking": [
+     "Kotturpuram Bridge, 550 m (flyover)",
+     "Govindaswamy Karuppiah Moopanar Flyover, 1.1 km (flyover)when to leave"
+    ]
+   },
+   "at_leave_by": "At 6 AM: 0 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "6 AM"
   },
   {
    "q": "T. Nagar",
    "suggestions": [
     "T. Nagar, Chennai"
    ],
-   "ms_to_settle": 6246,
+   "ms_to_card": 404,
    "street": "South Usman Road",
    "readout": "3 centimetres",
    "when": "Stays dry",
@@ -423,13 +413,39 @@
     "South Usman Road, 100 m (flyover)when to leave",
     "Flyover, 250 m (flyover)when to leave"
    ],
-   "route": null,
    "no_parking": null,
+   "flyover_note": true,
    "alert": null,
    "timeline_now": "Sun 2 AM",
+   "marker": null,
+   "marker_left": null,
+   "slider": {
+    "v": "32",
+    "max": "54"
+   },
    "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
-   "route_after_click": "Dry route to South Usman Road: 100 m. Leave by Sun 2 AM.",
-   "at_after_route": "At Sun 2 AM: 3 cm · Cyclone Michaung, Dec 2023"
+   "subscribe_btn": true,
+   "route_safe_pts": 0,
+   "route_normal_pts": 0,
+   "camera": {
+    "c": [
+     80.2301,
+     13.0345
+    ],
+    "z": 15.2
+   },
+   "after_when_to_leave": {
+    "ms": 3868,
+    "route_safe_pts": 10,
+    "marker": "leave by Sun 2 AM",
+    "decision": null,
+    "parking": [
+     "South Usman Road, 100 m (flyover)",
+     "Flyover, 250 m (flyover)when to leave"
+    ]
+   },
+   "at_leave_by": "At Sun 2 AM: 3 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "Sun 2 AM"
   },
   {
    "q": "Anna Nagar",
@@ -441,10 +457,10 @@
     "Anna Nagar West Depot, Chennai",
     "Anna Nagar Bridge, Chennai"
    ],
-   "ms_to_settle": 6348,
+   "ms_to_card": 615,
    "street": "Unnamed street",
    "readout": "6 centimetres",
-   "when": "Stays under 15 cm · deepest around Sun 3 PM",
+   "when": "Stays under 15 cm · peak Sun 3 PM",
    "band": "Wet but passable",
    "decision": null,
    "at": "At Sun 3 PM: 6 cm · Cyclone Michaung, Dec 2023",
@@ -453,154 +469,156 @@
     "Thirumangalam Flyover, 1.0 km (flyover)when to leave",
     "Anna Arch Flyover Ramp, 1.7 km (flyover)when to leave"
    ],
-   "route": null,
    "no_parking": null,
+   "flyover_note": true,
    "alert": null,
    "timeline_now": "Sun 3 PM",
+   "marker": null,
+   "marker_left": null,
+   "slider": {
+    "v": "45",
+    "max": "54"
+   },
    "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
-   "route_after_click": "Dry route to Thirumangalam Flyover: 56.4 km, 54.6 km longer than the usual way (grey). Leave by Sun 5 AM.",
-   "at_after_route": "At Sun 5 AM: 3 cm · Cyclone Michaung, Dec 2023"
+   "subscribe_btn": true,
+   "route_safe_pts": 0,
+   "route_normal_pts": 0,
+   "camera": {
+    "c": [
+     80.2073,
+     13.0883
+    ],
+    "z": 15.2
+   },
+   "after_when_to_leave": {
+    "ms": 4437,
+    "route_safe_pts": 1561,
+    "marker": "leave by Sun 5 AM",
+    "decision": null,
+    "parking": [
+     "Thirumangalam Flyover, 1.0 km (flyover)",
+     "Anna Arch Flyover Ramp, 1.7 km (flyover)when to leave"
+    ]
+   },
+   "at_leave_by": "At Sun 5 AM: 3 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "Sun 5 AM"
+  },
+  {
+   "q": "Arumugam Road",
+   "suggestions": [
+    "Arumugam Road, Chennai"
+   ],
+   "ms_to_card": 1018,
+   "ms_to_decision": 1933,
+   "street": "Arumugam Road",
+   "readout": "154 centimetres",
+   "when": "Reaches 15 cm by 11 PM · peak Sun 3 PM",
+   "band": "Unsafe for cars",
+   "decision": "Move your car to Velachery MRTS Bridge by 10 PM.",
+   "at": "At Sun 3 PM: 154 cm · Cyclone Michaung, Dec 2023",
+   "nearby": "110 of 182 streets within 500 m pass 15 cmfrom the model",
+   "parking": [
+    "Velachery MRTS Bridge, 350 m (flyover)",
+    "Major Mukund Varadharajan Road Flyover, 1.4 km (flyover)when to leave"
+   ],
+   "no_parking": null,
+   "flyover_note": true,
+   "alert": null,
+   "timeline_now": "Sun 3 PM",
+   "marker": "leave by 10 PM",
+   "marker_left": "5.66038%",
+   "slider": {
+    "v": "45",
+    "max": "54"
+   },
+   "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight",
+   "subscribe_btn": true,
+   "route_safe_pts": 42,
+   "route_normal_pts": 42,
+   "camera": {
+    "c": [
+     80.2137,
+     12.9633
+    ],
+    "z": 15.2
+   },
+   "at_leave_by": "At 10 PM: 13 cm · Cyclone Michaung, Dec 2023",
+   "now_at_leave_by": "10 PM"
   }
  ],
  "fps_scrubbing": {
-  "fps": 33.4,
-  "frames": 171,
-  "long_frames_gt50ms": 21,
-  "worst_ms": 100
+  "fps": 26.7,
+  "frames": 162,
+  "long_frames_gt50ms": 45,
+  "worst_ms": 100,
+  "span_s": 6
  },
  "scrub_samples": [
   {
    "h": 1,
    "at": "At 7 PM: 2 cm · Cyclone Michaung, Dec 2023",
    "now": "7 PM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
+  },
+  {
+   "h": 4,
+   "at": "At 10 PM: 13 cm · Cyclone Michaung, Dec 2023",
+   "now": "10 PM",
+   "readout": "154 centimetres"
   },
   {
    "h": 5,
    "at": "At 11 PM: 17 cm · Cyclone Michaung, Dec 2023",
    "now": "11 PM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
+  },
+  {
+   "h": 6,
+   "at": "At 12 AM: 21 cm · Cyclone Michaung, Dec 2023",
+   "now": "12 AM",
+   "readout": "154 centimetres"
   },
   {
    "h": 10,
    "at": "At 4 AM: 36 cm · Cyclone Michaung, Dec 2023",
    "now": "4 AM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
   },
   {
    "h": 31,
    "at": "At Sun 1 AM: 64 cm · Cyclone Michaung, Dec 2023",
    "now": "Sun 1 AM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
   },
   {
    "h": 45,
    "at": "At Sun 3 PM: 154 cm · Cyclone Michaung, Dec 2023",
    "now": "Sun 3 PM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
   },
   {
    "h": 54,
    "at": "At Mon 12 AM: 126 cm · Cyclone Michaung, Dec 2023",
    "now": "Mon 12 AM",
-   "readout": "154 centimetres",
-   "when": "Reaches 15 cm by 11 PM · deepest around Sun 3 PM"
+   "readout": "154 centimetres"
   }
  ],
- "fps_idle_after": {
-  "fps": 37,
-  "frames": 110,
-  "long_frames_gt50ms": 3,
-  "worst_ms": 100
+ "fps_idle": {
+  "fps": 34.4,
+  "frames": 139,
+  "long_frames_gt50ms": 6,
+  "worst_ms": 117,
+  "span_s": 4
  },
- "search_edge": [
-  {
-   "q": "Madurai",
-   "suggestions": [
-    "Madurai Vasal Street, Chennai",
-    "Madurai Veeran Street, Chennai",
-    "Madurai veerar street, Chennai",
-    "Madurai Naicken Main Road, Chennai",
-    "Madurai Naiken 1st Street, Chennai",
-    "Madurai Veeran Koil Street, Chennai"
-   ],
-   "source": "Places and streets from OpenStreetMap"
-  },
-  {
-   "q": "xqzvplk",
-   "suggestions": [],
-   "source": null
-  },
-  {
-   "q": "T Nagar",
-   "suggestions": [
-    "CIT Nagar, Chennai",
-    "Besant Nagar, Chennai",
-    "Besant Nagar MTC Terminus, Chennai",
-    "CIT Nagar 6th Street, Chennai",
-    "Besant Nagar 1st Avenue, Chennai",
-    "Besant Nagar 2nd Avenue, Chennai"
-   ],
-   "source": "Places and streets from OpenStreetMap"
-  },
-  {
-   "q": "T.Nagar",
-   "suggestions": [],
-   "source": null
-  },
-  {
-   "q": "Pondy Bazaar",
-   "suggestions": [],
-   "source": null
-  },
-  {
-   "q": "IIT Madras",
-   "suggestions": [
-    "Road to IIT Madras Research Park Gate, Chennai"
-   ],
-   "source": "Places and streets from OpenStreetMap"
-  },
-  {
-   "q": "Ve",
-   "suggestions": [],
-   "source": "Places and streets from OpenStreetMap"
-  }
- ],
- "gibberish_enter_alert": null,
- "madurai_pick": {
-  "street": "Madurai Vasal Street",
-  "readout": "0 centimetres",
-  "when": "Stays dry",
-  "band": "Dry",
-  "decision": null,
-  "at": "At 2 AM: 0 cm · Cyclone Michaung, Dec 2023",
-  "nearby": "112 of 232 streets within 500 m pass 15 cmfrom the model",
-  "parking": [
-   "Mint Flyover, 800 m (flyover)when to leave",
-   "Errabalu Chetty Street Car Park, 1.0 km (open ground)when to leave"
-  ],
-  "route": null,
-  "no_parking": null,
-  "alert": null,
-  "timeline_now": "2 AM",
-  "scenario": "Replay: Cyclone Michaung, Dec 2023, running as if it started at 6 PM tonight"
+ "fps_pan": {
+  "fps": 26.6,
+  "frames": 87,
+  "long_frames_gt50ms": 11,
+  "worst_ms": 150,
+  "span_s": 3.3
  },
- "subscribe_invalid": {
-  "validity": "Please include an '@' in the email address. 'not-an-email' is missing an '@'.",
-  "status": null
- },
+ "subscribe_label": "Email alerts for Arumugam Road",
+ "subscribe_invalid": "Please include an '@' in the email address. 'not-an-email' is missing an '@'.",
  "subscribe_offline": "Alerts need the live service; this preview is offline.",
- "subscribe_button": "Subscribe",
- "assistant_offline": [
-  "The assistant needs the live service; this preview is offline."
- ],
- "assistant_offline_emergency": [
-  "The assistant needs the live service; this preview is offline.",
-  "The assistant needs the live service; this preview is offline."
- ]
+ "subscribe_sms_note": "SMS alerts are coming soon. Sending to Indian numbers needs TRAI DLT registration, which takes days."
 }
