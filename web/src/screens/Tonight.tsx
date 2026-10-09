@@ -76,6 +76,16 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     })
   }, [place, mv])
 
+  // Switching storms replays the rise: water drains away, then rises to the new storm
+  const firstScenario = useRef(true)
+  useEffect(() => {
+    if (firstScenario.current) { firstScenario.current = false; return }
+    if (prefersReducedMotion()) return
+    mv.water?.setRise(0, 500)
+    const t = window.setTimeout(() => mv.water?.setRise(1, 2600), 650)
+    return () => window.clearTimeout(t)
+  }, [scenario, mv])
+
   // Depth frame for the current hour
   useEffect(() => {
     if (!scenario.mix.length) { mv.showMix([], 'max'); return }
@@ -142,7 +152,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           </div>
         )}
 
-        {error && <p className="small" style={{ color: '#E5A3A5' }}>{error}</p>}
+        {error && <p className="small" role="alert">{error}</p>}
 
         {seg && ans && band && (
           <>

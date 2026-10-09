@@ -37,7 +37,7 @@ export default function Subscribe({ lat, lon, street }: { lat: number; lon: numb
           onChange={(e) => setEmail(e.target.value)} style={{ flex: 1 }} />
         <button className="btn primary" disabled={state === 'busy'}>{state === 'busy' ? 'Sending' : 'Subscribe'}</button>
       </div>
-      {msg && <p className="small" role="status" style={{ color: state === 'err' ? '#E5A3A5' : undefined }}>{msg}</p>}
+      {msg && <p className="small" role="status">{msg}</p>}
       <p className="muted small">SMS alerts are coming soon. Sending to Indian numbers needs TRAI DLT registration, which takes days.</p>
     </form>
   )

@@ -85,7 +85,7 @@ a { color: var(--grey); }
 .band.unsafe_two_wheeler { color: #A6E2E5; background: rgba(127, 211, 216, 0.12); border-color: rgba(127, 211, 216, 0.5); }
 .band.unsafe_car { color: #fff; background: var(--deep); border-color: var(--deep); }
 .chip { display: inline-block; font-size: 10.5px; padding: 1px 6px; margin-left: 6px; border-radius: 4px; color: var(--grey-dim); border: 1px solid var(--line); vertical-align: 2px; }
-.chip.bad { color: #fff; border-color: var(--red); }
+.chip.bad { color: var(--grey); border-style: dashed; border-color: var(--grey); }
 
 .park { display: flex; gap: 10px; align-items: flex-start; }
 .pin { width: 12px; height: 12px; border-radius: 50%; background: var(--amber); margin-top: 6px; flex: none; }

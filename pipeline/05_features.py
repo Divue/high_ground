@@ -86,6 +86,12 @@ class Collector(osmium.SimpleHandler):
                                        lat=n.location.lat, beds=t.get("beds", ""), area=0.0))
         if t.get("place") in ("suburb", "neighbourhood", "quarter", "village", "town", "locality") and en_name(t):
             self.places.append([en_name(t), round(n.location.lon, 5), round(n.location.lat, 5), t.get("place")])
+        # stations and bus terminals give the gazetteer the big locality names (Velachery, T. Nagar)
+        if (t.get("railway") in ("station", "halt") or t.get("amenity") == "bus_station") and en_name(t):
+            nm = en_name(t)
+            for suffix in (" Railway Station", " railway station", " MRTS", " Bus Terminus", " Bus Stand", " Station"):
+                nm = nm.replace(suffix, "")
+            self.places.append([nm.strip(), round(n.location.lon, 5), round(n.location.lat, 5), "station"])
 
 
 def build_graph(ways):
@@ -280,7 +286,15 @@ def main():
         hospitals=[{k: (round(v, 6) if isinstance(v, float) else v) for k, v in x.items() if k != "area"} for x in hosp],
         runs={rid: {"reach": [r[0] for r in v], "share": [r[1] for r in v],
                     "cut_off": sum(1 - r[0] for r in v)} for rid, v in hosp_runs.items()}))
-    places = sorted({p[0]: p for p in h.places}.values())
+    # keep the first entry per name, preferring neighbourhood nodes over stations
+    by_name = {}
+    for p in sorted(h.places, key=lambda p: p[3] == "station"):
+        by_name.setdefault(p[0], p)
+    aliases = {"Thyagaraya Nagar": "T. Nagar", "Thiruvanmiyur": "Tiruvanmiyur"}
+    for full, short in aliases.items():
+        if full in by_name and short not in by_name:
+            by_name[short] = [short] + by_name[full][1:]
+    places = sorted(by_name.values())
     write_json(WEB / "places.json", places)
     print("05_features done")
 
