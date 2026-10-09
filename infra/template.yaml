@@ -1,0 +1,249 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  HighGround: street-level flood answers for Chennai residents.
+  S3 + CloudFront (model outputs, tiles), Lambda + API Gateway, DynamoDB, SNS,
+  EventBridge Scheduler, Amazon Bedrock (Strands Agents SDK), Amazon Location Service, Amplify Hosting.
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Description: Bedrock model or inference profile id used by the assistant and alert writer.
+  AdminToken:
+    Type: String
+    NoEcho: true
+    Description: Shared secret for the demo "Run now" endpoint.
+  SiteUrl:
+    Type: String
+    Default: ""
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [x86_64]
+    Timeout: 30
+    MemorySize: 512
+    Layers: [!Ref CommonLayer]
+    Environment:
+      Variables:
+        DATA_BUCKET: !Ref DataBucket
+        DATA_PREFIX: data/
+        TABLE: !Ref SubscribersTable
+        TOPIC_ARN: !Ref AlertsTopic
+        MODEL_ID: !Ref BedrockModelId
+
+Resources:
+  # ------------------------------------------------------------------ data + CDN
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET, HEAD]
+            AllowedOrigins: ["*"]
+            AllowedHeaders: ["*"]
+            ExposedHeaders: [ETag, Content-Length, Content-Range, Accept-Ranges]
+            MaxAge: 3600
+
+  DataOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-data-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  DataCDN:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: HighGround model outputs, terrain tiles, basemap
+        HttpVersion: http2and3
+        PriceClass: PriceClass_All
+        Origins:
+          - Id: data
+            DomainName: !GetAtt DataBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt DataOAC.Id
+            S3OriginConfig: {OriginAccessIdentity: ""}
+        DefaultCacheBehavior:
+          TargetOriginId: data
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6          # CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # CORS-S3Origin
+          ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c # SimpleCORS
+        CacheBehaviors:
+          - PathPattern: data/current.json
+            TargetOriginId: data
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+            AllowedMethods: [GET, HEAD, OPTIONS]
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad        # CachingDisabled
+            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+            ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+
+  DataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DataBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: cloudfront.amazonaws.com}
+            Action: s3:GetObject
+            Resource: !Sub "${DataBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${DataCDN}"
+
+  # ------------------------------------------------------------------ alerts
+  SubscribersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: pk, AttributeType: S}]
+      KeySchema: [{AttributeName: pk, KeyType: HASH}]
+
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: HighGround
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: [POST, OPTIONS]
+        AllowHeaders: [content-type]
+        MaxAge: 3600
+
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: layers/common/
+      CompatibleRuntimes: [python3.12]
+
+  StrandsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      Description: Strands Agents SDK (AWS open source) and dependencies
+      ContentUri: layers/strands/
+      CompatibleRuntimes: [python3.12]
+
+  SubscribeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/subscribe/
+      Handler: app.handler
+      Policies:
+        - DynamoDBCrudPolicy: {TableName: !Ref SubscribersTable}
+        - S3ReadPolicy: {BucketName: !Ref DataBucket}
+        - Statement:
+            - Effect: Allow
+              Action: [sns:Subscribe, sns:ListSubscriptionsByTopic, sns:SetSubscriptionAttributes]
+              Resource: "*"
+      Events:
+        Post:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /subscribe, Method: POST}
+
+  ForecastCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/forecast_check/
+      Handler: app.handler
+      Timeout: 180
+      Environment:
+        Variables:
+          ADMIN_TOKEN: !Ref AdminToken
+          SITE_URL: !Ref SiteUrl
+      Policies:
+        - S3CrudPolicy: {BucketName: !Ref DataBucket}
+        - DynamoDBCrudPolicy: {TableName: !Ref SubscribersTable}
+        - SNSPublishMessagePolicy: {TopicName: !GetAtt AlertsTopic.TopicName}
+        - Statement:
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource: "*"
+      Events:
+        Every3Hours:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(3 hours)
+            Description: HighGround forecast check
+        RunNow:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /admin/run, Method: POST}
+
+  AssistantFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/assistant/
+      Handler: app.handler
+      Timeout: 90
+      MemorySize: 1024
+      Layers: [!Ref CommonLayer, !Ref StrandsLayer]
+      Policies:
+        - S3ReadPolicy: {BucketName: !Ref DataBucket}
+        - Statement:
+            - Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource: "*"
+      Events:
+        Ask:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /ask, Method: POST}
+
+  GeocodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/geocode/
+      Handler: app.handler
+      Timeout: 15
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [geo-places:Geocode, geo-places:Autocomplete, geo-places:SearchText, geo-places:Suggest]
+              Resource: !Sub "arn:aws:geo-places:${AWS::Region}::provider/default"
+      Events:
+        Geocode:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /geocode, Method: POST}
+
+  # ------------------------------------------------------------------ site
+  SiteApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: highground
+      Platform: WEB
+      CustomRules:
+        - Source: "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|pmtiles|bin)$)([^.]+$)/>"
+          Target: /index.html
+          Status: "200"
+
+  SiteBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt SiteApp.AppId
+      BranchName: main
+      Stage: PRODUCTION
+
+Outputs:
+  DataBucketName: {Value: !Ref DataBucket}
+  CdnDomain: {Value: !GetAtt DataCDN.DomainName}
+  ApiUrl: {Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com"}
+  TopicArn: {Value: !Ref AlertsTopic}
+  AmplifyAppId: {Value: !GetAtt SiteApp.AppId}
+  SiteUrl: {Value: !Sub "https://main.${SiteApp.DefaultDomain}"}

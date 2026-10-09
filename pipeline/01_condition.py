@@ -182,8 +182,27 @@ def main():
 
     # 3. Burn waterways ---------------------------------------------------------
     burn_m = (ww_m | rivpoly_m) & ~sea
+    # Outlets: the sea and the land edge of the rectangle (free outfall, so valleys that
+    # drain out of the domain do not become artificial lakes).
+    edge = np.zeros(shape, bool)
+    edge[0, :] = edge[-1, :] = edge[:, 0] = edge[:, -1] = True
+    outlet = sea | (edge & ~sea)
+    from skimage.morphology import reconstruction
+    seed = np.where(outlet, dtm_bare, dtm_bare.max())
+    filled = reconstruction(seed, dtm_bare, method="erosion").astype(np.float32)
+    # Channel beds follow the sink-filled surface (priority flood from the outlets), so a
+    # burnt channel conveys water out instead of pooling in DSM noise pits.
     z = dtm_bare.copy()
-    z[burn_m] -= ccfg["burn_depth_m"]
+    z[burn_m] = filled[burn_m] - ccfg["burn_depth_m"]
+    print(f"channel pits raised: {np.mean((filled - dtm_bare)[burn_m] > 0.05)*100:.1f}% of channel cells, "
+          f"mean {np.mean((filled - dtm_bare)[burn_m]):.2f} m")
+    # Depression cap: real basins (Velachery, Pallikaranai) keep up to `max_depression_m` of
+    # ponding depth; deeper pits are DSM artefacts or embankments whose culverts the 30 m
+    # DSM cannot see, so their floors are raised to (spill level - max_depression_m).
+    dmax = ccfg["max_depression_m"]
+    deep = (filled - z > dmax) & ~burn_m & ~sea
+    z[deep] = filled[deep] - dmax
+    print(f"depression cap {dmax} m: raised {deep.sum()} cells ({deep.mean()*100:.2f}%)")
 
     # 4. Buildings as obstacles -------------------------------------------------
     obst = (bfrac > ccfg["building_obstacle_fraction"]) & ~road_m & ~burn_m & ~sea
@@ -200,7 +219,7 @@ def main():
 
     # Save ------------------------------------------------------------------------
     for name, arr in dict(dsm=dsm, dtm_bare=dtm_bare, z_model=z, landcover=lc, bfrac=bfrac,
-                          road=road_m, waterway=burn_m, sea=sea, bridge=bridge_m).items():
+                          road=road_m, waterway=burn_m, sea=sea, bridge=bridge_m, outlet_edge=edge & ~sea).items():
         np.save(WORK / f"{name}.npy", arr)
     prof = dict(driver="GTiff", height=H, width=W, count=1, crs=CRS, transform=transform,
                 compress="deflate", tiled=True)

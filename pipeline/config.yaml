@@ -27,6 +27,7 @@ conditioning:
   tree_tags: ["landuse=forest", "natural=wood", "natural=scrub", "landuse=orchard"]
   percentile_filter: {percentile: 5, size: 3}
   burn_depth_m: 2.0
+  max_depression_m: 2.5            # deeper closed pits are treated as DSM artefacts / unseen culverts
   burn_waterways: [river, canal, drain, stream]
   major_rivers: [Adyar, Cooum, "Buckingham Canal", Kosasthalaiyar, Otteri Nullah]
 
@@ -40,7 +41,7 @@ landcover:
   # parameter; the value used for all published runs is written by 06_validate.py
   # to data/out/calibration.json. Candidates searched on the calibration half only.
   drainage_mm_h_default: 10.0
-  drainage_mm_h_candidates: [0.0, 5.0, 10.0, 15.0, 20.0, 30.0]
+  drainage_mm_h_candidates: [0.0, 5.0, 10.0, 20.0, 30.0]
 
 solver:
   scheme: local-inertial (Bates et al. 2010, de Almeida et al. 2012 theta=1)

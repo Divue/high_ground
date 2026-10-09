@@ -1,0 +1,121 @@
+import { Map as MLMap } from 'maplibre-gl'
+import type * as GeoJSON from 'geojson'
+import { useEffect, useRef, useState } from 'react'
+import { getJSON } from '../lib/data'
+import type { MapView } from '../map/MapView'
+import { baseStyle } from '../map/style'
+import { TOKENS } from '../config'
+
+interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number }
+interface ProofJ {
+  headline: { model_hit_rate: number; baseline_hit_rate: number; model_false_rate: number; baseline_false_rate: number;
+    matched_baseline_hit_rate: number; matched_baseline_false_rate: number; model_flooded_share_of_city: number; reported_segments: number }
+  sentence: string
+  split: { value_mm_h: number; candidates: { drainage_mm_h: number; hit_rate: number; false_rate: number; skill: number }[] }
+  by_group: Record<'rain_only' | 'rain_plus_reservoir', Record<'all' | 'rain_driven' | 'river_driven', M>>
+  baseline: { rule: string; metrics: Record<string, M> }
+  zones: Record<string, { share_in_moderate_high_veryhigh: number; city_share_moderate_or_higher: number }>
+  nrsc_2015: Record<string, { csi: number; hit: number }>
+  anuga: null | { cell_agreement: number; csi: number; depth_corr: number; anuga_wet_share: number; fast_wet_share: number; triangles: number; note: string }
+  caveats: string[]
+  thresholds: { hit_depth_cm: number; hit_length_share: number; river_buffer_m: number }
+}
+
+const pct = (x: number | null | undefined) => (x == null ? '–' : `${Math.round(x * 100)}%`)
+
+export default function Proof({ mv }: { mv: MapView }) {
+  const [p, setP] = useState<ProofJ | null>(null)
+  const [split, setSplit] = useState(0.5)
+  const right = useRef<HTMLDivElement>(null)
+  const rmap = useRef<MLMap | null>(null)
+
+  useEffect(() => { getJSON<ProofJ>('proof.json').then(setP).catch(() => setP(null)) }, [])
+
+  useEffect(() => {
+    mv.map.easeTo({ center: [80.215, 13.02], zoom: 11.6, pitch: 0, bearing: 0, duration: 1200 })
+    mv.showMix([{ run: 'dec2015_reservoir', w: 1 }], 'max', 500)
+    mv.water?.setRain(0)
+    const style = baseStyle()
+    delete (style as { terrain?: unknown }).terrain
+    style.layers = style.layers.filter((l) => l.id !== 'buildings-3d')
+    const m = new MLMap({ container: right.current!, style, interactive: false, attributionControl: false,
+      center: mv.map.getCenter(), zoom: mv.map.getZoom(), pitch: 0, bearing: 0 })
+    rmap.current = m
+    m.on('load', async () => {
+      const gj = await getJSON<GeoJSON.FeatureCollection>('proof/crowd_2015.geojson').catch(() => null)
+      if (!gj) return
+      m.addSource('crowd', { type: 'geojson', data: gj })
+      m.addLayer({ id: 'crowd', type: 'line', source: 'crowd', layout: { 'line-cap': 'round' },
+        paint: { 'line-color': TOKENS.rainGrey, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.2, 15, 4], 'line-opacity': 0.9 } })
+    })
+    const sync = () => m.jumpTo({ center: mv.map.getCenter(), zoom: mv.map.getZoom(), bearing: mv.map.getBearing(), pitch: mv.map.getPitch() })
+    mv.map.on('move', sync)
+    return () => { mv.map.off('move', sync); m.remove() }
+  }, [mv])
+
+  const drag = (e: React.PointerEvent) => {
+    const el = e.currentTarget as HTMLElement
+    el.setPointerCapture(e.pointerId)
+    const move = (ev: PointerEvent) => setSplit(Math.max(0.05, Math.min(0.95, ev.clientX / window.innerWidth)))
+    const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up) }
+    el.addEventListener('pointermove', move)
+    el.addEventListener('pointerup', up)
+  }
+
+  const h = p?.headline
+  const g = p?.by_group
+  return (
+    <>
+      <div ref={right} style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: `inset(0 0 0 ${split * 100}%)` }} />
+      <div className="proof-handle" style={{ left: `calc(${split * 100}% - 1px)` }} onPointerDown={drag}
+        role="slider" aria-label="Swipe between model and citizen reports" aria-valuenow={Math.round(split * 100)} tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'ArrowLeft') setSplit((s) => Math.max(0.05, s - 0.05)); if (e.key === 'ArrowRight') setSplit((s) => Math.min(0.95, s + 0.05)) }} />
+      <div className="proof-label" style={{ left: 20 }}>Model: 1–2 Dec 2015 replay</div>
+      <div className="proof-label" style={{ right: 20 }}>Streets residents reported flooded in 2015</div>
+
+      {p && h && g && (
+        <>
+          <div className="panel proof-center">
+            <div className="vs">
+              <div>
+                <div className="hit">{pct(h.model_hit_rate)}</div>
+                <div className="hit-sub">of reported streets the model floods</div>
+              </div>
+              <div>
+                <div className="base">{pct(h.baseline_hit_rate)}</div>
+                <div className="hit-sub">naive baseline</div>
+              </div>
+            </div>
+            <p style={{ margin: '12px 0 4px' }}>{p.sentence}</p>
+            <p className="muted small" style={{ margin: 0 }}>
+              Scored only on the {h.reported_segments} reported street segments in the other half. The baseline floods the lowest 20% of the city.
+            </p>
+          </div>
+          <div className="panel proof-bottom">
+            <h3 style={{ marginTop: 0 }}>Where rain modelling works, and why the reservoir mattered</h3>
+            <table className="proof-table">
+              <thead><tr><th></th><th>All reported streets</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
+              <tbody>
+                <tr><td>Rain only</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_only[k].hit_rate)} <span className="muted">({g.rain_only[k].reported_segments})</span></td>)}</tr>
+                <tr><td>Rain + Chembarambakkam release</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_plus_reservoir[k].hit_rate)} <span className="muted">({g.rain_plus_reservoir[k].reported_segments})</span></td>)}</tr>
+                <tr><td>Baseline (lowest 20%)</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(p.baseline.metrics[k]?.hit_rate)}</td>)}</tr>
+              </tbody>
+            </table>
+            <p className="small" style={{ marginTop: 10 }}>
+              Flooding everything would score 100%, so we also check unreported streets: the model floods {pct(h.model_false_rate)} of them, the baseline {pct(h.baseline_false_rate)}.
+              At the same flooded area as the model ({pct(h.model_flooded_share_of_city)} of the city), the lowest-ground baseline catches {pct(h.matched_baseline_hit_rate)} of reported streets.
+            </p>
+            <p className="small">
+              GCC hazard zones: {pct(p.zones.rain_plus_reservoir?.share_in_moderate_high_veryhigh)} of the model’s flooded area falls in moderate, high or very high zones, which cover {pct(p.zones.rain_plus_reservoir?.city_share_moderate_or_higher)} of the zoned city.
+              {p.nrsc_2015.rain_plus_reservoir && <> Satellite (NRSC) 2015 inundation: the model covers {pct(p.nrsc_2015.rain_plus_reservoir.hit)} of it.</>}
+            </p>
+            {p.anuga && <p className="small">Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm. Same terrain, different numerics.</p>}
+            <h3>Limits of this test</h3>
+            <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>
+          </div>
+        </>
+      )}
+      {!p && <div className="panel proof-center"><p className="muted">Validation results are not available yet.</p></div>}
+    </>
+  )
+}
