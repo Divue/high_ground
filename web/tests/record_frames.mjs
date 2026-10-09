@@ -34,7 +34,7 @@ async function film(seconds) {
     if (process.env.MAXFRAMES && n >= Number(process.env.MAXFRAMES)) return   // smoke tests
     await page.clock.runFor(1000 / FPS)
     // let real-time work (tile decoding, worker messages) land before the frame is taken
-    await page.waitForTimeout(Number(process.env.SETTLE_MS ?? 40))
+    await settle()
     await page.screenshot({ path: path.join(frameDir, `f${String(n++).padStart(5, '0')}.png`) })
   }
 }
@@ -50,6 +50,32 @@ async function search(text) {
   await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter')
 }
 
+/** Real-time wait (app time paused) until every visible tile has loaded, so no frame is half-drawn. */
+async function settle(maxMs = Number(process.env.SETTLE_MAX_MS ?? 2500)) {
+  const t = Date.now()
+  await page.waitForTimeout(Number(process.env.SETTLE_MS ?? 30))
+  while (Date.now() - t < maxMs) {
+    const ok = await page.evaluate(() => !window.__map || window.__map.areTilesLoaded()).catch(() => true)
+    if (ok) return
+    await page.waitForTimeout(50)
+  }
+}
+/** Real-time wait for the map to load, nudging app time so startup timers fire. */
+async function waitReady() {
+  for (let i = 0; i < 400; i++) {
+    if (await page.evaluate(() => !!window.__map && window.__map.loaded()).catch(() => false)) return
+    await page.clock.runFor(16)
+    await page.waitForTimeout(100)
+  }
+}
+
+/** Fake clock pinned to a fixed evening and paused: app time moves only through film()/skip(). */
+async function startClock() {
+  const t0 = new Date(process.env.CLOCK ?? '2026-10-09T18:30:00+05:30')
+  await page.clock.install({ time: t0 })
+  await page.clock.pauseAt(new Date(t0.getTime() + 10))
+}
+
 async function warm(url) {
   // real-time pass so tiles, frames and JSON are in the HTTP cache before filming
   const p = await context.newPage()
@@ -62,16 +88,18 @@ const shots = {
   async opening() {
     const url = `${base}?replay=michaung2023`
     if (process.env.WARM) await warm(url)
-    await page.clock.install()
+    await startClock()
     await page.goto(url)
+    await waitReady()
     await film(22)
   },
   // a resident types their street
   async search() {
     const url = `${base}?replay=michaung2023`
     if (process.env.WARM) await warm(url)
-    await page.clock.install()
+    await startClock()
     await page.goto(url)
+    await waitReady()
     await skip(20)
     await film(1)
     await search('Arumugam Road')
@@ -81,8 +109,9 @@ const shots = {
   async timelapse() {
     const url = `${base}?replay=dec2015_reservoir`
     if (process.env.WARM) await warm(url)
-    await page.clock.install()
+    await startClock()
     await page.goto(url)
+    await waitReady()
     await skip(20)
     await film(1)
     await page.getByRole('button', { name: 'Watch the whole storm' }).click()
@@ -92,8 +121,9 @@ const shots = {
   async whatif() {
     const url = `${base}?replay=michaung2023#whatif`
     if (process.env.WARM) await warm(url)
-    await page.clock.install()
+    await startClock()
     await page.goto(url)
+    await waitReady()
     await skip(14)
     const slider = page.locator('input[type=range]').first()
     const box = await slider.boundingBox()
@@ -111,8 +141,9 @@ const shots = {
   async proof() {
     const url = `${base}#proof`
     if (process.env.WARM) await warm(url)
-    await page.clock.install()
+    await startClock()
     await page.goto(url)
+    await waitReady()
     await skip(10)
     await film(2)
     const h = page.locator('.split-handle, [role=separator]').first()

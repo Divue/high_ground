@@ -83,7 +83,11 @@ def main():
         "",
         "## Raw footage",
         "",
-        "`node web/tests/record_demo.mjs <url> review/p5/video` records a WebM walkthrough of every beat above.",
+        "**Smooth footage (use this for the video):** `cd web && WARM=1 node tests/record_frames.mjs <shot> <url>` with shot = opening | search | timelapse | whatif | proof. "
+        "It drives the app with a virtual clock and waits for every tile before each frame, so the footage is a steady 30 fps at 1920×1080 even on a slow laptop "
+        "(about 30 s of wall time per second of footage). Output: `review/p5/footage/<shot>.mp4` (H.264) plus the PNG frames as a lossless master.",
+        "",
+        "`node web/tests/record_demo.mjs <url> review/p5/video` records a real-time WebM walkthrough (it stutters on slow machines).",
     ]
     (ROOT / "docs" / "DEMO.md").write_text("\n".join(lines) + "\n")
     print("wrote docs/DEMO.md")

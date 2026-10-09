@@ -272,3 +272,8 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - `ui/DepthGlyph.tsx` draws the street's peak depth against an adult (1.65 m), a scooter with its rider and a small hatchback at typical sizes, in metres, with lines at 15 and 30 cm and the caption "Typical sizes, for scale". Outlines are drawn above the water so submerged figures stay readable.
 - The readout and the glyph count up together (`ui/useCountUp.ts`, 2.8 s ease-out, starting when the camera arrives); reduced motion shows the final value. The readout's width and weight now ease over 0–150 cm (they saturated at 90 cm, so 93 and 154 cm looked the same).
 - Screens: `review/p5-dev/cards_glyph.png`, `glyph_zoom.png`. Hero test 9/9 OK.
+
+### Frame-perfect demo footage tool (Fri ~20:10)
+- `web/tests/record_frames.mjs <shot>` (opening | search | timelapse | whatif | proof). Playwright's clock is pinned (6:30 PM) and paused, so app time advances exactly 1/FPS per frame. Before each frame it waits in real time until `map.areTilesLoaded()`. Frames are encoded with ffmpeg OpenH264 (Fedora's ffmpeg has no libx264); the PNGs are kept as a lossless master.
+- Smoke test at 5 fps: starts over the Bay, flies in, the card counts up while the night plays to the peak, every frame fully drawn, no errors. Final 1080p/30 fps footage to be recorded after the v3 rebuild.
+- Design critic: the first run was cut off by a usage limit (resets 22:10 IST) after capturing `review/design/r2/`; relaunched.
