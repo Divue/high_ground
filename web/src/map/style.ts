@@ -52,7 +52,7 @@ export function baseStyle(): StyleSpecification {
       },
     },
     layers: [
-      ...base,
+      ...base.filter((l) => l.type !== 'symbol'),
       {
         id: 'buildings-3d',
         type: 'fill-extrusion',
@@ -70,6 +70,8 @@ export function baseStyle(): StyleSpecification {
           'fill-extrusion-vertical-gradient': true,
         },
       },
+      // labels after the 3D buildings so names are never cut through
+      ...base.filter((l) => l.type === 'symbol'),
     ],
     sky: {
       'sky-color': '#0A1C24', 'horizon-color': '#1B3B47', 'fog-color': '#14303D',

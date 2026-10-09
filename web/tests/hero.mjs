@@ -40,9 +40,9 @@ await step('03_search', async () => {
   await page.waitForSelector('.readout', { timeout: 30_000 })
 })
 await step('04_route', async () => {
-  const btn = page.locator('button:has-text("When to leave")').first()
+  const btn = page.locator('button:has-text("when to leave")').first()
   await btn.click()
-  await page.waitForSelector('text=/Leave by|No route to/', { timeout: 90_000 })
+  await page.waitForSelector('text=/Move your car to|No dry way out|Leave by|No route to/', { timeout: 90_000 })
   await page.waitForTimeout(1500)
 })
 await step('05_subscribe', async () => {

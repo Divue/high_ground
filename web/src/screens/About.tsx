@@ -12,13 +12,13 @@ export default function About() {
       <ul>
         <li>A 2D shallow-water model (local-inertial scheme, Bates et al. 2010) runs over the whole Greater Chennai Corporation area on a 30 m grid. Storms of 50 to 400 mm in 24 hours, at mean and high tide, and three real storms are computed ahead of time. Your browser only blends the results.</li>
         <li>Every few hours an AWS Lambda reads the Open-Meteo rainfall forecast for Velachery, T. Nagar, Anna Nagar and Tambaram, and picks the two nearest storms to blend.</li>
-        <li>Storm-drain capacity is the one tuned number{drain != null ? ` (${drain} mm per hour)` : ''}. It was tuned on half of the GCC wards and tested on the other half (see Proof).</li>
+        <li>Storm drains are one uniform capacity{drain != null ? ` (${drain} mm per hour)` : ''}. We tried to tune it on half of the GCC wards, but the 2015 reports could not tell 0 from 30 mm per hour apart, so it is a stated assumption (see Proof).</li>
       </ul>
       <h3>Limits, in plain words</h3>
       <ul>
         <li>Terrain is 30 m satellite elevation (Copernicus GLO-30). Buildings and trees were removed by approximation. A kerb, a raised gate or a dip under a bridge is invisible to it.</li>
         <li>Drains are not mapped pipe by pipe. They are one uniform capacity, so a blocked drain on your street will make things worse than shown.</li>
-        <li>That capacity was tuned on the extreme 2015 floods, where the best fit was drains adding nothing. For smaller storms the model probably shows more water than you will see.</li>
+        <li>At street level, the 2015 citizen reports only barely separate this model from chance, and distance to a canal predicts them a little better than the model does. Treat a single street's number as a guide to how your area behaves, not a measurement.</li>
         <li>The 2015 Chembarambakkam reservoir release is modelled as an assumption, built from the release timeline in the CAG audit. Other tank surpluses that year are not included.</li>
         <li>Closed low pockets deeper than 1 m in the terrain are treated as errors or unseen culverts and partly filled. Small drains are represented as shallow channels on the 30 m grid.</li>
         <li>Storm surge from cyclones is not modelled. High tide is a fixed sea level 0.5 m above mean.</li>

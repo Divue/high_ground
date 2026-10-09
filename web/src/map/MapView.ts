@@ -84,7 +84,7 @@ export class MapView {
       layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 12, 'text-offset': [0, 1.2], 'text-anchor': 'top' },
       paint: { 'text-color': TOKENS.amber, 'text-halo-color': TOKENS.stormSky, 'text-halo-width': 1.5 } })
     m.addLayer({ id: 'here', type: 'circle', source: 'here',
-      paint: { 'circle-radius': 7, 'circle-color': TOKENS.rainGrey, 'circle-stroke-color': TOKENS.stormSky, 'circle-stroke-width': 3 } })
+      paint: { 'circle-radius': 9, 'circle-color': TOKENS.stormSky, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3.5 } })
   }
 
   setGeoJSON(id: string, data: GeoJSON.FeatureCollection | GeoJSON.Feature | null) {

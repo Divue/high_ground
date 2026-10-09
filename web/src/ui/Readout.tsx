@@ -1,5 +1,5 @@
 // Depth readout: Anek Latin widens and gains weight as the water gets deeper.
-export default function Readout({ cm, size = 76 }: { cm: number; size?: number }) {
+export default function Readout({ cm, size = 68 }: { cm: number; size?: number }) {
   const k = Math.max(0, Math.min(1, cm / 90))
   const wdth = 78 + k * 47
   const wght = 380 + k * 420

@@ -171,7 +171,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           <div style={{ marginTop: 12 }}>
             <h2>Tonight looks dry</h2>
             <p className="muted">The forecast for the next 24 hours is {scenario.forecastMm != null ? `about ${Math.round(scenario.forecastMm)} mm` : 'unavailable'}, below the smallest storm we model (50 mm). Replay a past storm to see what HighGround shows on a bad night.</p>
-            <button className="btn" onClick={() => setReplayRun('michaung2023')}>Replay Cyclone Michaung</button>
+            <button className="btn primary" onClick={() => setReplayRun('michaung2023')}>See Cyclone Michaung as if it were tonight</button>
           </div>
         )}
 
@@ -208,23 +208,22 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <h3>Park on dry ground</h3>
             {park.length === 0 && <p className="muted small">No mapped flyover or parking ground near you stays dry in this scenario.</p>}
             {park.slice(0, 2).map((o) => (
-              <div className="park" key={`${o.name}-${o.lon}`} style={{ marginBottom: 8 }}>
+              <div className="park" key={`${o.name}-${o.lon}`}>
                 <span className="pin" />
                 <div style={{ flex: 1 }}>
-                  <b>{o.name}</b>, {fmtDistance(o.d)} away <span className="muted small">({o.kind})</span>
-                  <div><button className="btn amber" style={{ marginTop: 6, padding: '5px 10px' }} disabled={routing}
-                    onClick={() => showRoute(o)}>{routing ? 'Checking each hour…' : 'When to leave'}</button></div>
+                  <b>{o.name}</b>, {fmtDistance(o.d)} <span className="muted small">({o.kind})</span>
+                  {route?.to !== o.name && (
+                    <button className="linkbtn" disabled={routing} onClick={() => showRoute(o)}>{routing ? 'checking…' : 'when to leave'}</button>
+                  )}
                 </div>
               </div>
             ))}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
             {route && (
-              <p className="small" role="status">
-                {route.safe && route.leaveBy ? <>
-                  <b>Leave by {clockLabel(scenario.start, route.leaveBy)}</b>: dry route to {route.to}, {fmtDistance(route.safe.lengthM)}
-                  {route.normal && route.safe.lengthM - route.normal.lengthM > 30 ? `, ${fmtDistance(route.safe.lengthM - route.normal.lengthM)} longer than the usual way` : ''}.
-                  {route.leaveBy === route.until && route.streetFloods && <span className="muted"> After that your own street passes 15 cm.</span>}
-                </> : <>No route to {route.to} stays under 30 cm at any hour before your street floods. Move the car early or stay put.</>}
+              <p className="small muted" style={{ margin: '4px 0 0' }}>
+                {route.safe && route.leaveBy
+                  ? <>Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}{route.normal && route.safe.lengthM - route.normal.lengthM > 30 ? `, ${fmtDistance(route.safe.lengthM - route.normal.lengthM)} longer than the usual way (grey)` : ''}. Leave by {clockLabel(scenario.start, route.leaveBy)}.</>
+                  : <>No route to {route.to} stays under 30 cm before your street floods.</>}
               </p>
             )}
             <div className="divider" />

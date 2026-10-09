@@ -7,13 +7,20 @@ import { baseStyle } from '../map/style'
 import { DATA_BASE, TOKENS } from '../config'
 
 interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number; matched_baseline_hit_rate?: number; gain?: number; flooded_share?: number }
+interface Auc { auc: number | null; ci95: [number, number] | null; n_reported: number }
 interface ProofJ {
+  honest_test?: { question: string; model: Auc; low_elevation: Auc; random: Auc; near_a_channel: Auc; verdict: string; plain: string }
+  auc_even_wards?: Record<string, Record<'all' | 'rain_driven' | 'river_driven', Auc>>
+  null_maps?: Record<string, M>
+  nrsc_matched_share?: Record<'model' | 'elevation_same_share' | 'random_same_share', { csi: number; hit: number }>
+  gcc_points_auc?: Record<string, { n: number; model: number; low_elevation: number; near_a_channel: number; random: number }>
+  ward_level?: { spearman: number; p: number; wards: number }
   headline: { model_hit_rate: number; baseline_hit_rate: number; model_false_rate: number; baseline_false_rate: number;
     matched_baseline_hit_rate: number; matched_baseline_false_rate: number; model_flooded_share_of_city: number; reported_segments: number }
   sentence: string
   metric_note?: string
   calibration_note?: string | null
-  split: { value_mm_h: number; candidates: { drainage_mm_h: number; hit_rate: number; false_rate: number; skill: number; gain?: number; matched_baseline_hit_rate?: number }[] }
+  split: { value_mm_h: number; method?: string; why?: string; candidates: { drainage_mm_h: number; auc?: number; ci95?: [number, number]; hit_rate?: number; matched_baseline_hit_rate?: number }[] }
   by_group: Record<'rain_only' | 'rain_plus_reservoir', Record<'all' | 'rain_driven' | 'river_driven', M>>
   baseline: { rule: string; metrics: Record<string, M> }
   zones: Record<string, { share_in_moderate_high_veryhigh: number; city_share_moderate_or_higher: number }>
@@ -96,6 +103,10 @@ export default function Proof({ mv }: { mv: MapView }) {
 
   const h = p?.headline
   const g = p?.by_group
+  const t = p?.honest_test
+  const auc = p?.auc_even_wards
+  const nr = p?.nrsc_matched_share
+  const pts = p?.gcc_points_auc?.['GCC 2015 flood hotspots']
   return (
     <>
       <div ref={right} style={{ position: 'absolute', inset: 0, zIndex: 2, clipPath: `inset(0 0 0 ${detail ? 100 : split * 100}%)` }} />
@@ -106,52 +117,42 @@ export default function Proof({ mv }: { mv: MapView }) {
       {!detail && <div className="proof-label" style={{ right: 20 }}>Streets residents reported flooded in 2015</div>}
       {detail && <div className="proof-label" style={{ left: 20 }}>{detail === 'anuga' ? 'ANUGA' : 'Fast model'}: peak depth, 200 mm storm, Velachery and Pallikaranai</div>}
 
-      {p && h && g && (
+      {p && h && g && t && (
         <>
           {!detail && <div className="panel proof-center">
+            <p className="hit-sub" style={{ margin: '0 0 8px' }}>{t.question}</p>
             <div className="vs">
               <div>
-                <div className="hit">{pct(h.model_hit_rate)}</div>
-                <div className="hit-sub">of reported flooded streets<br />the model floods</div>
+                <div className="hit">{pct(t.model.auc)}</div>
+                <div className="hit-sub">the model</div>
               </div>
-              <div>
-                <div className="base">{pct(h.matched_baseline_hit_rate)}</div>
-                <div className="hit-sub">elevation alone,<br />same area flooded</div>
-              </div>
-              <div>
-                <div className="base">{pct(h.baseline_hit_rate)}</div>
-                <div className="hit-sub">lowest 20%<br />of the city</div>
-              </div>
+              <div><div className="base">50%</div><div className="hit-sub">chance</div></div>
+              <div><div className="base">{pct(t.low_elevation.auc)}</div><div className="hit-sub">elevation alone</div></div>
+              <div><div className="base">{pct(t.near_a_channel.auc)}</div><div className="hit-sub">nearest channel</div></div>
             </div>
-            <p style={{ margin: '12px 0 4px' }}>{p.sentence}</p>
-            {p.calibration_note && <p className="muted small" style={{ margin: '0 0 4px' }}>{p.calibration_note}</p>}
+            <p style={{ margin: '12px 0 4px' }}>On wards we never tuned on, the model is <b>{t.verdict}</b>{t.model.ci95 ? ` (95% range ${pct(t.model.ci95[0])}–${pct(t.model.ci95[1])})` : ''}.</p>
             <p className="muted small" style={{ margin: 0 }}>
-              Scored only on the {h.reported_segments} reported street segments in the other half. {p.metric_note}
+              The 2015 reports mark where people reported, not every street that flooded, so they can only rank, not score. {p.sentence}
             </p>
           </div>}
           <div className="panel proof-bottom" style={detail ? { width: 620 } : undefined}>
             {!detail && <>
-            <h3 style={{ marginTop: 0 }}>Where rain modelling works, and why the reservoir mattered</h3>
+            <h3 style={{ marginTop: 0 }}>Every test we ran, on the {h.reported_segments} reported streets in the held-out wards</h3>
             <table className="proof-table">
-              <thead><tr><th></th><th>All reported streets</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
+              <thead><tr><th>How often a reported street ranks above an unreported one</th><th>All</th><th>Rain-driven</th><th>River-driven (≤{p.thresholds.river_buffer_m} m from Adyar or Cooum)</th></tr></thead>
               <tbody>
-                <tr><td>Rain only</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_only[k].hit_rate)} <span className="muted">({g.rain_only[k].reported_segments})</span></td>)}</tr>
-                <tr><td>Rain + Chembarambakkam release</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_plus_reservoir[k].hit_rate)} <span className="muted">({g.rain_plus_reservoir[k].reported_segments})</span></td>)}</tr>
-                <tr><td>Elevation alone, same area (rain + release)</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_plus_reservoir[k].matched_baseline_hit_rate)}</td>)}</tr>
-                <tr><td>Lowest 20% of the city</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(p.baseline.metrics[k]?.hit_rate)}</td>)}</tr>
+                {([['model', 'Model, rain + Chembarambakkam release'], ['model_rain_only', 'Model, rain only'], ['near_a_channel', 'Distance to the nearest channel'], ['low_elevation', 'Elevation alone'], ['random', 'Random']] as const).map(([k, label]) => (
+                  <tr key={k}><td>{label}</td>{(['all', 'rain_driven', 'river_driven'] as const).map((gk) => <td key={gk}>{pct(auc?.[k]?.[gk]?.auc)}</td>)}</tr>
+                ))}
               </tbody>
             </table>
-            <p className="small" style={{ marginTop: 10 }}>
-              The model floods {pct(h.model_flooded_share_of_city)} of the city’s land in this replay. Streets nobody reported are not proof of dry streets: the model floods {pct(h.model_false_rate)} of them, and an elevation map of the same size floods {pct(h.matched_baseline_false_rate)}.
-            </p>
-            <p className="small">
-              GCC hazard zones: {pct(p.zones.rain_plus_reservoir?.share_in_moderate_high_veryhigh)} of the model’s flooded area falls in moderate, high or very high zones, which cover {pct(p.zones.rain_plus_reservoir?.city_share_moderate_or_higher)} of the zoned city.
-              {p.nrsc_2015.rain_plus_reservoir && <> Satellite (NRSC) 2015 inundation: the model covers {pct(p.nrsc_2015.rain_plus_reservoir.hit)} of it.</>}
-            </p>
+            {nr && <p className="small" style={{ marginTop: 10 }}>Satellite (NRSC) 2015 flood extent: the model covers {pct(nr.model.hit)} of it, a random map of the same size {pct(nr.random_same_share.hit)}, the lowest ground of the same size {pct(nr.elevation_same_share.hit)}.</p>}
+            {pts && <p className="small">GCC’s own 2015 flood hotspots, ranked against random road points: model {pct(pts.model)}, distance to a channel {pct(pts.near_a_channel)}, elevation {pct(pts.low_elevation)}, random {pct(pts.random)}.</p>}
+            {p.null_maps && <p className="small muted">Why we do not lead with “share of reported streets flooded”: the model floods {pct(h.model_hit_rate)} of them, but a random speckle of the same size floods {pct(p.null_maps.random_speckle_same_share?.hit_rate)}, because reports are spread wherever people live.</p>}
             </>}
             {p.anuga && (
               <div className="small">
-                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics.</p>
+                <p style={{ margin: '8px 0 6px' }}>Velachery cross-check with ANUGA (Geoscience Australia), {p.anuga.triangles.toLocaleString()} triangles: the two models agree on {pct(p.anuga.cell_agreement)} of cells about whether water passes 15 cm (depth correlation {p.anuga.depth_corr.toFixed(2)}). Same terrain, different numerics, so this checks the arithmetic, not the terrain.</p>
                 <div className="seg" role="group" aria-label="Velachery detail view">
                   <button aria-pressed={!detail} onClick={() => setDetail(null)}>2015 split view</button>
                   <button aria-pressed={detail === 'anuga'} onClick={() => setDetail('anuga')}>Detail: ANUGA</button>
@@ -160,10 +161,10 @@ export default function Proof({ mv }: { mv: MapView }) {
               </div>
             )}
             {!detail && <>
-            <h3>Tuning, on the other half of the wards</h3>
+            <h3>Drain capacity</h3>
             <p className="small" style={{ margin: 0 }}>
-              {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${pct(c.hit_rate)} vs ${pct(c.matched_baseline_hit_rate)}`).join(' · ')}
-              <span className="muted"> (drain capacity: model hit rate vs elevation alone, same area)</span>
+              {p.split.candidates.map((c) => `${c.drainage_mm_h} mm/h: ${c.auc != null ? pct(c.auc) : pct(c.hit_rate)}`).join(' · ')}
+              <span className="muted"> on the tuning half. Within the error bars these are the same, so we use {p.split.value_mm_h} mm/h as an assumption.</span>
             </p>
             <h3>Limits of this test</h3>
             <ul className="small muted" style={{ paddingLeft: 18, margin: 0 }}>{p.caveats.map((c) => <li key={c}>{c}</li>)}</ul>

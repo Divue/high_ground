@@ -251,11 +251,19 @@ export async function edgeDepthFromFrame(g: Graph, meta: WaterMeta, frame: Uint8
   const { start, pix, bridge } = await edgeSamples(g, meta)
   const E = g.len.length
   const d = new Float32Array(E)
+  const buf = new Uint8Array(4096)
   for (let e = 0; e < E; e++) {
     if (bridge && bridge[e]) continue
-    let m = 0
-    for (let k = start[e]; k < start[e + 1]; k++) { const v = frame[pix[k]]; if (v > m) m = v }
-    d[e] = m
+    // 90th percentile of the edge's samples: the same statistic the answer card uses for a street
+    const n = Math.min(start[e + 1] - start[e], buf.length)
+    if (n === 0) continue
+    for (let k = 0; k < n; k++) {
+      const v = frame[pix[start[e] + k]]
+      let j = k - 1
+      while (j >= 0 && buf[j] > v) { buf[j + 1] = buf[j]; j-- }
+      buf[j + 1] = v
+    }
+    d[e] = buf[Math.floor(0.9 * (n - 1))]
   }
   return d
 }

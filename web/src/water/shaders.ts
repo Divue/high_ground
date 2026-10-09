@@ -31,6 +31,10 @@ void main() {
 `
 
 export const waterFrag = /* glsl */ `
+uniform sampler2D depthA;
+uniform sampler2D depthB;
+uniform float mixT;
+uniform float rise;
 uniform float time;
 uniform vec3 shallow;
 uniform vec3 deep;
@@ -51,8 +55,10 @@ float noise(vec2 p) {
 }
 
 void main() {
-  if (vDepth < minDepth) discard;
-  float t = smoothstep(0.03, 1.2, vDepth);
+  // depth sampled per pixel (bilinear) so shorelines are smooth, not mesh triangles
+  float depth = mix(texture2D(depthA, vUv).r, texture2D(depthB, vUv).r, mixT) * 2.55 * rise;
+  if (depth < minDepth) discard;
+  float t = smoothstep(0.03, 1.2, depth);
   vec3 col = mix(shallow, deep, t);
   // scrolling ripples -> perturbed normal
   vec2 q = vUv * vec2(900.0, 1500.0);
@@ -69,7 +75,7 @@ void main() {
     glint += exp(-d * d * 9000.0) * (0.6 + 0.4 * n1);
   }
   col += amber * glint * 0.55;
-  float edge = smoothstep(minDepth, minDepth + 0.11, vDepth);
+  float edge = smoothstep(minDepth, minDepth + 0.11, depth);
   float a = opacity * edge * (0.5 + 0.42 * t);
   col *= 1.12;
   gl_FragColor = vec4(col * a, a);  // premultiplied
