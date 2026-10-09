@@ -50,7 +50,10 @@ def p3():
     v = p["headline"]
     ok = check("model beats elevation baseline on hit rate (validation half)",
                v["model_hit_rate"] > v["baseline_hit_rate"],
-               f"model {v['model_hit_rate']:.3f} vs baseline {v['baseline_hit_rate']:.3f}")
+               f"model {v['model_hit_rate']:.3f} vs lowest-20% baseline {v['baseline_hit_rate']:.3f}")
+    ok &= check("model beats matched-share elevation baseline (validation half)",
+                v["model_hit_rate"] > v["matched_baseline_hit_rate"],
+                f"model {v['model_hit_rate']:.3f} vs matched {v['matched_baseline_hit_rate']:.3f}")
     ok &= check("rain vs river split reported", {"rain_driven", "river_driven"} <= set(p["by_group"]["rain_only"]))
     ok &= check("both runs reported", {"rain_only", "rain_plus_reservoir"} <= set(p["by_group"]))
     return ok

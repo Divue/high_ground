@@ -75,8 +75,10 @@ def nearest_segment(lat: float, lon: float):
         if not (w - 0.004 <= lon <= e + 0.004 and s - 0.004 <= lat <= n + 0.004):
             continue
         for i, (sid, name, hw, br, flat) in enumerate(s3_json(f"streets/geom/{tile}.json")["segs"]):
+            # prefer named public streets for an address answer
+            penalty = (25 if hw == "service" else 0) + (12 if not name else 0)
             for j in range(0, len(flat) - 2, 2):
-                d = _pt_seg(lon, lat, flat[j], flat[j + 1], flat[j + 2], flat[j + 3])
+                d = _pt_seg(lon, lat, flat[j], flat[j + 1], flat[j + 2], flat[j + 3]) + penalty
                 if best is None or d < best[0]:
                     best = (d, tile, i, sid, name, hw, br)
     if best is None:

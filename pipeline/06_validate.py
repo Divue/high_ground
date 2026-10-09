@@ -59,8 +59,12 @@ def main():
         return {g: scoring.evaluate(grid, data, filt, None if g == "all" else g)
                 for g in ("all", "rain_driven", "river_driven")}
 
-    by_group = {k: metrics(w, scoring.even) for k, w in wet.items()}
-    calib_half = {k: metrics(w, scoring.odd) for k, w in wet.items()}
+    def gains(grid, filt):
+        return {g: scoring.gain_over_matched_baseline(grid, data, filt, None if g == "all" else g)
+                for g in ("all", "rain_driven", "river_driven")}
+
+    by_group = {k: gains(w, scoring.even) for k, w in wet.items()}
+    calib_half = {k: gains(w, scoring.odd) for k, w in wet.items()}
     outside = {k: scoring.evaluate(w, data, lambda a: a < 0) for k, w in wet.items()}
     baseline = metrics(base20, scoring.even)
     matched_b = {k: metrics(m, scoring.even) for k, m in matched.items()}
@@ -105,6 +109,7 @@ def main():
 
     head_run = "rain_plus_reservoir"
     head = dict(run=head_run, subset="validation wards (even numbers)",
+                gain_over_matched_baseline=by_group[head_run]["all"]["gain"],
                 model_hit_rate=by_group[head_run]["all"]["hit_rate"],
                 model_false_rate=by_group[head_run]["all"]["false_rate"],
                 baseline_hit_rate=baseline["all"]["hit_rate"],
@@ -118,8 +123,10 @@ def main():
         headline=head,
         sentence=(f"We tuned one number, storm-drain capacity ({cal['drainage_mm_h']:g} mm/h), on half of "
                   f"Chennai's wards and tested on the other half."),
+        metric_note=("Citizen reports only say where it flooded. A map that floods everything would catch every report, "
+                     "so the fair comparison is a map that floods the same amount of land, chosen by elevation alone."),
         split=dict(rule=V["split"], parameter=cal["parameter"], value_mm_h=cal["drainage_mm_h"],
-                   objective=cal["objective"], candidates=cal["candidates"]),
+                   objective=cal["objective"], why=cal.get("why"), candidates=cal["candidates"]),
         by_group=by_group,
         calibration_half=calib_half,
         outside_gcc=outside,
@@ -175,7 +182,7 @@ def main():
     print(json.dumps(head, indent=1))
     for k in by_group:
         for g, m in by_group[k].items():
-            print(f"{k:22s} {g:13s} hit {m['hit_rate']} false {m['false_rate']} skill {m['skill']} n={m['reported_segments']}")
+            print(f"{k:22s} {g:13s} hit {m['hit_rate']:.3f} matched-baseline {m['matched_baseline_hit_rate']:.3f} gain {m['gain']:.3f} false {m['false_rate']:.3f} n={m['reported_segments']}")
     print("baseline", baseline["all"])
 
 

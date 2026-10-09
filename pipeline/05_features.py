@@ -31,6 +31,15 @@ DRIVE = {
 CAR_CM = CFG["routing"]["car_impassable_cm"]
 
 
+def en_name(tags) -> str:
+    """English only (project rule): name:en, else name if it is in Latin script."""
+    for k in ("name:en", "official_name:en", "name"):
+        v = tags.get(k, "")
+        if v and all(ord(ch) < 0x0900 for ch in v):
+            return v
+    return ""
+
+
 class Collector(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
@@ -48,7 +57,7 @@ class Collector(osmium.SimpleHandler):
             except osmium.InvalidLocationError:
                 return
             br = tags.get("bridge", "no") not in ("no",) or tags.get("layer", "0")[:1] in "123456789"
-            self.ways.append((DRIVE[hw], bool(br), nodes, tags.get("name", ""), w.id))
+            self.ways.append((DRIVE[hw], bool(br), nodes, en_name(tags), w.id))
         if tags.get("amenity") == "hospital" or tags.get("healthcare") == "hospital":
             try:
                 lons = np.array([n.lon for n in w.nodes])
@@ -58,14 +67,14 @@ class Collector(osmium.SimpleHandler):
             x = lons * 111_320 * np.cos(np.radians(13.0))
             y = lats * 110_540
             area = 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
-            self.hospitals.append(dict(id=f"w{w.id}", name=tags.get("name", ""), lon=float(lons.mean()),
+            self.hospitals.append(dict(id=f"w{w.id}", name=en_name(tags), lon=float(lons.mean()),
                                        lat=float(lats.mean()), beds=tags.get("beds", ""), area=float(area)))
         if tags.get("amenity") == "parking" or tags.get("building") == "parking":
             try:
                 pts = [(n.lon, n.lat) for n in w.nodes]
             except osmium.InvalidLocationError:
                 return
-            self.parking.append(dict(id=f"w{w.id}", name=tags.get("name", ""),
+            self.parking.append(dict(id=f"w{w.id}", name=en_name(tags),
                                      kind="multi-storey" if tags.get("parking") in ("multi-storey", "underground_no")
                                      or tags.get("building") == "parking" else "surface",
                                      pts=pts))
@@ -73,10 +82,10 @@ class Collector(osmium.SimpleHandler):
     def node(self, n):
         t = n.tags
         if t.get("amenity") == "hospital" or t.get("healthcare") == "hospital":
-            self.hospitals.append(dict(id=f"n{n.id}", name=t.get("name", ""), lon=n.location.lon,
+            self.hospitals.append(dict(id=f"n{n.id}", name=en_name(t), lon=n.location.lon,
                                        lat=n.location.lat, beds=t.get("beds", ""), area=0.0))
-        if t.get("place") in ("suburb", "neighbourhood", "quarter", "village", "town", "locality") and t.get("name"):
-            self.places.append([t.get("name"), round(n.location.lon, 5), round(n.location.lat, 5), t.get("place")])
+        if t.get("place") in ("suburb", "neighbourhood", "quarter", "village", "town", "locality") and en_name(t):
+            self.places.append([en_name(t), round(n.location.lon, 5), round(n.location.lat, 5), t.get("place")])
 
 
 def build_graph(ways):

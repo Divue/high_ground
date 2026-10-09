@@ -194,7 +194,7 @@ Resources:
       Handler: app.handler
       Timeout: 90
       MemorySize: 1024
-      Layers: [!Ref CommonLayer, !Ref StrandsLayer]
+      Layers: [!Ref StrandsLayer]   # CommonLayer comes from Globals
       Policies:
         - S3ReadPolicy: {BucketName: !Ref DataBucket}
         - Statement:

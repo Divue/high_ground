@@ -6,11 +6,12 @@ import type { MapView } from '../map/MapView'
 import { baseStyle } from '../map/style'
 import { TOKENS } from '../config'
 
-interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number }
+interface M { hit_rate: number; false_rate: number; skill: number; lift: number | null; reported_segments: number; unreported_segments: number; matched_baseline_hit_rate?: number; gain?: number; flooded_share?: number }
 interface ProofJ {
   headline: { model_hit_rate: number; baseline_hit_rate: number; model_false_rate: number; baseline_false_rate: number;
     matched_baseline_hit_rate: number; matched_baseline_false_rate: number; model_flooded_share_of_city: number; reported_segments: number }
   sentence: string
+  metric_note?: string
   split: { value_mm_h: number; candidates: { drainage_mm_h: number; hit_rate: number; false_rate: number; skill: number }[] }
   by_group: Record<'rain_only' | 'rain_plus_reservoir', Record<'all' | 'rain_driven' | 'river_driven', M>>
   baseline: { rule: string; metrics: Record<string, M> }
@@ -79,16 +80,20 @@ export default function Proof({ mv }: { mv: MapView }) {
             <div className="vs">
               <div>
                 <div className="hit">{pct(h.model_hit_rate)}</div>
-                <div className="hit-sub">of reported streets the model floods</div>
+                <div className="hit-sub">of reported flooded streets<br />the model floods</div>
+              </div>
+              <div>
+                <div className="base">{pct(h.matched_baseline_hit_rate)}</div>
+                <div className="hit-sub">elevation alone,<br />same area flooded</div>
               </div>
               <div>
                 <div className="base">{pct(h.baseline_hit_rate)}</div>
-                <div className="hit-sub">naive baseline</div>
+                <div className="hit-sub">lowest 20%<br />of the city</div>
               </div>
             </div>
             <p style={{ margin: '12px 0 4px' }}>{p.sentence}</p>
             <p className="muted small" style={{ margin: 0 }}>
-              Scored only on the {h.reported_segments} reported street segments in the other half. The baseline floods the lowest 20% of the city.
+              Scored only on the {h.reported_segments} reported street segments in the other half. {p.metric_note}
             </p>
           </div>
           <div className="panel proof-bottom">
@@ -98,12 +103,12 @@ export default function Proof({ mv }: { mv: MapView }) {
               <tbody>
                 <tr><td>Rain only</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_only[k].hit_rate)} <span className="muted">({g.rain_only[k].reported_segments})</span></td>)}</tr>
                 <tr><td>Rain + Chembarambakkam release</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_plus_reservoir[k].hit_rate)} <span className="muted">({g.rain_plus_reservoir[k].reported_segments})</span></td>)}</tr>
-                <tr><td>Baseline (lowest 20%)</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(p.baseline.metrics[k]?.hit_rate)}</td>)}</tr>
+                <tr><td>Elevation alone, same area (rain + release)</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(g.rain_plus_reservoir[k].matched_baseline_hit_rate)}</td>)}</tr>
+                <tr><td>Lowest 20% of the city</td>{(['all', 'rain_driven', 'river_driven'] as const).map((k) => <td key={k}>{pct(p.baseline.metrics[k]?.hit_rate)}</td>)}</tr>
               </tbody>
             </table>
             <p className="small" style={{ marginTop: 10 }}>
-              Flooding everything would score 100%, so we also check unreported streets: the model floods {pct(h.model_false_rate)} of them, the baseline {pct(h.baseline_false_rate)}.
-              At the same flooded area as the model ({pct(h.model_flooded_share_of_city)} of the city), the lowest-ground baseline catches {pct(h.matched_baseline_hit_rate)} of reported streets.
+              The model floods {pct(h.model_flooded_share_of_city)} of the city’s land in this replay. Streets nobody reported are not proof of dry streets: the model floods {pct(h.model_false_rate)} of them, and an elevation map of the same size floods {pct(h.matched_baseline_false_rate)}.
             </p>
             <p className="small">
               GCC hazard zones: {pct(p.zones.rain_plus_reservoir?.share_in_moderate_high_veryhigh)} of the model’s flooded area falls in moderate, high or very high zones, which cover {pct(p.zones.rain_plus_reservoir?.city_share_moderate_or_higher)} of the zoned city.

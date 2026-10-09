@@ -46,6 +46,9 @@ def segments():
     lines = lines[lines["highway"].isin(ROADS)].to_crs(CRS)
     lines["bridge"] = tag(lines["other_tags"], "bridge").fillna("")
     lines["layer"] = tag(lines["other_tags"], "layer").fillna("0")
+    name_en = tag(lines["other_tags"], "name:en")
+    latin = lines["name"].fillna("").map(lambda v: all(ord(ch) < 0x0900 for ch in v))
+    lines["name"] = name_en.where(name_en.notna() & (name_en != ""), lines["name"].where(latin, ""))
     lines["is_bridge"] = (lines["bridge"].isin(["yes", "viaduct"]) |
                           lines["layer"].str.match(r"^[1-9]")).astype(int)
     rows = []
