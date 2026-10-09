@@ -191,11 +191,17 @@ def main():
 
     # parking candidates
     cand = []
+    fly = {}
     for i in np.nonzero(brg & (cls <= 3) & (lengths > 150))[0]:
         gg = geoms[i]
         mid = gg[len(gg) // 2]
-        cand.append(dict(id=f"e{i}", kind="flyover", name=names[i] or "Flyover", lon=mid[0], lat=mid[1],
-                         ends=[gg[0], gg[-1]], edge=int(i)))
+        nm = names[i] or "Flyover"
+        # one candidate per name per ~2 km cell (the longest piece); unnamed ones per ~1 km cell
+        key = (nm, round(mid[0] * 50), round(mid[1] * 50)) if names[i] else (nm, round(mid[0], 2), round(mid[1], 2))
+        if key not in fly or lengths[i] > fly[key]["length"]:
+            fly[key] = dict(id=f"e{i}", kind="flyover", name=nm, lon=mid[0], lat=mid[1],
+                            ends=[gg[0], gg[-1]], edge=int(i), length=float(lengths[i]))
+    cand = list(fly.values())
     for p in h.parking:
         pts = np.array(p["pts"])
         x, y = to_utm.transform(pts[:, 0], pts[:, 1])
@@ -205,13 +211,6 @@ def main():
                              name=p["name"] or ("Multi-storey parking" if p["kind"] == "multi-storey" else "Parking ground"),
                              lon=float(pts[:, 0].mean()), lat=float(pts[:, 1].mean()), area=float(area),
                              pts=pts[:: max(1, len(pts) // 12)].tolist()))
-    # merge adjacent flyover pieces with the same name (keep the longest per name+1km cell)
-    best = {}
-    for c in cand:
-        key = (c["kind"], c["name"], round(c["lon"], 2), round(c["lat"], 2))
-        if c["kind"] != "flyover" or key not in best:
-            best[key if c["kind"] == "flyover" else c["id"]] = c
-    cand = list(best.values())
     print(f"{len(cand)} parking candidates ({sum(c['kind']=='flyover' for c in cand)} flyovers)")
 
     def cell(lon, lat):
@@ -273,7 +272,7 @@ def main():
         rule={"flyover": f"deck is elevated; dry if at least one approach is under {CAR_CM} cm at peak",
               "multi-storey": f"dry if the entrance stays under {CAR_CM} cm at peak",
               "open ground": "dry if 90% of the ground stays under 5 cm at peak"},
-        candidates=[{k: v for k, v in c.items() if k not in ("pts", "ends", "edge")} for c in cand],
+        candidates=[{k: v for k, v in c.items() if k not in ("pts", "ends", "edge", "length")} for c in cand],
         dry=park_runs))
     write_json(WEB / "hospitals.json", dict(
         rule=f"Reachable = connected to the main arterial network by roads under {CAR_CM} cm at peak.",

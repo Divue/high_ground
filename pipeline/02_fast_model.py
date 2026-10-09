@@ -218,7 +218,8 @@ def all_runs():
 
 # ----------------------------------------------------------------------------- driver
 def load_terrain():
-    z = np.load(WORK / "z_model.npy").astype(np.float64)
+    import os
+    z = np.load(WORK / os.environ.get("HG_ZMODEL", "z_model.npy")).astype(np.float64)
     lc = np.load(WORK / "landcover.npy")
     sea = np.load(WORK / "sea.npy")
     burn = np.load(WORK / "waterway.npy")
@@ -258,7 +259,8 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     # Antecedent state: channels hold water to their measured surface (burn depth),
     # sea at tide. Then a 2-hour dry spin-up lets channels settle before the storm.
     h = np.zeros(z.shape)
-    h[burn] = CFG["conditioning"]["burn_depth_m"]
+    bd_file = WORK / "burn_depth.npy"
+    h[burn] = np.load(bd_file)[burn] if bd_file.exists() else CFG["conditioning"]["burn_depth_m"]
     outlet_h = np.zeros(z.shape)
     outlet_h[sea_only] = np.maximum(tide - z[sea_only], 0.0)
     h[sea] = outlet_h[sea]
@@ -403,7 +405,7 @@ def update_index():
         f = d / "info.json"
         if f.exists():
             info = json.loads(f.read_text())
-            if not info["id"].startswith("cal"):
+            if not info["id"].startswith(("cal", "exp")):
                 runs[info["id"]] = {k: info[k] for k in ("label", "kind", "total_mm", "tide", "drainage_mm_h",
                                                           "mass_error_pct", "hours", "wall_s", "wet_share_15cm",
                                                           "start_local")}

@@ -30,7 +30,7 @@ BOX = (80.19, 12.925, 80.25, 12.99)         # W, S, E, N
 CORE = (80.205, 12.962, 80.235, 12.985)     # Velachery core, refined
 
 
-def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
+def main(run_id="design_200_mean", max_area=900.0, core_area=350.0, hours=14):
     import importlib
     fm = importlib.import_module("02_fast_model")
     from pyproj import Transformer
@@ -90,7 +90,8 @@ def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
     elev = domain.quantities["elevation"].centroid_values
     stage0 = elev.copy()
     wet0 = burn[rows, cols]
-    stage0[wet0] += CFG["conditioning"]["burn_depth_m"]
+    bd = np.load(WORK / "burn_depth.npy")[rows, cols]
+    stage0[wet0] += bd[wet0]
     domain.set_quantity("stage", stage0, location="centroids")
 
     bt = anuga.Transmissive_stage_zero_momentum_boundary(domain)
@@ -117,16 +118,17 @@ def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
     loss_q.set_values(-loss, location="centroids")
     anuga.Rate_operator(domain, rate=loss_q)
 
-    total = spin + storm_s + sc["tail_h"] * 3600.0
+    # Timeboxed: the first `hours` of the storm (covers the front-loaded peak). Both models'
+    # maxima are taken from hourly states over the same window so the comparison is like for like.
+    total = spin + hours * 3600.0
     hmax = np.zeros(len(n))
     wall = time.time()
-    for t in domain.evolve(yieldstep=600.0, finaltime=total):
+    for t in domain.evolve(yieldstep=3600.0, finaltime=total):
         st = domain.quantities["stage"].centroid_values
         h = st - elev
-        if t > spin:
+        if t > spin + 1:
             hmax = np.maximum(hmax, h)
-        if int(t) % 7200 == 0:
-            print(f"  t={t/3600:5.1f} h  wall {time.time()-wall:6.0f} s  max h {h.max():.2f}", flush=True)
+        print(f"  t={t/3600:5.1f} h  wall {time.time()-wall:6.0f} s  max h {h.max():.2f}", flush=True)
 
     # Rasterise centroid hmax onto the Stage A grid window (mean per cell)
     acc = np.zeros((H, W))
@@ -136,11 +138,14 @@ def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
     grid = np.where(cnt > 0, acc / np.maximum(cnt, 1), np.nan)
     np.save(out / "hmax_grid.npy", grid.astype(np.float32))
 
-    fast = np.load(OUT / "runs" / run_id / "hmax.npy")
-    m = np.isfinite(grid) & ~burn
+    snaps = np.load(OUT / "runs" / run_id / "snapshots_cm.npy", mmap_mode="r")
+    fast = np.asarray(snaps[:hours]).max(axis=0) / 100.0
+    water = burn | (lc == 4)
+    m = np.isfinite(grid) & ~water
     a = grid[m] >= 0.15
     b = fast[m] >= 0.15
     agree = dict(run=run_id, triangles=int(domain.number_of_elements), wall_s=round(time.time() - wall),
+                 hours_simulated=hours, max_triangle_area_m2=max_area, core_triangle_area_m2=core_area,
                  cells_compared=int(m.sum()),
                  cell_agreement=float((a == b).mean()),
                  csi=float((a & b).sum() / max((a | b).sum(), 1)),
@@ -153,4 +158,11 @@ def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
 
 
 if __name__ == "__main__":
-    main(*(sys.argv[1:2] or ["design_200_mean"]))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("run", nargs="?", default="design_200_mean")
+    ap.add_argument("--max-area", type=float, default=900.0)
+    ap.add_argument("--core-area", type=float, default=350.0)
+    ap.add_argument("--hours", type=int, default=14)
+    a = ap.parse_args()
+    main(a.run, a.max_area, a.core_area, a.hours)

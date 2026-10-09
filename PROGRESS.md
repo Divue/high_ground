@@ -84,3 +84,17 @@ P2 Model — in progress.
 - Gotchas fixed: MapLibre 6 needs `setWorkerUrl`; MapLibre's CSS overrode the full-bleed container (`position: relative`); the Protomaps basemap already has a layer called `water` (renamed ours `flood-water`); custom-layer matrix is `defaultProjectionData.mainMatrix` in v5+.
 - Playwright hero test runs on the real GPU (`--use-angle=gl-egl`). All steps pass on the dev server; 36–58 fps while the model hogs the CPU.
 - `data/out/web/current.json` is currently a **dev placeholder** (200 mm, flagged `demo_override`). The forecast-check Lambda overwrites it in production.
+
+### Terrain experiments before the final calibration (Fri 06:55–07:10 IST)
+
+Problem: the 200 mm test flooded scattered pits everywhere. Velachery's wet share was 13%, the same as T. Nagar's. Closed depressions in the 30 m DSM could hold **124 Mm³**, against 173 Mm³ for the whole 200 mm storm, so rain stayed where it fell. Separately, every OSM waterway was burnt as a 30 m × 2 m channel, so a street drain carried as much as the Adyar and water left the city far too efficiently.
+
+Experiments (200 mm, drainage 10 mm/h, scored on odd wards = calibration half only):
+
+| Terrain | Velachery wet | Pallikaranai | T. Nagar | hit | matched baseline | gain |
+|---|---|---|---|---|---|---|
+| depression cap 2.5 m, all channels 2 m | 13% | 37% | 13% | 0.192 | 0.074 | 0.118 |
+| cap 1.0 m | 16% | 37% | 18% | 0.225 | 0.086 | 0.139 |
+| **cap 1.0 m + burn depth by type (river 2, canal 1.5, stream 0.6, drain 0.4 m)** | 15% | 35% | 19% | 0.241 | 0.091 | **0.150** |
+
+**Decision:** adopt the last row. It is physically motivated, and it improves the calibration-half score only; the validation half is untouched. Calibration and all runs were restarted at 07:10 IST. The previous terrain is backed up in `data/work_backup_v1/`. The P2 place gate (Velachery wet, T. Nagar mostly dry) will be judged on the calibrated runs.

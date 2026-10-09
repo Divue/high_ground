@@ -26,8 +26,9 @@ conditioning:
   building_obstacle_m: 3.0
   tree_tags: ["landuse=forest", "natural=wood", "natural=scrub", "landuse=orchard"]
   percentile_filter: {percentile: 5, size: 3}
-  burn_depth_m: 2.0
-  max_depression_m: 2.5            # deeper closed pits are treated as DSM artefacts / unseen culverts
+  burn_depth_m: 2.0                # rivers and river polygons
+  burn_depth_by_type: {river: 2.0, canal: 1.5, stream: 0.6, drain: 0.4}   # a 30 m cell stands in for the channel
+  max_depression_m: 1.0            # deeper closed pits are treated as DSM artefacts / unseen culverts
   burn_waterways: [river, canal, drain, stream]
   major_rivers: [Adyar, Cooum, "Buckingham Canal", Kosasthalaiyar, Otteri Nullah]
 

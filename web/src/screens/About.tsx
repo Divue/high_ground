@@ -19,7 +19,7 @@ export default function About() {
         <li>Terrain is 30 m satellite elevation (Copernicus GLO-30). Buildings and trees were removed by approximation. A kerb, a raised gate or a dip under a bridge is invisible to it.</li>
         <li>Drains are not mapped pipe by pipe. They are one uniform capacity, so a blocked drain on your street will make things worse than shown.</li>
         <li>The 2015 Chembarambakkam reservoir release is modelled as an assumption, built from the release timeline in the CAG audit. Other tank surpluses that year are not included.</li>
-        <li>Low pockets deeper than 2.5 m in the terrain are treated as errors or unseen culverts and partly filled.</li>
+        <li>Closed low pockets deeper than 1 m in the terrain are treated as errors or unseen culverts and partly filled. Small drains are represented as shallow channels on the 30 m grid.</li>
         <li>Storm surge from cyclones is not modelled. High tide is a fixed sea level 0.5 m above mean.</li>
         <li>Rain falls evenly across the city in each scenario. Real storms are patchier.</li>
         <li>This is not an official warning. Follow GCC, IMD and Tamil Nadu State Disaster Management Authority advisories. In danger, call <span className="emergency">112</span>.</li>
