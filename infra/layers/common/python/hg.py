@@ -22,11 +22,11 @@ BANDS = [(5, "dry", "Dry"), (15, "wet", "Wet but passable"),
          (30, "unsafe_two_wheeler", "Unsafe for two-wheelers"), (10 ** 9, "unsafe_car", "Unsafe for cars")]
 LIMITS = [
     "Terrain is 30 m satellite elevation (Copernicus GLO-30) with buildings and trees removed by approximation, so small dips and kerbs are invisible.",
-    "Storm drains are modelled as one uniform capacity (mm per hour) calibrated on half of the GCC wards, not as a drain network.",
+    "Storm drains are modelled as one uniform capacity (10 mm per hour), not as a drain network. It is a stated assumption: the 2015 citizen reports could not tell 0 from 30 mm per hour apart.",
     "Scenarios are precomputed 24-hour storms (50–400 mm); tonight's forecast is matched to the two nearest and blended.",
     "The 2015 reservoir release is a documented assumption built from the CAG/PWD release timeline.",
     "Storm surge and blocked drains are not modelled.",
-    "Drain capacity was tuned on the extreme 2015 floods (best fit: drains add nothing); for smaller storms the model probably shows more water than residents will see.",
+    "Tested on the 2015 floods on wards held out from any tuning, the model ranks reported-flooded streets deeper than unreported ones only slightly more often than chance; street-level answers are indicative, not precise.",
     "This is not an official warning. Follow GCC, IMD and Tamil Nadu SDMA advisories. In danger, call 112.",
 ]
 
