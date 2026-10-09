@@ -50,7 +50,7 @@ float noise(vec2 p) {
 }
 
 void main() {
-  if (vDepth < 0.03) discard;
+  if (vDepth < 0.04) discard;
   float t = smoothstep(0.03, 1.2, vDepth);
   vec3 col = mix(shallow, deep, t);
   // scrolling ripples -> perturbed normal
@@ -68,8 +68,8 @@ void main() {
     glint += exp(-d * d * 9000.0) * (0.6 + 0.4 * n1);
   }
   col += amber * glint * 0.55;
-  float edge = smoothstep(0.03, 0.12, vDepth);
-  float a = opacity * edge * (0.62 + 0.3 * t);
+  float edge = smoothstep(0.04, 0.15, vDepth);
+  float a = opacity * edge * (0.38 + 0.5 * t);
   gl_FragColor = vec4(col * a, a);  // premultiplied
 }
 `
@@ -86,7 +86,7 @@ void main() {
   vec3 o = offset;
   o.z = mod(offset.z - time * speed, 1.0);
   vec3 p = center + vec3((o.x - 0.5) * boxSize, (o.y - 0.5) * boxSize, o.z * boxSize * 0.6);
-  p += vec3(position.x * boxSize * 0.0009, 0.0, position.y * streak);
+  p += vec3(position.x * boxSize * 0.00025, 0.0, position.y * streak);
   vA = smoothstep(0.0, 0.15, o.z) * (1.0 - smoothstep(0.85, 1.0, o.z));
   gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
 }
@@ -96,7 +96,7 @@ export const rainFrag = /* glsl */ `
 uniform float opacity;
 varying float vA;
 void main() {
-  float a = opacity * vA * 0.35;
+  float a = opacity * vA * 0.22;
   gl_FragColor = vec4(vec3(0.79, 0.83, 0.85) * a, a);
 }
 `

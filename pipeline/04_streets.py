@@ -68,6 +68,7 @@ def main():
     runs = json.loads((OUT / "runs.json").read_text())
     segs = segments()
     print(f"{len(segs)} segments")
+    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
 
     # sample cells
     samples, tiles = [], []
@@ -80,7 +81,9 @@ def main():
         c = ((xs - x0) / transform.a).astype(int)
         r = ((ys - y1) / transform.e).astype(int)
         ok = (r >= 0) & (r < H) & (c >= 0) & (c < W)
-        samples.append((r[ok], c[ok]))
+        r, c = r[ok], c[ok]
+        land = ~water[r, c]          # a street sample on a lake/channel cell is a bridge or a mapping offset
+        samples.append((r[land], c[land]))
         mid = g.interpolate(0.5, normalized=True)
         tiles.append(f"{int((mid.x - x0) // TILE_M)}_{int((y1 - mid.y) // TILE_M)}")
 

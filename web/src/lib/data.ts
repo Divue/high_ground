@@ -7,7 +7,7 @@ export function getJSON<T>(path: string, fresh = false): Promise<T> {
   const url = `${DATA_BASE}/${path}`
   if (!fresh && cache.has(url)) return cache.get(url) as Promise<T>
   const p = fetch(url, fresh ? { cache: 'no-store' } : undefined).then((r) => {
-    if (!r.ok) throw new Error(`${r.status} ${url}`)
+    if (!r.ok || (r.headers.get('content-type') ?? '').includes('text/html')) throw new Error(`missing ${url}`)
     return r.json() as Promise<T>
   })
   if (!fresh) {
@@ -111,7 +111,8 @@ export async function loadPixels(path: string): Promise<{ data: Uint8ClampedArra
   if (!cache.has(key)) {
     cache.set(key, (async () => {
       const blob = await fetch(`${DATA_BASE}/${path}`).then((r) => {
-        if (!r.ok) throw new Error(`${r.status} ${path}`)
+        // a dev server may answer a missing file with index.html (SPA fallback)
+        if (!r.ok || !(r.headers.get('content-type') ?? '').startsWith('image/')) throw new Error(`missing ${path}`)
         return r.blob()
       })
       const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })

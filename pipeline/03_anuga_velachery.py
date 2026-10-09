@@ -26,8 +26,8 @@ from common import CFG, OUT, WORK, grid_spec  # noqa: E402
 
 import anuga  # noqa: E402
 
-BOX = (80.19, 12.92, 80.25, 12.98)          # W, S, E, N
-CORE = (80.205, 12.965, 80.235, 12.985)     # Velachery core, refined
+BOX = (80.19, 12.925, 80.25, 12.99)         # W, S, E, N
+CORE = (80.205, 12.962, 80.235, 12.985)     # Velachery core, refined
 
 
 def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
@@ -55,7 +55,7 @@ def main(run_id="design_200_mean", max_area=400.0, core_area=150.0):
     domain = anuga.create_domain_from_regions(
         bounding, boundary_tags={"south": [0], "east": [1], "north": [2], "west": [3]},
         maximum_triangle_area=max_area, interior_regions=[[core, core_area]],
-        mesh_filename=str(out / "mesh.msh"), use_cache=False, verbose=False)
+        use_cache=False, verbose=False)
     domain.set_name("velachery")
     domain.set_datadir(str(out))
     domain.set_minimum_storable_height(0.01)

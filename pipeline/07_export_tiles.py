@@ -83,23 +83,26 @@ def main():
     Image.fromarray((seam * 255).astype(np.uint8), "L").save(WEB / "water" / "sea.png", optimize=True)
 
     runs = json.loads((OUT / "runs.json").read_text())
+    perm_water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+    land = ~sea & ~perm_water
     web_runs = {}
     for rid, info in runs.items():
         d = OUT / "runs" / rid
         full = json.loads((d / "info.json").read_text())
         od = WEB / "water" / rid
         od.mkdir(parents=True, exist_ok=True)
-        hmax = np.load(d / "hmax.npy")
+        hmax = np.where(perm_water, 0, np.load(d / "hmax.npy"))
+        wet_share = float((hmax[land] >= CFG["validation"]["hit_depth_m"]).mean())
         m = to_merc(hmax * 100, transform, mt, Wm, Hm)
         Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / "max.png", optimize=True)
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
         for k in range(snaps.shape[0]):
-            m = to_merc(np.asarray(snaps[k], np.float32), transform, mt, Wm, Hm)
+            m = to_merc(np.where(perm_water, 0, np.asarray(snaps[k], np.float32)), transform, mt, Wm, Hm)
             Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / f"h{k+1:02d}.png", optimize=True)
         web_runs[rid] = dict(label=info["label"], kind=info["kind"], total_mm=info["total_mm"], tide=info["tide"],
                              hours=int(snaps.shape[0]), start_local=info["start_local"],
                              rain_mm_h=full["rain_mm_h"], drainage_mm_h=info["drainage_mm_h"],
-                             wet_share_15cm=round(info["wet_share_15cm"], 4))
+                             wet_share_15cm=round(wet_share, 4))
         print(f"water textures {rid}: {snaps.shape[0]} hours")
 
     write_json(WEB / "water" / "meta.json", dict(

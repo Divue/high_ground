@@ -62,3 +62,25 @@ P2 Model — in progress.
   - gcc_inundation_points_depth: 192 points with DEPTH (inches; date unknown).
   - inundation_2015: 4,001 multipolygons, the NRSC 2015 inundation extent; usable for an areal cross-check.
   - Wards 2022: 200 polygons; ward number in `Name` (whitespace-padded).
+
+### P2 model — decisions and findings (Fri)
+
+- **Solver** (`pipeline/02_fast_model.py`): local-inertial (Bates 2010), numba, branchless float32 momentum kernel (hf^(1/3) by rational guess and two Halley steps, ≤0.7% error), donor-cell outflow limiter (exact mass conservation, no clipping), Froude ≤ 1 cap. 200 mm test run: **mass error 0.0000%**, 36,745 steps, ~12 min wall on this 2-core Ryzen 3 3250U.
+- Speed work: the first version took ~35 min/run. Fixes: (1) fused, vectorisable kernels (2.3× faster); (2) channel beds follow the sink-filled surface so burnt channels drain instead of pooling; (3) **free-outfall outlets on the N/S/W domain edges**, because closed edges turned valleys draining out of the domain into 19 m "lakes"; (4) **depression cap 2.5 m**: closed pits deeper than 2.5 m below their spill level are DSM artefacts or embankments whose culverts 30 m data cannot see (1% of cells raised). Max depth fell from 15 m to ~5 m and dt rose from 1.7 s to 3.2 s.
+- Antecedent state: channels start full to their measured surface (burn depth), then a 2 h dry spin-up.
+- **Permanent water** (lakes, ponds, temple tanks, channels: 35% of "wet" cells in the first run) is excluded from flood statistics, street and edge sampling, validation and textures. A lake is not a flooded street.
+- Hospitals: OSM tags 790 named features as hospitals, mostly clinics. **Selection = campuses ≥ 4,000 m² or ≥100 beds → 47 major hospitals.**
+- Parking candidates: 181 (135 flyovers ≥150 m on trunk–tertiary roads, multi-storey, open grounds ≥3,000 m²).
+- **Calibration objective changed** (logged in `data/out/calibration.json`). The KML holds only positives. Reported streets sit slightly *higher* than unreported ones (reports come from better-connected central neighbourhoods), so hit − false rate is ~0 for every map: the naive elevation baseline scores −0.016 and the model +0.018. The objective is now the **hit-rate gain over an elevation-only map that floods the same share of land**. It needs no "dry" labels and cannot be gamed by flooding more. First candidate (drainage 0 mm/h, 2015 rain + reservoir, odd wards): hit 38.3% vs matched baseline 18.6%, gain +0.197.
+- Calibration candidates reduced to 0, 5, 10, 20, 30 mm/h (compute budget). Two restarts lost about 45 min: a scoring index bug after `explode()`, then the objective change.
+- ANUGA 4.0.1 installed (separate env). The feasibility test with 233k triangles ran 30 sim-min in 386 s, so a full storm would take about 7 h. Plan: ~25 m core mesh, first 14 h of the 200 mm storm, niced, after calibration (same drainage). **Deviation from spec:** the core is not ~10 m along streets. Timebox: 4 h from the ANUGA start.
+
+### P4/P5 groundwork (Fri, while the model runs)
+
+- SAM template (`infra/template.yaml`): S3 data bucket + CloudFront (OAC, CORS), DynamoDB subscribers, SNS topic, HTTP API, Lambdas `subscribe`, `forecast_check` (EventBridge Scheduler `rate(3 hours)` + `/admin/run`), `assistant` (Strands Agents SDK layer, 94 MB, built for py3.12/manylinux), `geocode` (Amazon Location Places v2 with Nominatim fallback), Amplify app + branch.
+- Shared layer `hg.py`: nearest street, scenario blend, risk bands, dry parking, hospital status, A* safe route. Every number comes from S3 model files.
+- Assistant: every number in the reply is checked against tool outputs, and the UI marks it "from the model" or "not in model output".
+- Frontend (Vite + React + TS, MapLibre 6, three.js): Protomaps dark basemap from the token palette, terrain-RGB raster-dem (exaggeration 1.5), 3D buildings, three.js water mesh (vertex displacement from elevation + blended depth textures, ripples, fresnel, amber junction glints), 4k instanced rain, the opening flight from the Bay of Bengal, Tonight / What if / Proof (swipe split) / Hospitals / About / hidden `#admin`.
+- Gotchas fixed: MapLibre 6 needs `setWorkerUrl`; MapLibre's CSS overrode the full-bleed container (`position: relative`); the Protomaps basemap already has a layer called `water` (renamed ours `flood-water`); custom-layer matrix is `defaultProjectionData.mainMatrix` in v5+.
+- Playwright hero test runs on the real GPU (`--use-angle=gl-egl`). All steps pass on the dev server; 36–58 fps while the model hogs the CPU.
+- `data/out/web/current.json` is currently a **dev placeholder** (200 mm, flagged `demo_override`). The forecast-check Lambda overwrites it in production.

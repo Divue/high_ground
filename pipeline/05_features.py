@@ -51,12 +51,15 @@ class Collector(osmium.SimpleHandler):
             self.ways.append((DRIVE[hw], bool(br), nodes, tags.get("name", ""), w.id))
         if tags.get("amenity") == "hospital" or tags.get("healthcare") == "hospital":
             try:
-                lon = np.mean([n.lon for n in w.nodes])
-                lat = np.mean([n.lat for n in w.nodes])
+                lons = np.array([n.lon for n in w.nodes])
+                lats = np.array([n.lat for n in w.nodes])
             except osmium.InvalidLocationError:
                 return
-            self.hospitals.append(dict(id=f"w{w.id}", name=tags.get("name", ""), lon=lon, lat=lat,
-                                       beds=tags.get("beds", "")))
+            x = lons * 111_320 * np.cos(np.radians(13.0))
+            y = lats * 110_540
+            area = 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
+            self.hospitals.append(dict(id=f"w{w.id}", name=tags.get("name", ""), lon=float(lons.mean()),
+                                       lat=float(lats.mean()), beds=tags.get("beds", ""), area=float(area)))
         if tags.get("amenity") == "parking" or tags.get("building") == "parking":
             try:
                 pts = [(n.lon, n.lat) for n in w.nodes]
@@ -71,7 +74,7 @@ class Collector(osmium.SimpleHandler):
         t = n.tags
         if t.get("amenity") == "hospital" or t.get("healthcare") == "hospital":
             self.hospitals.append(dict(id=f"n{n.id}", name=t.get("name", ""), lon=n.location.lon,
-                                       lat=n.location.lat, beds=t.get("beds", "")))
+                                       lat=n.location.lat, beds=t.get("beds", ""), area=0.0))
         if t.get("place") in ("suburb", "neighbourhood", "quarter", "village", "town", "locality") and t.get("name"):
             self.places.append([t.get("name"), round(n.location.lon, 5), round(n.location.lat, 5), t.get("place")])
 
@@ -141,6 +144,9 @@ def main():
     samp_r = np.concatenate(samp_r)
     samp_c = np.concatenate(samp_c)
     samp_e = np.concatenate(samp_e)
+    water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+    keep_s = ~water[samp_r, samp_c]
+    samp_r, samp_c, samp_e = samp_r[keep_s], samp_c[keep_s], samp_e[keep_s]
 
     g = WEB / "graph"
     g.mkdir(parents=True, exist_ok=True)
@@ -158,7 +164,14 @@ def main():
     tree = cKDTree(nodes * [np.cos(np.radians(13.0)), 1.0])
 
     # hospitals: dedupe, keep named, inside bbox
-    hosp = [x for x in h.hospitals if x["name"] and w <= x["lon"] <= e and s <= x["lat"] <= n]
+    # major hospitals only: mapped campuses >= 4000 m2 or >= 100 beds (OSM tags many clinics as hospitals)
+    def beds(x):
+        try:
+            return int(str(x["beds"]).split(";")[0])
+        except ValueError:
+            return 0
+    hosp = [x for x in h.hospitals if x["name"] and w <= x["lon"] <= e and s <= x["lat"] <= n
+            and (x["area"] >= 4000 or beds(x) >= 100)]
     seen = set()
     hosp = [x for x in hosp if not (x["name"].lower() in seen or seen.add(x["name"].lower()))]
     hq = np.array([[x["lon"], x["lat"]] for x in hosp])
@@ -255,7 +268,8 @@ def main():
         dry=park_runs))
     write_json(WEB / "hospitals.json", dict(
         rule=f"Reachable = connected to the main arterial network by roads under {CAR_CM} cm at peak.",
-        hospitals=[{k: (round(v, 6) if isinstance(v, float) else v) for k, v in x.items()} for x in hosp],
+        selection="Major hospitals: OSM amenity=hospital mapped as a campus of at least 4,000 m², or tagged with 100+ beds.",
+        hospitals=[{k: (round(v, 6) if isinstance(v, float) else v) for k, v in x.items() if k != "area"} for x in hosp],
         runs={rid: {"reach": [r[0] for r in v], "share": [r[1] for r in v],
                     "cut_off": sum(1 - r[0] for r in v)} for rid, v in hosp_runs.items()}))
     places = sorted({p[0]: p for p in h.places}.values())

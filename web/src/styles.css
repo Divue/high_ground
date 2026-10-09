@@ -28,7 +28,7 @@ body {
 button, input, select { font: inherit; color: inherit; }
 a { color: var(--grey); }
 
-.map { position: absolute; inset: 0; }
+.map, .map.maplibregl-map { position: absolute; inset: 0; }
 .maplibregl-ctrl-attrib { background: rgba(14, 37, 48, 0.7) !important; color: var(--grey-dim); font-size: 11px; }
 .maplibregl-ctrl-attrib a { color: var(--grey-dim); }
 .maplibregl-ctrl-group { background: var(--panel) !important; }

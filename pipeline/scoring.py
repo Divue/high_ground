@@ -67,13 +67,13 @@ def prepare(force=False):
     wd = wards()
     crowd = _read_kml(RAW / "validation" / "crowd_2015.kml").to_crs(CRS)
     crowd = crowd[crowd["is_flooded"].astype(str) == "1"].copy()
-    crowd = crowd.explode(index_parts=False)
+    crowd = crowd.explode(index_parts=False).reset_index(drop=True)
     crowd["osm_id"] = crowd["osm_id"].astype(str)
 
     lines = gpd.read_file(WORK / "osm.gpkg", layer="lines")
     lines = lines[lines["highway"].isin(ROADS)].to_crs(CRS)
     reported_ids = set(crowd["osm_id"])
-    unrep = lines[~lines["osm_id"].astype(str).isin(reported_ids)].copy()
+    unrep = lines[~lines["osm_id"].astype(str).isin(reported_ids)].copy().reset_index(drop=True)
 
     rivers = lines.iloc[0:0]
     allw = gpd.read_file(WORK / "osm.gpkg", layer="lines").to_crs(CRS)
@@ -94,6 +94,9 @@ def prepare(force=False):
     uw, ur = attrs(unrep)
     cs, cc = _sample_lines(list(crowd.geometry), transform, W, H)
     us, uc = _sample_lines(list(unrep.geometry), transform, W, H, step=10.0)
+    water = ((np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")).ravel()
+    kc, ku = ~water[cc], ~water[uc]
+    cs, cc, us, uc = cs[kc], cc[kc], us[ku], uc[ku]
     data = dict(c_ward=cw, c_river=cr, c_seg=cs, c_cell=cc, c_n=len(crowd),
                 u_ward=uw, u_river=ur, u_seg=us, u_cell=uc, u_n=len(unrep),
                 c_len=crowd.length.values, n_named_river_lines=len(named))
@@ -141,3 +144,42 @@ def even(w):
 
 def gcc(w):
     return w > 0
+
+
+# ---------------------------------------------------------------- matched elevation baseline
+_BASE = {}
+
+
+def _land_and_dtm():
+    if "land" not in _BASE:
+        from rasterio.features import rasterize
+        transform, W, H = grid_spec()
+        wd = wards()
+        wg = rasterize([(g, w) for g, w in zip(wd.geometry, wd["ward"])], out_shape=(H, W),
+                       transform=transform, fill=0, dtype="int32")
+        sea = np.load(WORK / "sea.npy")
+        water = (np.load(WORK / "landcover.npy") == 4) | np.load(WORK / "waterway.npy")
+        _BASE["land"] = (wg > 0) & ~sea & ~water
+        _BASE["dtm"] = np.load(WORK / "dtm_bare.npy")
+        _BASE["sea"] = sea
+        _BASE["water"] = water
+    return _BASE["land"], _BASE["dtm"]
+
+
+def baseline_grid(share: float) -> np.ndarray:
+    """Naive map: the lowest `share` of GCC land (by bare-earth elevation) is flooded."""
+    land, dtm = _land_and_dtm()
+    thr = np.percentile(dtm[land], 100 * share)
+    return (dtm <= thr) & ~_BASE["sea"] & ~_BASE["water"]
+
+
+def gain_over_matched_baseline(wet: np.ndarray, data: dict, ward_filter, group=None) -> dict:
+    """Hit-rate gain over an elevation-only map that floods the same share of GCC land.
+    Needs no 'dry' labels and cannot be gamed by flooding more: flooding more raises the
+    baseline's hit rate equally."""
+    land, _ = _land_and_dtm()
+    share = float(wet[land].mean())
+    m = evaluate(wet, data, ward_filter, group)
+    b = evaluate(baseline_grid(share), data, ward_filter, group)
+    return dict(m, flooded_share=share, matched_baseline_hit_rate=b["hit_rate"],
+                matched_baseline_false_rate=b["false_rate"], gain=m["hit_rate"] - b["hit_rate"])

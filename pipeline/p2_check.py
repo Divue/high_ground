@@ -18,7 +18,7 @@ def shares(run="design_200_mean"):
     transform, W, H = grid_spec()
     hmax = np.load(OUT / "runs" / run / "hmax.npy")
     sea = np.load(WORK / "sea.npy")
-    burn = np.load(WORK / "waterway.npy")
+    burn = np.load(WORK / "waterway.npy") | (np.load(WORK / "landcover.npy") == 4)   # channels + permanent water
     tr = Transformer.from_crs("EPSG:4326", CRS, always_xy=True)
     yy, xx = np.mgrid[0:H, 0:W]
     X = transform.c + (xx + 0.5) * transform.a

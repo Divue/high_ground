@@ -16,7 +16,7 @@ const JUNCTIONS: [number, number][] = [
 export interface WaterFrame { data: Uint8Array; width: number; height: number }
 
 export class WaterLayer implements CustomLayerInterface {
-  id = 'water'
+  id = 'flood-water'
   type = 'custom' as const
   renderingMode = '3d' as const
 
@@ -31,9 +31,10 @@ export class WaterLayer implements CustomLayerInterface {
   private bufA: Uint8Array
   private bufB: Uint8Array
   private anim: { from: number; to: number; t0: number; ms: number; key: 'mixT' | 'rise' }[] = []
-  private clock = new THREE.Clock()
+  private t0 = performance.now()
   private rainLevel = 0
   private rainTarget = 0
+  private lowPower = false
   terrainExag = 1.0
   private meta: WaterMeta
   private elev: Float32Array
@@ -47,6 +48,10 @@ export class WaterLayer implements CustomLayerInterface {
 
   onAdd(map: MLMap, gl: WebGL2RenderingContext) {
     this.map = map
+    // software rasterisers (SwiftShader, llvmpipe): coarser mesh, no idle animation
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info')
+    const rname = String(dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER))
+    this.lowPower = /swiftshader|llvmpipe|software|softpipe/i.test(rname) || new URLSearchParams(location.search).has('lowgpu')
     const { width: W, height: H, bbox_mercator: [l, b, r, t] } = this.meta
     const x0 = (l + R) / (2 * R), x1 = (r + R) / (2 * R)
     const yTop = (R - t) / (2 * R), yBot = (R - b) / (2 * R)
@@ -69,7 +74,8 @@ export class WaterLayer implements CustomLayerInterface {
     elevTex.needsUpdate = true
 
     // grid mesh: x east 0..1, y south 0..1 (uv.y = 0 at the north edge = texture row 0)
-    const sx = Math.round(W / 2), sy = Math.round(H / 2)
+    const step = this.lowPower ? 6 : 2
+    const sx = Math.round(W / step), sy = Math.round(H / step)
     const pos = new Float32Array((sx + 1) * (sy + 1) * 3)
     const uv = new Float32Array((sx + 1) * (sy + 1) * 2)
     let k = 0
@@ -98,7 +104,7 @@ export class WaterLayer implements CustomLayerInterface {
       uniforms: {
         elevTex: { value: elevTex }, depthA: { value: this.texA }, depthB: { value: this.texB },
         mixT: { value: 1 }, rise: { value: 1 }, zPerMeter: { value: zPerMeter },
-        terrainExag: { value: this.terrainExag }, depthExag: { value: 3.0 }, time: { value: 0 },
+        terrainExag: { value: this.terrainExag }, depthExag: { value: 1.5 }, time: { value: 0 },
         shallow: { value: new THREE.Color(TOKENS.shallow) }, deep: { value: new THREE.Color(TOKENS.deep) },
         amber: { value: new THREE.Color(TOKENS.amber) }, camPos: { value: new THREE.Vector3() },
         lights: { value: lights }, opacity: { value: 1 },
@@ -111,7 +117,7 @@ export class WaterLayer implements CustomLayerInterface {
     this.scene.add(this.water)
 
     // rain: ~5k instanced streaks around the camera target
-    const N = 5000
+    const N = 4000
     const quad = new THREE.InstancedBufferGeometry()
     quad.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-1, 0, 0, 1, 0, 0, -1, 1, 0, 1, 1, 0]), 3))
     quad.setIndex([0, 1, 2, 1, 3, 2])
@@ -135,6 +141,7 @@ export class WaterLayer implements CustomLayerInterface {
 
   /** Cross-fade to a new depth frame (cm, 8-bit). */
   showFrame(frame: Uint8Array, ms = 600) {
+    if (!this.water) return
     const u = this.water.material.uniforms
     // current visible state -> A
     const t = u.mixT.value as number
@@ -148,12 +155,13 @@ export class WaterLayer implements CustomLayerInterface {
   }
 
   setRise(to: number, ms = 0) {
+    if (!this.water) return
     if (ms <= 0) { this.water.material.uniforms.rise.value = to; this.map?.triggerRepaint(); return }
     this.animate('rise', this.water.material.uniforms.rise.value, to, ms)
   }
 
   setRain(level: number) { this.rainTarget = level; this.map?.triggerRepaint() }
-  setOpacity(o: number) { this.water.material.uniforms.opacity.value = o; this.map?.triggerRepaint() }
+  setOpacity(o: number) { if (!this.water) return; this.water.material.uniforms.opacity.value = o; this.map?.triggerRepaint() }
   setTerrainExag(e: number) { this.terrainExag = e; if (this.water) this.water.material.uniforms.terrainExag.value = e }
 
   private animate(key: 'mixT' | 'rise', from: number, to: number, ms: number) {
@@ -162,7 +170,9 @@ export class WaterLayer implements CustomLayerInterface {
     this.map?.triggerRepaint()
   }
 
+  renders = 0
   render(_gl: WebGL2RenderingContext, args: CustomRenderMethodInput) {
+    this.renders++
     const u = this.water.material.uniforms
     const now = performance.now()
     this.anim = this.anim.filter((a) => {
@@ -171,7 +181,7 @@ export class WaterLayer implements CustomLayerInterface {
       u[a.key].value = a.from + (a.to - a.from) * e
       return p < 1
     })
-    const time = this.clock.getElapsedTime()
+    const time = (now - this.t0) / 1000
     u.time.value = time
     // camera position in mercator units (internal transform API; fresnel only)
     const cp = (this.map as unknown as { transform?: { cameraPosition?: ArrayLike<number> } }).transform?.cameraPosition
@@ -186,15 +196,18 @@ export class WaterLayer implements CustomLayerInterface {
     ru.time.value = time
     ru.center.value.set(c.x, c.y, 0)
     ru.boxSize.value = box
-    ru.streak.value = box * 0.035
+    ru.streak.value = box * 0.018
     ru.opacity.value = this.rainLevel * Math.min(1, Math.max(0, (zoom - 9) / 3))
     this.rain.visible = ru.opacity.value > 0.01
 
-    this.camera.projectionMatrix = new THREE.Matrix4().fromArray(args.modelViewProjectionMatrix as unknown as number[])
+    // mainMatrix maps web-mercator 0..1 coordinates (z conformal) to clip space
+    this.camera.projectionMatrix = new THREE.Matrix4().fromArray(args.defaultProjectionData.mainMatrix as unknown as number[])
     this.camera.projectionMatrixInverse.copy(this.camera.projectionMatrix).invert()
     this.renderer.resetState()
     this.renderer.render(this.scene, this.camera)
-    // ripples and rain animate continuously while visible
-    this.map.triggerRepaint()
+    // ripples and rain animate continuously while visible (not on software renderers)
+    if (!this.lowPower || this.anim.length || ru.opacity.value > 0.01) {
+      if (!this.lowPower || this.anim.length) this.map.triggerRepaint()
+    }
   }
 }

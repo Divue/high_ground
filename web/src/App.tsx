@@ -30,8 +30,10 @@ export default function App() {
   const [intro, setIntro] = useState(true)
 
   useEffect(() => {
+    let alive = true
     const v = new MapView(mapEl.current!)
     Promise.all([loadRuns(), loadCurrent(), v.ready]).then(async ([r, c]) => {
+      if (!alive) return
       setRuns(r)
       setCurrent(c)
       setMv(v)
@@ -41,6 +43,7 @@ export default function App() {
       v.water?.setRise(0)
       v.water?.setRain(mix.length ? 0.8 : 0.25)
       if (mix.length) await v.showMix(mix, 'max', 0)
+      if (!alive) return
       if (screenFromHash() === 'tonight') {
         await v.openingSequence()
         v.water?.setRise(1, prefersReducedMotion() ? 0 : 3200)
@@ -53,7 +56,11 @@ export default function App() {
     })
     const onHash = () => setScreen(screenFromHash())
     window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
+    return () => {
+      alive = false
+      window.removeEventListener('hashchange', onHash)
+      v.map.remove()
+    }
   }, [])
 
   const scenario = useMemo(() => {

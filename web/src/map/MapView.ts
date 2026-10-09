@@ -1,7 +1,8 @@
 import type * as GeoJSON from 'geojson'
 // Imperative wrapper around MapLibre: basemap, terrain, 3D buildings, water layer, overlays,
 // and the depth-frame controller (fetch hourly textures, blend runs, cross-fade).
-import { Map as MLMap, addProtocol, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
+import { Map as MLMap, addProtocol, setWorkerUrl, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TOKENS, VELACHERY, prefersReducedMotion } from '../config'
@@ -22,6 +23,7 @@ export class MapView {
 
   constructor(container: HTMLElement) {
     if (!protocolAdded) {
+      setWorkerUrl(workerUrl)
       addProtocol('pmtiles', new Protocol().tile)
       protocolAdded = true
     }
@@ -36,7 +38,8 @@ export class MapView {
       attributionControl: { compact: true },
       canvasContextAttributes: { antialias: true },
     })
-    ;(window as unknown as { __map: MLMap }).__map = this.map
+    ;(window as unknown as { __map: MLMap; __mv: MapView }).__map = this.map
+    ;(window as unknown as { __mv: MapView }).__mv = this
     this.ready = new Promise((resolve) => {
       this.map.on('load', async () => {
         this.map.setTerrain({ source: 'terrain', exaggeration: 1.5 })
@@ -45,6 +48,7 @@ export class MapView {
         const ev = await loadPixels('water/elev.png')
         const elev = new Float32Array(meta.width * meta.height)
         for (let i = 0; i < elev.length; i++) elev[i] = (ev.data[4 * i] * 256 + ev.data[4 * i + 1]) / 100 - 10
+        if (this.map.getLayer('flood-water')) return resolve()
         this.water = new WaterLayer(meta, elev)
         this.water.setTerrainExag(1.5)
         this.map.addLayer(this.water, 'buildings-3d')

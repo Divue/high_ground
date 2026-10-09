@@ -44,15 +44,16 @@ def main():
     wd = scoring.wards()
     ward_grid = rasterize([(g, w) for g, w in zip(wd.geometry, wd["ward"])], out_shape=(H, W),
                           transform=transform, fill=0, dtype="int32")
-    gcc_land = (ward_grid > 0) & ~sea
+    perm_water = (np.load(WORK / "landcover.npy") == 4) | burn
+    gcc_land = (ward_grid > 0) & ~sea & ~perm_water
 
     runs = {"rain_only": "dec2015_rain", "rain_plus_reservoir": "dec2015_reservoir"}
-    wet = {k: np.load(OUT / "runs" / rid / "hmax.npy") >= V["hit_depth_m"] for k, rid in runs.items()}
+    wet = {k: (np.load(OUT / "runs" / rid / "hmax.npy") >= V["hit_depth_m"]) & ~perm_water for k, rid in runs.items()}
 
     thr20 = np.percentile(dtm[gcc_land], 100 * V["baseline_lowest_share"])
-    base20 = (dtm <= thr20) & ~sea
+    base20 = (dtm <= thr20) & ~sea & ~perm_water
     share_model = {k: float(w[gcc_land].mean()) for k, w in wet.items()}
-    matched = {k: (dtm <= np.percentile(dtm[gcc_land], 100 * s)) & ~sea for k, s in share_model.items()}
+    matched = {k: (dtm <= np.percentile(dtm[gcc_land], 100 * s)) & ~sea & ~perm_water for k, s in share_model.items()}
 
     def metrics(grid, filt):
         return {g: scoring.evaluate(grid, data, filt, None if g == "all" else g)
