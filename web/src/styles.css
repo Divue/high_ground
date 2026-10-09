@@ -161,8 +161,9 @@ a { color: var(--grey); }
 @media (max-width: 900px) {
   .left { width: calc(100% - 24px); left: 12px; top: auto; bottom: 12px; max-height: 55vh; }
   .right, .timeline { display: none; }
-  .nav { gap: 0; }
-  .nav button { padding: 6px; font-size: 14px; }
+  .nav { gap: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex: 1; }
+  .nav button { padding: 6px 8px; font-size: 14px; flex: none; }
+  .brand { font-size: 18px; flex: none; }
   .topbar { gap: 12px; padding: 0 12px; }
   .proof-center, .about, .proof-bottom { width: calc(100% - 24px); }
 }
