@@ -22,9 +22,12 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
       const my = ++seq.current
       const places = await loadPlaces().catch(() => [])
       const ql = q.toLowerCase()
-      const local = places.filter(([n]) => n.toLowerCase().includes(ql)).slice(0, 5)
+      const rank = ([n, , , kind]: [string, number, number, string]) =>
+        (n.toLowerCase().startsWith(ql) ? 0 : 2) + (kind === 'street' ? 1 : 0)
+      const local = places.filter(([n]) => n.toLowerCase().includes(ql))
+        .sort((a, b) => rank(a) - rank(b) || a[0].length - b[0].length).slice(0, 6)
         .map(([n, lon, lat]) => ({ label: `${n}, Chennai`, lon, lat }))
-      if (my === seq.current) { setItems(local); setSource(local.length ? 'Neighbourhoods from OpenStreetMap' : '') }
+      if (my === seq.current) { setItems(local); setSource(local.length ? 'Places and streets from OpenStreetMap' : '') }
       if (!API_BASE) return
       setBusy(true)
       try {

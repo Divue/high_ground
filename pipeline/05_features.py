@@ -69,6 +69,17 @@ class Collector(osmium.SimpleHandler):
             area = 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
             self.hospitals.append(dict(id=f"w{w.id}", name=en_name(tags), lon=float(lons.mean()),
                                        lat=float(lats.mean()), beds=tags.get("beds", ""), area=float(area)))
+        if (tags.get("amenity") == "bus_station" or tags.get("railway") == "station") and en_name(tags):
+            try:
+                lon = float(np.mean([n.lon for n in w.nodes]))
+                lat = float(np.mean([n.lat for n in w.nodes]))
+            except osmium.InvalidLocationError:
+                lon = None
+            if lon is not None:
+                nm = en_name(tags)
+                for suffix in (" Railway Station", " railway station", " MRTS", " Bus Terminus", " Bus Stand", " Station"):
+                    nm = nm.replace(suffix, "")
+                self.places.append([nm.strip(), round(lon, 5), round(lat, 5), "station"])
         if tags.get("amenity") == "parking" or tags.get("building") == "parking":
             try:
                 pts = [(n.lon, n.lat) for n in w.nodes]
@@ -295,6 +306,15 @@ def main():
         if full in by_name and short not in by_name:
             by_name[short] = [short] + by_name[full][1:]
     places = sorted(by_name.values())
+    # named streets (one point per name: the middle of its longest piece) for offline street search
+    streets = {}
+    for i, nm in enumerate(names):
+        if nm and (nm not in streets or lengths[i] > streets[nm][1]):
+            g_ = geoms[i]
+            mid = g_[len(g_) // 2]
+            streets[nm] = ([nm, round(mid[0], 5), round(mid[1], 5), "street"], float(lengths[i]))
+    places += [v[0] for k, v in sorted(streets.items()) if k not in by_name]
+    print(f"gazetteer: {len(by_name)} places and stations, {len(streets)} street names")
     write_json(WEB / "places.json", places)
     print("05_features done")
 

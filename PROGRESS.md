@@ -120,3 +120,27 @@ Objective (pre-registered before any results): hit-rate gain over the matched-ar
 - **Evidence the expectation is not supported by observed data:** the 2015 citizen reports flag 38.8% of Velachery's road length (1.2 km circle) and 38.3% of T. Nagar's (1 km circle) as flooded, which is equal, and Pallikaranai 21.8%. The model's ranking matches the reports better than the spec's intuition does.
 - Decision (autonomy rule: three fixes tried, never sit blocked): log it, keep the 25% threshold unchanged, continue. The Proof screen reports validation honestly.
 - ANUGA first launch failed: the env lacked numba, which it needs to import the scenario helper. Installed numba and restarted at 08:28 IST, 103k triangles, 14 h of the 200 mm storm, 4 h timebox (until 12:28).
+
+### P3 validation (Fri 09:15 IST): **gate PASSED** (`proof.json`)
+
+Held-out even wards, 3,200 reported segments, 2015 rain + Chembarambakkam release:
+- Model hit rate **39.4%**; lowest-20% elevation baseline 10.0%; same-area elevation map 26.0% (**+13.4 pts**).
+- Rain-driven streets: 41.4% vs 25.4% (+16.1). River-driven (≤500 m from Adyar/Cooum): rain only 14.5%, with the release 18.8%. So the release matters, but an elevation map scores 32.6% there: river flooding is the model's weakest part, plausibly because other tank surpluses are not included.
+- NRSC 2015 satellite inundation: the model covers 38.7% of it (CSI 0.169) vs the baseline's 12.4% (CSI 0.07).
+- GCC hazard zones: 22.8% of the model's flooded area falls in moderate+ zones (which are 20.2% of the city); the baseline gets 23.4%. Weak agreement, reported as is.
+- Calibration half (odd wards) gain 0.212. Validation half gain 0.134: a drop out of sample, as expected.
+
+### Hero-flow realism experiments (Fri 09:30–10:45 IST, main chain paused)
+
+Problem: at five well-known places the 2015 replay answered "stays dry" at street level. The model's water sits in DSM pockets: in a 600 m window around Seva Nagar the median cell is ~1 cm while the deepest 10% reach 50–100 cm. Around Velachery, 34% of land passes 15 cm at hour 12; residents reported 39% of Velachery's road length, so the area share is close but the answer depends on which street you pick.
+
+Decision rule, fixed before results: adopt a variant only if the calibration-half gain beats the current model by at least 0.01.
+
+| Variant (2015 + release, drainage 0) | gain | hit | flooded | Velachery wet |
+|---|---|---|---|---|
+| current | 0.212 | 0.426 | 0.379 | 0.31 |
+| A: wet antecedent (pockets and tanks full) | 0.217 | 0.478 | 0.428 | 0.35 |
+| B: DTM smoothed (σ 1.5 cells) | 0.142 | 0.323 | 0.342 | 0.23 |
+| C: A + B | 0.149 | 0.359 | 0.374 | 0.25 |
+
+**Kept the current model.** Smoothing clearly hurts, so the fine DSM structure carries signal. The wet antecedent is +0.005, below the pre-set bar. The main chain resumed at 10:45 IST. For the demo, use addresses where the model floods. Teammate 2's address list should span risk levels as the spec says.

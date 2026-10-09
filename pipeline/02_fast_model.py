@@ -226,6 +226,9 @@ def load_terrain():
     return z, lc, sea, burn
 
 
+import os
+
+
 def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
         snapshots: bool = True, verbose: bool = True) -> dict:
     sc = scenario(run_id)
@@ -264,6 +267,12 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     outlet_h = np.zeros(z.shape)
     outlet_h[sea_only] = np.maximum(tide - z[sea_only], 0.0)
     h[sea] = outlet_h[sea]
+    if CFG["solver"].get("antecedent", "dry") == "full" or os.environ.get("HG_ANTECEDENT") == "full":
+        # Wet antecedent: closed pockets and tanks already full to their spill level (monsoon season)
+        from skimage.morphology import reconstruction
+        seed = np.where(sea, z, z.max())
+        spill = reconstruction(seed, z, method="erosion")
+        h = np.maximum(h, np.where(sea, h, spill - z))
     spinup_s = 2 * 3600.0
 
     # Reservoir inflow cells
