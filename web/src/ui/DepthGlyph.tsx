@@ -13,6 +13,7 @@ export default function DepthGlyph({ cm }: { cm: number }) {
   const shown = Math.min(d, TOP)
   // y grows downward in SVG; ground at y = TOP
   const y = (m: number) => TOP - m
+  const pts = (p: [number, number][]) => p.map(([x, m]) => `${x},${y(m)}`).join(' ')
   return (
     <figure className="glyph" aria-label={`Water at ${cm} cm against an adult, a scooter rider and a small car, at typical sizes`}>
       <svg viewBox={`-0.1 -0.02 6.6 ${TOP + 0.08}`} preserveAspectRatio="xMinYMax meet" role="img" aria-hidden="true">
@@ -22,18 +23,24 @@ export default function DepthGlyph({ cm }: { cm: number }) {
           <rect x="0.12" y={y(1.40)} width="0.36" height="0.58" rx="0.08" />
           <rect x="0.15" y={y(0.84)} width="0.12" height="0.84" rx="0.04" />
           <rect x="0.33" y={y(0.84)} width="0.12" height="0.84" rx="0.04" />
-          {/* scooter and rider */}
+          {/* step-through scooter and its rider */}
           <circle cx="1.15" cy={y(0.21)} r="0.21" />
           <circle cx="2.35" cy={y(0.21)} r="0.21" />
-          <path d={`M1.0 ${y(0.3)} L2.5 ${y(0.3)} L2.6 ${y(0.55)} L1.75 ${y(0.6)} L1.55 ${y(0.78)} L1.15 ${y(0.78)} L1.05 ${y(1.05)} L0.95 ${y(1.05)} L1.0 ${y(0.3)} Z`} />
-          <rect x="1.55" y={y(1.35)} width="0.34" height="0.6" rx="0.08" />
-          <circle cx="1.74" cy={y(1.47)} r="0.12" />
+          <polygon points={pts([[0.92, 0.3], [1.62, 0.3], [1.62, 0.62], [1.5, 0.8], [0.95, 0.8], [0.88, 0.6]])} />
+          <polygon points={pts([[1.6, 0.28], [2.05, 0.28], [2.05, 0.38], [1.6, 0.38]])} />
+          <polygon points={pts([[2.0, 0.3], [2.2, 0.3], [2.4, 1.02], [2.24, 1.02]])} />
+          <polygon points={pts([[2.12, 1.02], [2.5, 1.02], [2.5, 1.08], [2.12, 1.08]])} />
+          <polygon points={pts([[1.18, 0.8], [1.5, 0.8], [1.52, 1.36], [1.24, 1.36]])} />
+          <circle cx="1.38" cy={y(1.48)} r="0.12" />
+          <polygon points={pts([[1.3, 0.8], [1.86, 0.84], [1.92, 0.4], [1.78, 0.4], [1.74, 0.7], [1.3, 0.68]])} />
+          <polygon points={pts([[1.44, 1.3], [2.22, 1.08], [2.2, 1.02], [1.42, 1.22]])} />
           {/* small hatchback, 1.5 m tall */}
           <path d={`M3.0 ${y(0.25)} L3.0 ${y(0.85)} Q3.05 ${y(1.0)} 3.4 ${y(1.0)} L3.85 ${y(1.48)} L5.75 ${y(1.48)} Q6.2 ${y(1.4)} 6.3 ${y(0.95)} L6.35 ${y(0.25)} Z`} />
           <circle cx="3.65" cy={y(0.3)} r="0.3" className="wheel" />
           <circle cx="5.7" cy={y(0.3)} r="0.3" className="wheel" />
         </g>
-        {shown > 0.005 && <rect x="-0.1" y={y(shown)} width="6.6" height={shown} fill={rampColour(d)} opacity="0.72" />}
+        {shown > 0.005 && <rect x="-0.1" y={y(shown)} width="6.6" height={shown} fill={rampColour(d)} opacity="0.45" />}
+        {shown > 0.005 && <line x1="-0.1" x2="6.5" y1={y(shown)} y2={y(shown)} className="surface" />}
         {/* outlines on top, so submerged figures stay readable */}
         <g className="outline">
           {/* adult, 1.65 m */}
@@ -41,12 +48,17 @@ export default function DepthGlyph({ cm }: { cm: number }) {
           <rect x="0.12" y={y(1.40)} width="0.36" height="0.58" rx="0.08" />
           <rect x="0.15" y={y(0.84)} width="0.12" height="0.84" rx="0.04" />
           <rect x="0.33" y={y(0.84)} width="0.12" height="0.84" rx="0.04" />
-          {/* scooter and rider */}
+          {/* step-through scooter and its rider */}
           <circle cx="1.15" cy={y(0.21)} r="0.21" />
           <circle cx="2.35" cy={y(0.21)} r="0.21" />
-          <path d={`M1.0 ${y(0.3)} L2.5 ${y(0.3)} L2.6 ${y(0.55)} L1.75 ${y(0.6)} L1.55 ${y(0.78)} L1.15 ${y(0.78)} L1.05 ${y(1.05)} L0.95 ${y(1.05)} L1.0 ${y(0.3)} Z`} />
-          <rect x="1.55" y={y(1.35)} width="0.34" height="0.6" rx="0.08" />
-          <circle cx="1.74" cy={y(1.47)} r="0.12" />
+          <polygon points={pts([[0.92, 0.3], [1.62, 0.3], [1.62, 0.62], [1.5, 0.8], [0.95, 0.8], [0.88, 0.6]])} />
+          <polygon points={pts([[1.6, 0.28], [2.05, 0.28], [2.05, 0.38], [1.6, 0.38]])} />
+          <polygon points={pts([[2.0, 0.3], [2.2, 0.3], [2.4, 1.02], [2.24, 1.02]])} />
+          <polygon points={pts([[2.12, 1.02], [2.5, 1.02], [2.5, 1.08], [2.12, 1.08]])} />
+          <polygon points={pts([[1.18, 0.8], [1.5, 0.8], [1.52, 1.36], [1.24, 1.36]])} />
+          <circle cx="1.38" cy={y(1.48)} r="0.12" />
+          <polygon points={pts([[1.3, 0.8], [1.86, 0.84], [1.92, 0.4], [1.78, 0.4], [1.74, 0.7], [1.3, 0.68]])} />
+          <polygon points={pts([[1.44, 1.3], [2.22, 1.08], [2.2, 1.02], [1.42, 1.22]])} />
           {/* small hatchback, 1.5 m tall */}
           <path d={`M3.0 ${y(0.25)} L3.0 ${y(0.85)} Q3.05 ${y(1.0)} 3.4 ${y(1.0)} L3.85 ${y(1.48)} L5.75 ${y(1.48)} Q6.2 ${y(1.4)} 6.3 ${y(0.95)} L6.35 ${y(0.25)} Z`} />
           <circle cx="3.65" cy={y(0.3)} r="0.3" className="wheel" />

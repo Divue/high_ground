@@ -42,7 +42,14 @@ export function lapseEvents(run: RunInfo): LapseEvent[] {
   if (w?.length) ev.push({ hour: run.hours, text: `${run.hours} hours after the start, ${pct(w[w.length - 1])} of the land is still under 15 cm.` })
   // every caption carries its own time, so it never reads as a claim about a later hour
   const start = run.start_local
-  return ev.sort((a, b) => a.hour - b.hour).map((e) => ({ ...e, text: start ? `${fmtShort(start, e.hour)}: ${e.text}` : e.text }))
+  // events in the same hour share one caption (otherwise the later one hides the earlier)
+  const merged: LapseEvent[] = []
+  for (const e of ev.sort((a, b) => a.hour - b.hour)) {
+    const last = merged[merged.length - 1]
+    if (last && last.hour === e.hour) last.text = `${last.text} ${e.text}`
+    else merged.push({ ...e })
+  }
+  return merged.map((e) => ({ ...e, text: start ? `${fmtShort(start, e.hour)}: ${e.text}` : e.text }))
 }
 
 export default function Timelapse({ run, hour, playing, onStop, onProof }: {

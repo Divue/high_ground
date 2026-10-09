@@ -26,7 +26,13 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
   }, [mv])
   useEffect(() => { if (runs[run]) mv.showMix([{ run, w: 1 }], 'max', 350) }, [run, runs, mv])
 
-  const title = (n: string) => (n === n.toLowerCase() ? n.replace(/\b\w/g, (c) => c.toUpperCase()) : n)
+  // OSM names are often typed in lower case; capitalise them (small words stay small)
+  const SMALL = new Set(['of', 'and', 'the', 'for', 'in', 'at', 'by', 'to', 'a', 'an', 'on'])
+  const title = (n: string) => {
+    const words = n.split(/\s+/)
+    if (words.filter((w) => /^[a-z]/.test(w)).length < Math.max(1, words.length / 2)) return n
+    return words.map((w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(' ')
+  }
   const rows = useMemo(() => {
     if (!data || !data.runs[run]) return []
     const r = data.runs[run]

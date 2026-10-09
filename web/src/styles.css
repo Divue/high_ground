@@ -85,12 +85,12 @@ a { color: var(--grey); }
 .readout .note { font-family: var(--body); font-size: 15px; margin-left: 8px; color: var(--grey-dim); font-weight: 400; font-variation-settings: normal; }
 .readout .unit { font-size: 0.42em; margin-left: 4px; color: var(--grey-dim); font-weight: 400; font-variation-settings: 'wdth' 100; }
 .when { font-family: var(--head); font-size: 19px; font-variation-settings: 'wdth' 100; }
-.band { display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 999px; font-size: 13px; border: 1px solid var(--line); }
+.band { display: inline-block; margin-top: 8px; padding: 3px 9px; border-radius: 6px; font-size: 13px; border: 1px solid var(--line); }
 .band.dry { color: var(--grey-dim); }
 .band.wet { color: var(--shallow); border-color: rgba(127, 211, 216, 0.4); }
 .band.unsafe_two_wheeler { color: #A6E2E5; background: rgba(127, 211, 216, 0.12); border-color: rgba(127, 211, 216, 0.5); }
 .band.unsafe_car { color: #fff; background: var(--deep); border-color: var(--deep); }
-.chip { display: inline-block; font-size: 10.5px; padding: 1px 6px; margin-left: 6px; border-radius: 4px; color: var(--grey-dim); border: 1px solid var(--line); vertical-align: 2px; }
+.chip { display: inline-block; font-size: 10.5px; padding: 1px 6px; margin-left: 6px; border-radius: 6px; color: var(--grey-dim); border: 1px solid var(--line); vertical-align: 2px; }
 .chip.bad { color: var(--grey); border-style: dashed; border-color: var(--grey); }
 
 .decision { margin-top: 10px; padding: 9px 11px; border-radius: 8px; border: 1px solid rgba(201, 212, 216, 0.3); font-size: 15px; }
@@ -228,6 +228,7 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .glyph .iso { stroke: var(--grey); stroke-width: 0.012; }
 .glyph .iso.bold { stroke-width: 0.03; }
 .glyph .ground { stroke: rgba(201, 212, 216, 0.35); stroke-width: 0.02; }
+.glyph .surface { stroke: #7FD3D8; stroke-width: 0.035; }
 .glyph figcaption { margin-top: 2px; font-size: 11.5px; }
 
 /* opening line over the empty sky */
@@ -240,3 +241,11 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 @media (max-width: 480px) { .intro-title { font-size: 21px; } }
 
 .btn.small-btn { padding: 3px 10px; font-size: 13px; }
+
+@media (max-width: 480px) {
+  /* the nav gets its own row so every screen, including About, is reachable */
+  .topbar { flex-wrap: wrap; height: auto; row-gap: 0; padding-bottom: 6px; background: #0B2029; }
+  .brand { line-height: 30px; }
+  .nav { flex-basis: 100%; overflow-x: visible; justify-content: space-between; }
+  .nav button { padding: 4px 4px; font-size: 13.5px; }
+}
