@@ -78,3 +78,9 @@ export function mixDescription(mix: MixPart[], runs: Runs): string {
   const [a, b] = mix
   return `blend of ${runs[a.run]?.total_mm} mm and ${runs[b.run]?.total_mm} mm runs`
 }
+
+/** Local wall-clock ISO string without a zone (what the Lambdas expect, like current.json). */
+export function localIso(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}

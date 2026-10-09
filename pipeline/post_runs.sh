@@ -15,4 +15,5 @@ step python 04_streets.py
 step python 05_features.py
 step python 07_export_tiles.py
 step python write_current_local.py
+step python ../docs/make_demo_guide.py
 echo "post_runs done" | tee -a $LOG

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { API_BASE } from '../config'
 import { postAPI } from '../lib/data'
-import type { Scenario } from '../lib/scenario'
+import { localIso, type Scenario } from '../lib/scenario'
 
 interface Ans { answer: string; numbers: { value: string; grounded: boolean }[]; tools: { tool: string }[]; all_grounded: boolean }
 interface Msg { who: 'user' | 'bot'; text: string; nums?: Ans['numbers']; tools?: string[] }
@@ -41,8 +41,9 @@ export default function Assistant({ place, scenario }: {
     setQ('')
     setBusy(true)
     try {
-      const sc = scenario.kind === 'replay' ? { run: scenario.mix[0].run, label: scenario.label, start_local: scenario.start.toISOString() }
-        : scenario.kind === 'whatif' ? (scenario.mix.length === 1 ? { run: scenario.mix[0].run } : { lower: scenario.mix[0].run, upper: scenario.mix[1].run, w: scenario.mix[1].w })
+      const sc = scenario.kind === 'replay' ? { run: scenario.mix[0].run, label: scenario.label, start_local: localIso(scenario.start) }
+        : scenario.kind === 'whatif' ? (scenario.mix.length === 1 ? { run: scenario.mix[0].run, start_local: localIso(scenario.start) }
+          : { lower: scenario.mix[0].run, upper: scenario.mix[1].run, w: scenario.mix[1].w, start_local: localIso(scenario.start) })
           : null
       const r = await postAPI<Ans>('/ask', { question, lat: place?.lat, lon: place?.lon, place: place?.label, scenario: sc })
       setLog((l) => [...l, { who: 'bot', text: r.answer, nums: r.numbers, tools: r.tools.map((t) => t.tool) }])
