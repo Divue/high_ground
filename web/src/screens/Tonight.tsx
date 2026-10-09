@@ -13,6 +13,7 @@ import Readout from '../ui/Readout'
 import Search, { type Place } from '../ui/Search'
 import Subscribe from '../ui/Subscribe'
 import Timeline from '../ui/Timeline'
+import Timelapse from '../ui/Timelapse'
 
 interface Props {
   mv: MapView
@@ -110,7 +111,40 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   }, [place, ans, arrived, scenario])
 
   // scrubbing by hand stops the playback
-  const scrub = useCallback((h: number) => { playToken.current++; fadeMs.current = 450; setHour(h) }, [])
+  const scrub = useCallback((h: number) => {
+    playToken.current++; fadeMs.current = 450; setHour(h)
+    setLapse((l) => (l === 'playing' ? 'done' : l))
+  }, [])
+
+  // "Watch the whole storm": a replay played hour by hour over a wide view of the city
+  const [lapse, setLapse] = useState<'off' | 'playing' | 'done'>('off')
+  const lapseRun = scenario.kind === 'replay' && scenario.mix.length === 1 ? scenario.mix[0].run : null
+  useEffect(() => { setLapse('off') }, [place, scenario])
+  const watchStorm = async () => {
+    if (!lapseRun) return
+    const token = ++playToken.current
+    setLapse('playing')
+    const H = scenario.hours
+    const stepMs = prefersReducedMotion() ? 0 : Math.min(800, Math.max(450, Math.round(30000 / H)))
+    await mv.showWide()
+    for (let h = 1; h <= H; h++) {
+      await Promise.all(scenario.mix.map(({ run }) => loadGray(`water/${run}/${frameName(h)}.png`).catch(() => null)))
+      if (playToken.current !== token) return
+      fadeMs.current = stepMs
+      setHour(h)
+      await new Promise((r) => setTimeout(r, stepMs))
+    }
+    if (playToken.current !== token) return
+    fadeMs.current = 450
+    setLapse('done')
+  }
+  const endLapse = () => {
+    playToken.current++
+    fadeMs.current = 450
+    setLapse('off')
+    if (place) mv.flyTo([place.lon, place.lat])
+    if (ans) setHour(ans.peakHour ?? hour)
+  }
 
   // Depth frame for the current hour
   useEffect(() => {
@@ -187,6 +221,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           {scenario.kind === 'replay' && ', running as if it started at 6 PM tonight'}
           {scenario.kind === 'forecast' && current && <> · forecast updated {new Date(current.updated_at).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</>}
         </div>
+        {lapseRun && lapse === 'off' && runs[lapseRun]?.wet_share_15cm_hourly && (
+          <button className="btn" style={{ marginTop: 10 }} onClick={watchStorm}>Watch the whole storm</button>
+        )}
+        {lapseRun && lapse !== 'off' && (
+          <Timelapse run={runs[lapseRun]} hour={hour} playing={lapse === 'playing'} onStop={endLapse}
+            onProof={lapseRun.startsWith('dec2015') ? () => { window.location.hash = 'proof' } : null} />
+        )}
 
         {dryTonight && (
           <div style={{ marginTop: 12 }}>
@@ -198,7 +239,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
 
         {error && <p className="small" role="alert">{error}</p>}
 
-        {seg && ans && band && scenario.mix.length > 0 && (
+        {lapse === 'off' && seg && ans && band && scenario.mix.length > 0 && (
           <>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
             <Readout cm={ans.maxCm} />
@@ -254,8 +295,10 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <span className="emergency">112</span>.</p>
         </div>
       </div>
-      {scenario.mix.length > 0 && <Timeline scenario={scenario} runs={runs} hour={hour} setHour={scrub}
-        marker={route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
+      {scenario.mix.length > 0 && <Timeline runs={runs} hour={hour} setHour={scrub}
+        // during the time-lapse the timeline shows the storm's real dates, like the caption card
+        scenario={lapse !== 'off' && lapseRun && runs[lapseRun]?.start_local ? { ...scenario, start: new Date(runs[lapseRun].start_local!) } : scenario}
+        marker={lapse === 'off' && route?.leaveBy && route.streetFloods ? { hour: route.leaveBy, label: `leave by ${clockLabel(scenario.start, route.leaveBy)}` } : null} />}
     </>
   )
 }

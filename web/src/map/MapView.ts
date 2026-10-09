@@ -141,6 +141,15 @@ export class MapView {
     })
   }
 
+  /** Wide view for the storm time-lapse: looking north-west from Pallikaranai over Velachery to the upper Adyar,
+   *  where the corrected 2015 run floods land that rain alone does not. */
+  showWide() {
+    const reduced = prefersReducedMotion()
+    this.map.easeTo({ center: [80.185, 12.975], zoom: 12.9, pitch: 60, bearing: -40, duration: reduced ? 0 : 2200,
+      padding: { left: 380, top: 0, right: 0, bottom: 120 }, essential: true })
+    return new Promise<void>((res) => { if (reduced) res(); else this.map.once('moveend', () => res()) })
+  }
+
   /** True when the camera already shows this point at street view (no second flight needed). */
   isFraming(p: [number, number]) {
     const c = this.map.getCenter()

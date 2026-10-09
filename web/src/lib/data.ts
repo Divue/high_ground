@@ -51,6 +51,8 @@ export interface RunInfo {
   rain_mm_h: number[]
   drainage_mm_h: number
   wet_share_15cm: number
+  wet_share_15cm_hourly?: number[]     // share of modelled land >= 15 cm at each hour
+  reservoir?: { peak_cusecs: number; peak_from_local: string; rising_from_local: string; note: string } | null
 }
 export type Runs = Record<string, RunInfo>
 

@@ -204,3 +204,11 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .legend .iso.bold { border-top-width: 2.5px; }
 .legend .dot { display: inline-block; width: 9px; height: 9px; margin: 0 6.5px; border-radius: 50%; background: var(--amber); }
 @media (max-width: 900px) { .legend { display: none; } }
+
+/* storm time-lapse */
+.lapse { margin-top: 14px; }
+.lapse-clock { font-family: var(--head); font-size: 17px; font-weight: 520; font-variant-numeric: tabular-nums; }
+.lapse-share { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.lapse-share .num { font-family: var(--head); font-size: 56px; line-height: 1; font-weight: 640; font-variation-settings: 'wdth' 110; font-variant-numeric: tabular-nums; }
+.lapse-event { min-height: 3.2em; margin: 12px 0; font-size: 15px; line-height: 1.45; }
+.lapse-actions { display: flex; gap: 8px; flex-wrap: wrap; }

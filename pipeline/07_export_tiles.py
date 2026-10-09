@@ -66,6 +66,18 @@ def to_merc(arr, src_t, dst_t, Wm, Hm, resampling=Resampling.bilinear):
     return dst
 
 
+def reservoir_story(rid):
+    """The documented release assumption (config.yaml) for captions: when it starts and peaks."""
+    rc = (CFG.get("replays", {}).get(rid) or {}).get("reservoir")
+    if not rc:
+        return None
+    tl = rc["cusecs_timeline_local"]
+    peak = max(c for _, c in tl)
+    return dict(peak_cusecs=int(peak), peak_from_local=next(t for t, c in tl if c == peak),
+                rising_from_local=next(t for t, c in tl if c >= 10_000), entry_lonlat=rc["entry_lonlat"],
+                source=rc.get("source", ""), note="Modelled release; an assumption from the CAG timeline, not a measured flow.")
+
+
 def main():
     transform, W, H = grid_spec()
     dtm = np.load(WORK / "dtm_bare.npy").astype(np.float32)
@@ -99,13 +111,19 @@ def main():
         m = to_merc(hmax * 100, transform, mt, Wm, Hm)
         Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / "max.png", optimize=True)
         snaps = np.load(d / "snapshots_cm.npy", mmap_mode="r")
+        storm_land = land & ~run_water
+        wet_hourly = []
         for k in range(snaps.shape[0]):
-            m = to_merc(np.where(run_water, 0, np.asarray(snaps[k], np.float32)), transform, mt, Wm, Hm)
+            sk = np.asarray(snaps[k], np.float32)
+            # share of modelled land under >= 15 cm at this hour (same masks as wet_share_15cm)
+            wet_hourly.append(round(float((sk[storm_land] >= CFG["validation"]["hit_depth_m"] * 100).mean()), 4))
+            m = to_merc(np.where(run_water, 0, sk), transform, mt, Wm, Hm)
             Image.fromarray(np.clip(np.round(m), 0, 255).astype(np.uint8), "L").save(od / f"h{k+1:02d}.png", optimize=True)
         web_runs[rid] = dict(label=info["label"], kind=info["kind"], total_mm=info["total_mm"], tide=info["tide"],
                              hours=int(snaps.shape[0]), start_local=info["start_local"],
                              rain_mm_h=full["rain_mm_h"], drainage_mm_h=info["drainage_mm_h"],
-                             wet_share_15cm=round(wet_share, 4))
+                             wet_share_15cm=round(wet_share, 4), wet_share_15cm_hourly=wet_hourly,
+                             reservoir=reservoir_story(rid))
         print(f"water textures {rid}: {snaps.shape[0]} hours")
 
     write_json(WEB / "water" / "meta.json", dict(
