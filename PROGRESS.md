@@ -257,12 +257,12 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
   Skipped as infeasible or off-licence: photogrammetry and Google 3D tiles. Open Buildings 2.5D heights (CC BY 4.0) are optional, last.
 - Design-critic and qa-tester run once after tonight's v3 rebuild, covering these frontend changes too.
 
-### Model-timed rise + single opening flight (Fri ~19:50)
+### Model-timed rise + single opening flight (Fri ~19:15)
 - **Glitch found and fixed.** The opening landed at zoom 14.2 and started the water rising. The default Velachery place then triggered a second flight to zoom 15.2, which snapped the water to zero and raised it again. The opening now lands on the street view itself (`STREET_VIEW`), and Tonight skips the flight when the camera already frames the place (`MapView.isFraming`).
 - **The water now rises the way the model says.** There is no uniform 0→1 multiplier any more. The flight shows hour 1 (6 PM: channels only). After landing, the timeline plays the night to the street's peak through 8 of the model's own hourly frames, cross-faded, in about 3 s. Rain follows the hourly rainfall. It plays once per place and storm, scrubbing by hand stops it, and reduced motion jumps to the peak.
 - **Answer card at about 12 s** after load (was 17.6 s in QA); the hero test's load step went 14.7 s → 10.6 s. Frames: `review/p5-dev/opening_rise/` (`contact.png`). Hero test: 9/9 OK, no errors. Leave-by test OK; its `route line` probe targets a removed element.
 
-### "Watch the whole storm" time-lapse (Fri ~20:30)
+### "Watch the whole storm" time-lapse (Fri ~19:25)
 - A button on replays plays every model hour in about 30 s over a wide view. It shows the storm's real date and time (the timeline switches to real dates too), a large "% of the modelled land under 15 cm" figure, and event captions: rain begins, heaviest hour, release passes 10,000 cusecs and peaks (labelled as modelled from the CAG timeline), most land under water, rain stops, and the end state. The end offers "Back to my street" and, for 2015, "See how we tested this" (Proof).
 - **All numbers come from `runs.json`.** `07_export_tiles.py` now writes `wet_share_15cm_hourly` (land only, same masks as `wet_share_15cm`) and `reservoir` (from the config assumption). The served `runs.json` was patched for development with v3 values; the full re-export tonight replaces it.
 - Test `web/tests/timelapse.mjs`: 2015 plays in 31 s, no errors, captions match `runs.json`. Frames are in `review/p5-dev/timelapse/`.
