@@ -99,10 +99,10 @@ def _lim(q, fa, fb):
 
 @nb.njit(parallel=True, cache=True)
 def continuity(h, qx, qy, fac, z, sea, outlet_h, rain_m, loss_rate, inflow_d, Q, dt, dx, t_now, thr,
-               hmax, t15, row_stats, hn_all):
+               hmax, t15, row_stats, hn_all, is_edge):
     """Apply limited fluxes, update depth, sources/sinks, reset sea cells.
     Each cell also stores its own east/south limited flux back (each face written once).
-    row_stats[i] = [sea_removed_depth_sum, loss_depth_sum, rain_depth_sum, inflow_depth_sum, max_h]"""
+    row_stats[i] = [sea_removed, loss, rain, inflow, max_h, edge_removed] (depth sums; sea_removed includes edges)"""
     H, W = h.shape
     for i in nb.prange(H):
         for j in range(W):
@@ -118,6 +118,7 @@ def continuity(h, qx, qy, fac, z, sea, outlet_h, rain_m, loss_rate, inflow_d, Q,
             hn_all[i, j] = h[i, j] + net * dt / dx
     for i in nb.prange(H):
         s_sea = 0.0
+        s_edge = 0.0
         s_loss = 0.0
         s_rain = 0.0
         s_in = 0.0
@@ -134,6 +135,8 @@ def continuity(h, qx, qy, fac, z, sea, outlet_h, rain_m, loss_rate, inflow_d, Q,
                 # outlet cell (sea at tide level, or free-outfall domain edge at h = 0)
                 target = outlet_h[i, j]
                 s_sea += hn - target
+                if is_edge[i, j]:
+                    s_edge += hn - target
                 hn = target
             else:
                 hn += rain_m
@@ -159,6 +162,7 @@ def continuity(h, qx, qy, fac, z, sea, outlet_h, rain_m, loss_rate, inflow_d, Q,
         row_stats[i, 2] = s_rain
         row_stats[i, 3] = s_in
         row_stats[i, 4] = mh
+        row_stats[i, 5] = s_edge
 
 
 # ----------------------------------------------------------------------------- scenarios
@@ -269,7 +273,9 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     dtm0 = np.load(WORK / "dtm_bare.npy").astype(np.float64)
     h[burn] = np.clip(dtm0[burn] - z[burn], 0.0, bd[burn])
     outlet_h = np.zeros(z.shape)
-    outlet_h[sea_only] = np.maximum(tide - z[sea_only], 0.0)
+    # every outlet (sea and the free-outfall land edge) holds the tide level where its bed is below it,
+    # so a channel crossing the edge below sea level cannot drain the sea through the city
+    outlet_h[sea] = np.maximum(tide - z[sea], 0.0)
     h[sea] = outlet_h[sea]
     if CFG["solver"].get("antecedent", "dry") == "full" or os.environ.get("HG_ANTECEDENT") == "full":
         # Wet antecedent: closed pockets and tanks already full to their spill level (monsoon season)
@@ -315,13 +321,14 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     fac = np.ones(z.shape)
     hmax = np.zeros(z.shape)
     t15 = np.full(z.shape, -1.0)
-    row = np.zeros((H, 5))
+    row = np.zeros((H, 6))
     hbuf = np.empty(z.shape)
     snaps = np.zeros((nsnap, H, W), np.uint16) if snapshots else None
 
     land = ~sea
     V0 = float(h[land].sum() * area)
-    vin_rain = vin_res = vout_sea = vout_loss = 0.0
+    vin_rain = vin_res = vout_sea = vout_loss = vout_edge = 0.0
+    h_start = None
     t = 0.0
     hmax_dom = float(h.max())
     nsteps = 0
@@ -338,11 +345,14 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
         momentum(h, z32, qx, qy, n2, dt, dx, G, scfg["h_dry_m"])
         limit_outflow(h, qx, qy, fac, dt, dx)
         continuity(h, qx, qy, fac, z, sea, outlet_h, rain_m, loss, inflow_unit, Q, dt, dx, max(ts, 0.0) / 3600.0,
-                   scfg["wet_threshold_m"] if ts >= 0 else 1e9, hmax, t15, row, hbuf)
+                   scfg["wet_threshold_m"] if ts >= 0 else 1e9, hmax, t15, row, hbuf, edge_out)
         if ts < 0:
             hmax[:] = 0.0   # do not record antecedent channel water during spin-up as storm peaks
             hmax[burn] = 0.0
+        elif h_start is None:
+            h_start = h.astype(np.float32)   # standing water at storm start (post-processing masks it)
         vout_sea += row[:, 0].sum() * area
+        vout_edge += row[:, 5].sum() * area
         vout_loss += row[:, 1].sum() * area
         vin_rain += row[:, 2].sum() * area
         vin_res += row[:, 3].sum() * area
@@ -371,6 +381,7 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
     d.mkdir(parents=True, exist_ok=True)
     np.save(d / "hmax.npy", hmax_storm.astype(np.float32))
     np.save(d / "t15.npy", t15.astype(np.float32))
+    np.save(d / "h_start.npy", h_start if h_start is not None else np.zeros(z.shape, np.float32))
     if snapshots:
         np.save(d / "snapshots_cm.npy", snaps[:snap_i])
     info = dict(id=out_id, scenario=run_id, label=sc["label"], kind=sc["kind"], total_mm=sc["total_mm"],
@@ -378,7 +389,8 @@ def run(run_id: str, drainage_mm_h: float | None = None, tag: str | None = None,
                 rain_mm_h=[round(float(x), 3) for x in rain], tail_h=sc["tail_h"],
                 hours=snap_i, steps=nsteps, wall_s=round(time.time() - wall, 1),
                 volume_m3=dict(initial=V0, final=V1, rain=vin_rain, reservoir=vin_res,
-                               sea_outflow=vout_sea, losses=vout_loss, error=err),
+                               outflow_total=vout_sea, outflow_sea=vout_sea - vout_edge, outflow_land_edges=vout_edge,
+                               losses=vout_loss, error=err),
                 mass_error_pct=err_pct,
                 reservoir_peak_m3s=float(res_q.max()) if res_q is not None else 0.0,
                 wet_share_15cm=float((hmax_storm[land] >= 0.15).mean()))

@@ -5,9 +5,8 @@ cd "$(dirname "$0")"
 source env.sh
 LOG=../data/logs
 mkdir -p $LOG
-echo "[$(date +%T)] calibration start" >> $LOG/run_all.log
-python -u 02b_calibrate.py >> $LOG/calibrate.log 2>&1
-echo "[$(date +%T)] calibration done: $(cat ../data/out/calibration.json | python -c 'import json,sys; print(json.load(sys.stdin)["drainage_mm_h"])') mm/h" >> $LOG/run_all.log
+# v3: drain capacity is a stated assumption (calibration.json explains why); no calibration step
+echo "[$(date +%T)] drainage $(python -c 'import json; print(json.load(open("../data/out/calibration.json"))["drainage_mm_h"])') mm/h (assumption)" >> $LOG/run_all.log
 # Order: the runs the product needs first
 for r in design_200_mean dec2015_rain dec2015_reservoir michaung2023 fengal2024 \
          design_100_mean design_300_mean design_50_mean design_150_mean design_400_mean \

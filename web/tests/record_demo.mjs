@@ -30,7 +30,7 @@ if (box) {
   for (let f = 0.05; f <= 0.6; f += 0.05) { await page.mouse.click(box.x + box.width * f, box.y + box.height / 2); await wait(450) }
 }
 await wait(1500)
-const routeBtn = page.locator('button:has-text("Dry route there")').first()
+const routeBtn = page.locator('button:has-text("When to leave")').first()
 if (await routeBtn.count()) { await routeBtn.click(); await wait(6000) }
 await page.click('button:has-text("Email me if this changes")')
 await typeSlow('#email', 'resident@example.com')

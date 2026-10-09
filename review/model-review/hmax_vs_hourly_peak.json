@@ -1,0 +1,38 @@
+{
+ "design_200_mean": {
+  "gt10cm": 0,
+  "gt20cm": 0,
+  "gt50cm": 0,
+  "gt100cm": 0,
+  "wet_cells": 207003,
+  "share_of_wet_cells_hmax_exceeds_hourly_peak_by_20cm": 0.0,
+  "p99_excess_cm_wet": 0.5
+ },
+ "michaung2023": {
+  "gt10cm": 8469,
+  "gt20cm": 4952,
+  "gt50cm": 1704,
+  "gt100cm": 752,
+  "wet_cells": 268200,
+  "share_of_wet_cells_hmax_exceeds_hourly_peak_by_20cm": 0.0185,
+  "p99_excess_cm_wet": 34.0
+ },
+ "dec2015_reservoir": {
+  "gt10cm": 0,
+  "gt20cm": 0,
+  "gt50cm": 0,
+  "gt100cm": 0,
+  "wet_cells": 287799,
+  "share_of_wet_cells_hmax_exceeds_hourly_peak_by_20cm": 0.0,
+  "p99_excess_cm_wet": 0.6
+ },
+ "design_50_mean": {
+  "gt10cm": 789,
+  "gt20cm": 375,
+  "gt50cm": 6,
+  "gt100cm": 0,
+  "wet_cells": 62106,
+  "share_of_wet_cells_hmax_exceeds_hourly_peak_by_20cm": 0.006,
+  "p99_excess_cm_wet": 13.6
+ }
+}

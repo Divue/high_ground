@@ -1,6 +1,6 @@
 // A* over the precomputed road graph, run in the browser. Edges deeper than the limit
 // (cars 30 cm, two-wheelers 15 cm) at peak in the active scenario are skipped.
-import { getBin, getJSON } from './data'
+import { getBin, getJSON, type WaterMeta } from './data'
 import type { MixPart } from './scenario'
 import { distM } from './geo'
 
@@ -199,4 +199,85 @@ export function toArterial(g: Graph, s: number, depth: Float32Array, limitCm: nu
   }
   if (target < 0) return null
   return astar(g, target, s, depth, limitCm)
+}
+
+// ---------------------------------------------------------------- time-aware routing
+// Edge depth at a given hour is sampled from the same hourly depth frames the map shows,
+// so a route can be planned for the moment you leave rather than the storm's peak.
+const R = 20037508.342789244
+let samplesP: Promise<{ start: Uint32Array; pix: Uint32Array; bridge: Uint8Array | null }> | null = null
+
+export function edgeSamples(g: Graph, meta: WaterMeta) {
+  if (!samplesP) {
+    samplesP = (async () => {
+      const bridge = await getBin('graph/bridge.bin').then((b) => new Uint8Array(b)).catch(() => null)
+      const [l, b, r, t] = meta.bbox_mercator
+      const W = meta.width, H = meta.height
+      const sx = W / (r - l), sy = H / (t - b)
+      const E = g.len.length
+      const start = new Uint32Array(E + 1)
+      const pix: number[] = []
+      const toPix = (lon: number, lat: number) => {
+        const x = lon * R / 180
+        const y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) * R / Math.PI
+        const c = Math.floor((x - l) * sx), rr = Math.floor((t - y) * sy)
+        return c >= 0 && c < W && rr >= 0 && rr < H ? rr * W + c : -1
+      }
+      for (let e = 0; e < E; e++) {
+        start[e] = pix.length
+        const a = g.geomOff[e], z = g.geomOff[e + 1]
+        for (let i = a; i < z; i++) {
+          const lon = g.geom[2 * i], lat = g.geom[2 * i + 1]
+          const p = toPix(lon, lat)
+          if (p >= 0) pix.push(p)
+          if (i + 1 < z) {   // midpoints every ~15 m on long segments
+            const lon2 = g.geom[2 * i + 2], lat2 = g.geom[2 * i + 3]
+            const n = Math.floor(distM(lon, lat, lon2, lat2) / 15)
+            for (let k = 1; k < n; k++) {
+              const q = toPix(lon + (lon2 - lon) * k / n, lat + (lat2 - lat) * k / n)
+              if (q >= 0) pix.push(q)
+            }
+          }
+        }
+      }
+      start[E] = pix.length
+      return { start, pix: Uint32Array.from(pix), bridge }
+    })()
+  }
+  return samplesP
+}
+
+export async function edgeDepthFromFrame(g: Graph, meta: WaterMeta, frame: Uint8Array): Promise<Float32Array> {
+  const { start, pix, bridge } = await edgeSamples(g, meta)
+  const E = g.len.length
+  const d = new Float32Array(E)
+  for (let e = 0; e < E; e++) {
+    if (bridge && bridge[e]) continue
+    let m = 0
+    for (let k = start[e]; k < start[e + 1]; k++) { const v = frame[pix[k]]; if (v > m) m = v }
+    d[e] = m
+  }
+  return d
+}
+
+export interface LeavePlan { leaveByHour: number | null; route: Route | null; normal: Route | null; openAllNight: boolean }
+
+/** Latest hour (up to `untilHour`) at which a route under `limitCm` still exists, and that route. */
+export async function leaveByPlan(fromLL: [number, number], toLL: [number, number], meta: WaterMeta,
+  frameAt: (h: number) => Promise<Uint8Array | null>, untilHour: number, limitCm = 30): Promise<LeavePlan> {
+  const g = await loadGraph()
+  const s = nearestNode(g, fromLL[0], fromLL[1])
+  const t = nearestNode(g, toLL[0], toLL[1])
+  const normal = astar(g, s, t, null, limitCm)
+  let best: Route | null = null
+  let bestH: number | null = null
+  for (let h = 1; h <= untilHour; h++) {
+    const f = await frameAt(h)
+    if (!f) break
+    const r = astar(g, s, t, await edgeDepthFromFrame(g, meta, f), limitCm)
+    if (!r) break
+    best = r
+    bestH = h
+  }
+  return { leaveByHour: bestH, route: best, normal, openAllNight: bestH === untilHour }
 }

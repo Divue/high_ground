@@ -17,7 +17,9 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
   }, [mv])
   useEffect(() => { mv.showMix(sc.mix, 'max', 350) }, [mm, tide]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const wet = sc.mix.reduce((s, m) => s + m.w * (runs[m.run]?.wet_share_15cm ?? 0), 0)
+  // Never invent a number: if any run in the blend is missing, say so instead of treating it as 0
+  const computed = sc.mix.every((m) => runs[m.run])
+  const wet = computed ? sc.mix.reduce((s, m) => s + m.w * runs[m.run].wet_share_15cm, 0) : null
   const dom = [...sc.mix].sort((a, b) => b.w - a.w)[0].run
   const hr = hosp?.runs[dom]
   const blended = sc.mix.length > 1
@@ -38,8 +40,10 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
       <div className="divider" />
       <div className="row" style={{ gap: 24, alignItems: 'flex-end' }}>
         <div>
-          <div className="stat">{Math.round(wet * 100)}%</div>
-          <div className="muted small">of the city’s land under at least 15 cm of water<span className="chip">from the model</span></div>
+          {wet != null ? <>
+            <div className="stat">{Math.round(wet * 100)}%</div>
+            <div className="muted small">of the city’s land under at least 15 cm of water<span className="chip">from the model</span></div>
+          </> : <div className="muted small">This rainfall has not been computed yet.</div>}
         </div>
         {hr && hosp && (
           <div>

@@ -1,0 +1,135 @@
+{
+ "model": {
+  "hit": 0.393,
+  "false": 0.393,
+  "skill": 0.0,
+  "flooded_share": 0.378
+ },
+ "model_displaced_3to6km_mean": {
+  "hit": 0.379,
+  "false": 0.354,
+  "skill": 0.024,
+  "flooded_share": 0.3
+ },
+ "model_displaced_each": [
+  {
+   "shift_cells": [
+    100,
+    0
+   ],
+   "hit": 0.454,
+   "false": 0.399,
+   "skill": 0.056,
+   "flooded_share": 0.361
+  },
+  {
+   "shift_cells": [
+    -100,
+    0
+   ],
+   "hit": 0.393,
+   "false": 0.382,
+   "skill": 0.01,
+   "flooded_share": 0.325
+  },
+  {
+   "shift_cells": [
+    0,
+    100
+   ],
+   "hit": 0.452,
+   "false": 0.431,
+   "skill": 0.021,
+   "flooded_share": 0.373
+  },
+  {
+   "shift_cells": [
+    0,
+    -100
+   ],
+   "hit": 0.289,
+   "false": 0.301,
+   "skill": -0.012,
+   "flooded_share": 0.238
+  },
+  {
+   "shift_cells": [
+    170,
+    0
+   ],
+   "hit": 0.453,
+   "false": 0.414,
+   "skill": 0.039,
+   "flooded_share": 0.345
+  },
+  {
+   "shift_cells": [
+    -170,
+    0
+   ],
+   "hit": 0.373,
+   "false": 0.377,
+   "skill": -0.004,
+   "flooded_share": 0.315
+  },
+  {
+   "shift_cells": [
+    0,
+    170
+   ],
+   "hit": 0.425,
+   "false": 0.38,
+   "skill": 0.044,
+   "flooded_share": 0.327
+  },
+  {
+   "shift_cells": [
+    0,
+    -170
+   ],
+   "hit": 0.24,
+   "false": 0.226,
+   "skill": 0.014,
+   "flooded_share": 0.18
+  },
+  {
+   "shift_cells": [
+    120,
+    120
+   ],
+   "hit": 0.466,
+   "false": 0.38,
+   "skill": 0.086,
+   "flooded_share": 0.332
+  },
+  {
+   "shift_cells": [
+    -120,
+    -120
+   ],
+   "hit": 0.246,
+   "false": 0.255,
+   "skill": -0.01,
+   "flooded_share": 0.208
+  }
+ ],
+ "random_speckle_same_share": {
+  "hit": 0.642,
+  "false": 0.592,
+  "skill": 0.05,
+  "flooded_share": 0.377
+ },
+ "matched_elevation_baseline": {
+  "hit": 0.258,
+  "false": 0.292,
+  "skill": -0.035,
+  "flooded_share": 0.378
+ },
+ "matched_local_relief_baseline_330m": {
+  "hit": 0.531,
+  "false": 0.481,
+  "skill": 0.049,
+  "flooded_share": 0.378
+ },
+ "note": "even wards, hit = >=15 cm on >=30% of sampled length; false = same on unreported OSM roads"
+}

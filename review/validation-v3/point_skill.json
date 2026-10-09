@@ -1,0 +1,42 @@
+{
+ "GCC 2015 hotspots": {
+  "n_points": 327,
+  "model dec2015_reservoir": 0.516,
+  "model design_200_mean": 0.531,
+  "model michaung2023": 0.512,
+  "model exp_B (v1)": 0.503,
+  "low elevation (-DTM)": 0.543,
+  "local hollow (-relief 330 m)": 0.552,
+  "near a channel (-distance)": 0.58,
+  "random": 0.456
+ },
+ "GCC 2015 stagnation points": {
+  "n_points": 751,
+  "model dec2015_reservoir": 0.51,
+  "model design_200_mean": 0.521,
+  "model michaung2023": 0.512,
+  "model exp_B (v1)": 0.5,
+  "low elevation (-DTM)": 0.46,
+  "local hollow (-relief 330 m)": 0.525,
+  "near a channel (-distance)": 0.541,
+  "random": 0.484
+ },
+ "hotspot depth (feet) rank correlation": {
+  "model dec2015_reservoir": {
+   "spearman": 0.043,
+   "n": 327
+  },
+  "model design_200_mean": {
+   "spearman": -0.042,
+   "n": 327
+  },
+  "model michaung2023": {
+   "spearman": 0.01,
+   "n": 327
+  },
+  "model exp_B (v1)": {
+   "spearman": 0.108,
+   "n": 327
+  }
+ }
+}

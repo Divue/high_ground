@@ -1,0 +1,401 @@
+{
+ "places": {
+  "design_100_mean": {
+   "Velachery": {
+    "wet_share_at_hours": {
+     "2": 0.006,
+     "4": 0.073,
+     "6": 0.132,
+     "8": 0.146,
+     "12": 0.154,
+     "30": 0.159
+    },
+    "final_hmax_wet_share": 0.16,
+    "median_t15_h_of_wet": 4.21,
+    "mean_elev_m": 8.13
+   },
+   "Pallikaranai": {
+    "wet_share_at_hours": {
+     "2": 0.065,
+     "4": 0.111,
+     "6": 0.17,
+     "8": 0.191,
+     "12": 0.222,
+     "30": 0.23
+    },
+    "final_hmax_wet_share": 0.257,
+    "median_t15_h_of_wet": 4.42,
+    "mean_elev_m": 4.51
+   },
+   "T. Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.0,
+     "4": 0.064,
+     "6": 0.162,
+     "8": 0.183,
+     "12": 0.202,
+     "30": 0.209
+    },
+    "final_hmax_wet_share": 0.209,
+    "median_t15_h_of_wet": 5.61,
+    "mean_elev_m": 13.32
+   },
+   "Anna Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.0,
+     "4": 0.033,
+     "6": 0.144,
+     "8": 0.182,
+     "12": 0.197,
+     "30": 0.199
+    },
+    "final_hmax_wet_share": 0.209,
+    "median_t15_h_of_wet": 5.23,
+    "mean_elev_m": 13.58
+   },
+   "Mylapore": {
+    "wet_share_at_hours": {
+     "2": 0.042,
+     "4": 0.09,
+     "6": 0.128,
+     "8": 0.134,
+     "12": 0.139,
+     "30": 0.141
+    },
+    "final_hmax_wet_share": 0.147,
+    "median_t15_h_of_wet": 3.86,
+    "mean_elev_m": 10.6
+   }
+  },
+  "design_200_mean": {
+   "Velachery": {
+    "wet_share_at_hours": {
+     "2": 0.016,
+     "4": 0.137,
+     "6": 0.168,
+     "8": 0.179,
+     "12": 0.217,
+     "30": 0.218
+    },
+    "final_hmax_wet_share": 0.23,
+    "median_t15_h_of_wet": 3.39,
+    "mean_elev_m": 8.13
+   },
+   "Pallikaranai": {
+    "wet_share_at_hours": {
+     "2": 0.069,
+     "4": 0.181,
+     "6": 0.242,
+     "8": 0.293,
+     "12": 0.4,
+     "30": 0.449
+    },
+    "final_hmax_wet_share": 0.482,
+    "median_t15_h_of_wet": 6.08,
+    "mean_elev_m": 4.51
+   },
+   "T. Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.013,
+     "4": 0.174,
+     "6": 0.211,
+     "8": 0.24,
+     "12": 0.273,
+     "30": 0.29
+    },
+    "final_hmax_wet_share": 0.29,
+    "median_t15_h_of_wet": 3.61,
+    "mean_elev_m": 13.32
+   },
+   "Anna Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.006,
+     "4": 0.178,
+     "6": 0.213,
+     "8": 0.32,
+     "12": 0.337,
+     "30": 0.309
+    },
+    "final_hmax_wet_share": 0.341,
+    "median_t15_h_of_wet": 3.79,
+    "mean_elev_m": 13.58
+   },
+   "Mylapore": {
+    "wet_share_at_hours": {
+     "2": 0.047,
+     "4": 0.133,
+     "6": 0.156,
+     "8": 0.16,
+     "12": 0.168,
+     "30": 0.16
+    },
+    "final_hmax_wet_share": 0.174,
+    "median_t15_h_of_wet": 2.65,
+    "mean_elev_m": 10.6
+   }
+  },
+  "design_300_mean": {
+   "Velachery": {
+    "wet_share_at_hours": {
+     "2": 0.039,
+     "4": 0.162,
+     "6": 0.192,
+     "8": 0.231,
+     "12": 0.265,
+     "30": 0.246
+    },
+    "final_hmax_wet_share": 0.279,
+    "median_t15_h_of_wet": 3.29,
+    "mean_elev_m": 8.13
+   },
+   "Pallikaranai": {
+    "wet_share_at_hours": {
+     "2": 0.094,
+     "4": 0.226,
+     "6": 0.308,
+     "8": 0.423,
+     "12": 0.524,
+     "30": 0.506
+    },
+    "final_hmax_wet_share": 0.565,
+    "median_t15_h_of_wet": 5.48,
+    "mean_elev_m": 4.51
+   },
+   "T. Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.052,
+     "4": 0.198,
+     "6": 0.256,
+     "8": 0.298,
+     "12": 0.338,
+     "30": 0.348
+    },
+    "final_hmax_wet_share": 0.36,
+    "median_t15_h_of_wet": 3.34,
+    "mean_elev_m": 13.32
+   },
+   "Anna Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.028,
+     "4": 0.196,
+     "6": 0.329,
+     "8": 0.346,
+     "12": 0.372,
+     "30": 0.377
+    },
+    "final_hmax_wet_share": 0.387,
+    "median_t15_h_of_wet": 3.89,
+    "mean_elev_m": 13.58
+   },
+   "Mylapore": {
+    "wet_share_at_hours": {
+     "2": 0.062,
+     "4": 0.148,
+     "6": 0.19,
+     "8": 0.187,
+     "12": 0.188,
+     "30": 0.17
+    },
+    "final_hmax_wet_share": 0.211,
+    "median_t15_h_of_wet": 2.45,
+    "mean_elev_m": 10.6
+   }
+  },
+  "michaung2023": {
+   "Velachery": {
+    "wet_share_at_hours": {
+     "2": 0.006,
+     "4": 0.015,
+     "6": 0.049,
+     "8": 0.095,
+     "12": 0.123,
+     "54": 0.266
+    },
+    "final_hmax_wet_share": 0.301,
+    "median_t15_h_of_wet": 23.97,
+    "mean_elev_m": 8.13
+   },
+   "Pallikaranai": {
+    "wet_share_at_hours": {
+     "2": 0.064,
+     "4": 0.075,
+     "6": 0.097,
+     "8": 0.128,
+     "12": 0.154,
+     "54": 0.56
+    },
+    "final_hmax_wet_share": 0.597,
+    "median_t15_h_of_wet": 32.71,
+    "mean_elev_m": 4.51
+   },
+   "T. Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.0,
+     "4": 0.018,
+     "6": 0.055,
+     "8": 0.077,
+     "12": 0.106,
+     "54": 0.365
+    },
+    "final_hmax_wet_share": 0.391,
+    "median_t15_h_of_wet": 25.45,
+    "mean_elev_m": 13.32
+   },
+   "Anna Nagar": {
+    "wet_share_at_hours": {
+     "2": 0.0,
+     "4": 0.009,
+     "6": 0.029,
+     "8": 0.046,
+     "12": 0.111,
+     "54": 0.414
+    },
+    "final_hmax_wet_share": 0.423,
+    "median_t15_h_of_wet": 31.03,
+    "mean_elev_m": 13.58
+   },
+   "Mylapore": {
+    "wet_share_at_hours": {
+     "2": 0.042,
+     "4": 0.05,
+     "6": 0.068,
+     "8": 0.105,
+     "12": 0.122,
+     "54": 0.171
+    },
+    "final_hmax_wet_share": 0.204,
+    "median_t15_h_of_wet": 8.21,
+    "mean_elev_m": 10.6
+   }
+  }
+ },
+ "high_ground": {
+  "run": "design_200_mean",
+  "cells_more_than_3m_above_600m_neighbourhood_min": 394368,
+  "share_of_those_ge15cm": 0.0752,
+  "top5pct_elevation_cells": 43787,
+  "share_top5pct_ge15cm": 0.04,
+  "local_maxima_cells": 62034,
+  "share_local_maxima_ge15cm": 0.4956,
+  "building_obstacle_cells": 14607,
+  "building_cells_ge15cm": 7,
+  "building_cells_ge5cm": 8,
+  "building_max_cm": 20.9
+ },
+ "checkerboard": {
+  "design_200_mean_h6": {
+   "blocks": 163448,
+   "cb_p50_cm": 0.0,
+   "cb_p99_cm": 0.5,
+   "strict_alternation_share_eta": 0.0002,
+   "strict_alternation_share_terrain": 0.0024
+  },
+  "design_200_mean_h30": {
+   "blocks": 178347,
+   "cb_p50_cm": 0.0,
+   "cb_p99_cm": 0.28,
+   "strict_alternation_share_eta": 0.0,
+   "strict_alternation_share_terrain": 0.0043
+  },
+  "michaung2023_h6": {
+   "blocks": 34726,
+   "cb_p50_cm": 0.0,
+   "cb_p99_cm": 80.5,
+   "strict_alternation_share_eta": 0.0492,
+   "strict_alternation_share_terrain": 0.0016
+  },
+  "michaung2023_h54": {
+   "blocks": 238463,
+   "cb_p50_cm": 0.0,
+   "cb_p99_cm": 7.75,
+   "strict_alternation_share_eta": 0.0205,
+   "strict_alternation_share_terrain": 0.0061
+  }
+ },
+ "nan_neg": {
+  "cal_0": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.78,
+   "p999_m": 2.63
+  },
+  "cal_10": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.43,
+   "p999_m": 2.34
+  },
+  "cal_20": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.23,
+   "p999_m": 2.21
+  },
+  "cal_30": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.2,
+   "p999_m": 2.14
+  },
+  "cal_5": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.61,
+   "p999_m": 2.4
+  },
+  "dec2015_rain": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.27,
+   "p999_m": 2.63
+  },
+  "dec2015_reservoir": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.78,
+   "p999_m": 2.63
+  },
+  "design_100_mean": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.09,
+   "p999_m": 1.19
+  },
+  "design_150_mean": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.15,
+   "p999_m": 1.29
+  },
+  "design_200_mean": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.19,
+   "p999_m": 1.5
+  },
+  "design_300_mean": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.24,
+   "p999_m": 2.21
+  },
+  "design_50_mean": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 1.67,
+   "p999_m": 0.84
+  },
+  "fengal2024": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 3.1,
+   "p999_m": 1.16
+  },
+  "michaung2023": {
+   "nan": 0,
+   "neg_depth": 0,
+   "max_m": 5.89,
+   "p999_m": 3.65
+  }
+ }
+}

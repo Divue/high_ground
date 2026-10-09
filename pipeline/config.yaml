@@ -41,13 +41,13 @@ landcover:
   # Storm drains: uniform removal rate on urban cells. This is THE calibration
   # parameter; the value used for all published runs is written by 06_validate.py
   # to data/out/calibration.json. Candidates searched on the calibration half only.
-  drainage_mm_h_default: 10.0
+  drainage_mm_h_default: 10.0       # ASSUMPTION used for all published runs (see calibration.json: the 2015 reports cannot pin it down)
   drainage_mm_h_candidates: [0.0, 5.0, 10.0, 20.0, 30.0]
 
 solver:
   scheme: local-inertial (Bates et al. 2010, de Almeida et al. 2012 theta=1)
   g: 9.81
-  cfl_alpha: 0.7
+  cfl_alpha: 0.5                   # 0.7 sloshed in deep flat ponds (review/model-review/theta_test.json); 0.5 matches a 4x smaller step to 0.1 cm
   h_dry_m: 0.001
   max_dt_s: 10.0
   snapshot_every_s: 3600

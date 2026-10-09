@@ -1,0 +1,42 @@
+{
+ "nrsc_matched_share": {
+  "model": {
+   "share_of_nrsc_covered": 0.386,
+   "csi": 0.169,
+   "flooded_share": 0.378
+  },
+  "elevation_same_share": {
+   "share_of_nrsc_covered": 0.276,
+   "csi": 0.116,
+   "flooded_share": 0.378
+  },
+  "random_same_share": {
+   "share_of_nrsc_covered": 0.379,
+   "csi": 0.166,
+   "flooded_share": 0.377
+  },
+  "lowest20_as_in_proof": {
+   "share_of_nrsc_covered": 0.124,
+   "csi": 0.07,
+   "flooded_share": 0.2
+  }
+ },
+ "segment_auc_even_wards": {
+  "model_share_of_length_ge15cm": 0.504,
+  "model_mean_peak_depth": 0.521,
+  "minus_elevation": 0.469,
+  "random_speckle": 0.515
+ },
+ "ward_level_even": {
+  "model": {
+   "spearman": 0.074,
+   "p": 0.4628,
+   "wards": 100
+  },
+  "elevation_same_share": {
+   "spearman": -0.183,
+   "p": 0.0688,
+   "wards": 100
+  }
+ }
+}

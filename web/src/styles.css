@@ -87,6 +87,9 @@ a { color: var(--grey); }
 .chip { display: inline-block; font-size: 10.5px; padding: 1px 6px; margin-left: 6px; border-radius: 4px; color: var(--grey-dim); border: 1px solid var(--line); vertical-align: 2px; }
 .chip.bad { color: var(--grey); border-style: dashed; border-color: var(--grey); }
 
+.decision { margin-top: 10px; padding: 9px 11px; border-radius: 8px; border: 1px solid rgba(201, 212, 216, 0.3); font-size: 15px; }
+.decision b { font-weight: 600; color: #fff; }
+.decision b.safe { color: var(--amber); }
 .park { display: flex; gap: 10px; align-items: flex-start; }
 .pin { width: 12px; height: 12px; border-radius: 50%; background: var(--amber); margin-top: 6px; flex: none; }
 .park b { color: var(--amber); font-weight: 600; }

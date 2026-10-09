@@ -1,0 +1,46 @@
+{
+ "dec2015_rain": {
+  "sea": 53.07,
+  "north": 56.29,
+  "south": 32.34,
+  "west": 4.67,
+  "east_edge": 0.02,
+  "estimated_total": 146.38,
+  "reported_total_outflow": 151.9,
+  "rain_Mm3": 324.34,
+  "reservoir_Mm3": 0.0
+ },
+ "dec2015_reservoir": {
+  "sea": 104.76,
+  "north": 56.29,
+  "south": 32.34,
+  "west": 31.69,
+  "east_edge": 0.02,
+  "estimated_total": 225.09,
+  "reported_total_outflow": 229.66,
+  "rain_Mm3": 324.34,
+  "reservoir_Mm3": 88.23
+ },
+ "design_200_mean": {
+  "sea": 17.96,
+  "north": 11.74,
+  "south": 7.01,
+  "west": 1.76,
+  "east_edge": 0.01,
+  "estimated_total": 38.48,
+  "reported_total_outflow": 44.97,
+  "rain_Mm3": 173.44,
+  "reservoir_Mm3": 0.0
+ },
+ "michaung2023": {
+  "sea": 223.68,
+  "north": 144.83,
+  "south": 18.26,
+  "west": 4.52,
+  "east_edge": 0.02,
+  "estimated_total": 391.3,
+  "reported_total_outflow": 108.42,
+  "rain_Mm3": 359.9,
+  "reservoir_Mm3": 0.0
+ }
+}

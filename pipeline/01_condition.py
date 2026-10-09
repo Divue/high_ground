@@ -192,6 +192,13 @@ def main():
     # drain out of the domain do not become artificial lakes).
     edge = np.zeros(shape, bool)
     edge[0, :] = edge[-1, :] = edge[:, 0] = edge[:, -1] = True
+    # The Adyar enters through the west edge, so that stretch of edge is not an outlet: otherwise a third
+    # of the 2015 reservoir release drained straight back out (review/model-review/outflow_split.json).
+    from pyproj import Transformer
+    elon, elat = CFG["replays"]["dec2015_reservoir"]["reservoir"]["entry_lonlat"]
+    ex, ey = Transformer.from_crs("EPSG:4326", CRS, always_xy=True).transform(elon, elat)
+    erow = int((ey - transform.f) / transform.e)
+    edge[max(erow - 65, 0):erow + 66, 0] = False
     outlet = sea | (edge & ~sea)
     from skimage.morphology import reconstruction
     seed = np.where(outlet, dtm_bare, dtm_bare.max())

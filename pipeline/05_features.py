@@ -180,6 +180,7 @@ def main():
     edges.astype(np.uint32).tofile(g / "edges.bin")
     lengths.tofile(g / "len.bin")
     cls.astype(np.uint8).tofile(g / "cls.bin")
+    brg.astype(np.uint8).tofile(g / "bridge.bin")      # decks stay passable whatever the water below
     np.array(off, np.uint32).tofile(g / "geom_off.bin")
     np.array(flat, np.float32).tofile(g / "geom.bin")
     write_json(g / "names.json", names)

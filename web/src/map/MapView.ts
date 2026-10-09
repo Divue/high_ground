@@ -7,6 +7,7 @@ import { Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { TOKENS, VELACHERY, prefersReducedMotion } from '../config'
 import { loadGray, loadPixels, loadWaterMeta, type WaterMeta } from '../lib/data'
+import { blendedFrame } from '../lib/frames'
 import type { MixPart } from '../lib/scenario'
 import { WaterLayer } from '../water/WaterLayer'
 import { baseStyle } from './style'
@@ -99,23 +100,10 @@ export class MapView {
   async showMix(mix: MixPart[], hour: number | 'max', ms = 700) {
     if (!this.water || !this.meta) return
     const token = ++this.frameToken
-    const n = this.meta.width * this.meta.height
-    const out = new Uint8Array(n)
-    if (mix.length) {
-      const frames = await Promise.all(mix.map(async ({ run }) => {
-        const name = hour === 'max' ? 'max' : `h${String(Math.max(1, hour)).padStart(2, '0')}`
-        try { return await loadGray(`water/${run}/${name}.png`) } catch { return null }
-      }))
-      if (token !== this.frameToken) return
-      const acc = new Float32Array(n)
-      frames.forEach((f, k) => {
-        if (!f) return
-        const w = mix[k].w
-        for (let i = 0; i < n; i++) acc[i] += w * f[i]
-      })
-      for (let i = 0; i < n; i++) out[i] = acc[i]
-    }
-    this.water.showFrame(out, prefersReducedMotion() ? 0 : ms)
+    const frame = await blendedFrame(mix, hour, this.meta.width * this.meta.height)
+    if (token !== this.frameToken) return
+    // a run that has not been computed shows no water rather than a made-up blend
+    this.water.showFrame(frame ?? new Uint8Array(this.meta.width * this.meta.height), prefersReducedMotion() ? 0 : ms)
   }
 
   /** Preload hourly frames for a mix so scrubbing is instant. */

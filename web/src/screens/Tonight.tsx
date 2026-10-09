@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { REPLAYS, bandFor, prefersReducedMotion } from '../config'
 import { loadParking, type Current, type Parking, type Runs } from '../lib/data'
 import { distM, fmtDistance } from '../lib/geo'
-import { routePair, type Route } from '../lib/routing'
+import { blendedFrame } from '../lib/frames'
+import { leaveByPlan, type Route } from '../lib/routing'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
 import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
 import type { MapView } from '../map/MapView'
@@ -32,7 +33,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [hour, setHour] = useState(1)
   const [park, setPark] = useState<ParkOpt[]>([])
   const [parking, setParking] = useState<Parking | null>(null)
-  const [route, setRoute] = useState<{ normal: Route | null; safe: Route | null; to: string } | null>(null)
+  const [route, setRoute] = useState<{ normal: Route | null; safe: Route | null; to: string; leaveBy: number | null; until: number; streetFloods: boolean } | null>(null)
   const [routing, setRouting] = useState(false)
   const [error, setError] = useState('')
   const [nearby, setNearby] = useState<{ wet: number; total: number } | null>(null)
@@ -46,6 +47,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     if (!place) return
     ;(async () => {
       setError('')
+      setAns(null)          // never mix the previous street's answer with the new street
+      setRoute(null)
       const s = await nearestSegment(place.lon, place.lat).catch(() => null)
       if (dead) return
       if (!s || s.distanceM > 600) {
@@ -117,15 +120,32 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   }, [place, parking, scenario, mv])
 
   const showRoute = useCallback(async (o: ParkOpt) => {
-    if (!place) return
+    if (!place || !mv.meta) return
     setRouting(true)
     try {
-      const r = await routePair([place.lon, place.lat], [o.lon, o.lat], scenario.mix, 30)
-      setRoute({ ...r, to: o.name })
-      mv.setGeoJSON('route-normal', r.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.normal.coords } } : null)
-      mv.setGeoJSON('route-safe', r.safe ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.safe.coords } } : null)
+      // Plan for the moment you leave: the last hour a dry route still exists, and never later
+      // than the hour your own street passes 15 cm.
+      const streetFloods = !!ans?.hoursTo15
+      const until = ans?.hoursTo15 ? Math.max(1, ans.hoursTo15 - 1) : (ans?.peakHour ?? Math.min(scenario.hours, 12))
+      const n = mv.meta.width * mv.meta.height
+      const plan = await leaveByPlan([place.lon, place.lat], [o.lon, o.lat], mv.meta,
+        (h) => blendedFrame(scenario.mix, h, n), until, 30)
+      setRoute({ normal: plan.normal, safe: plan.route, to: o.name, leaveBy: plan.leaveByHour, until, streetFloods })
+      if (plan.leaveByHour) setHour(plan.leaveByHour)
+      mv.setGeoJSON('route-normal', plan.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.normal.coords } } : null)
+      mv.setGeoJSON('route-safe', plan.route ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.route.coords } } : null)
     } finally { setRouting(false) }
-  }, [place, scenario, mv])
+  }, [place, scenario, mv, ans])
+
+  // When the street floods, work out the decision straight away for the nearest dry parking
+  const planned = useRef('')
+  useEffect(() => {
+    if (!ans?.hoursTo15 || !park.length || !seg) return
+    const key = `${seg.id}|${ans.hoursTo15}|${ans.maxCm}|${park[0].name}|${scenario.label}`
+    if (planned.current === key) return
+    planned.current = key
+    showRoute(park[0])
+  }, [ans, park, seg, scenario, showRoute])
 
   const atHour = ans?.seriesCm[hour - 1] ?? 0
   const band = ans ? bandFor(ans.maxCm) : null
@@ -168,6 +188,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             </div>
             <span className={`band ${band.code}`}>{band.label}</span>
             <span className="chip">from the model</span>
+            {ans.hoursTo15 && (
+              <div className="decision" role="status">
+                {routing && !route ? 'Working out when to move your car…'
+                  : route?.safe && route.leaveBy ? <>Move your car to <b className="safe">{route.to}</b> by <b>{clockLabel(scenario.start, route.leaveBy)}</b>.</>
+                    : route ? <>No dry way out to {route.to} before your street floods.</> : null}
+              </div>
+            )}
             <div className="muted small" style={{ marginTop: 6 }}>
               At {clockLabel(scenario.start, hour)}: {atHour} cm · {mixDescription(scenario.mix, runs)}
             </div>
@@ -186,19 +213,20 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                 <div style={{ flex: 1 }}>
                   <b>{o.name}</b>, {fmtDistance(o.d)} away <span className="muted small">({o.kind})</span>
                   <div><button className="btn amber" style={{ marginTop: 6, padding: '5px 10px' }} disabled={routing}
-                    onClick={() => showRoute(o)}>{routing ? 'Finding a dry route' : 'Dry route there'}</button></div>
+                    onClick={() => showRoute(o)}>{routing ? 'Checking each hour…' : 'When to leave'}</button></div>
                 </div>
               </div>
             ))}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
             {route && (
-              <p className="small">
-                {route.safe ? <>Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}{route.normal && route.safe.lengthM - route.normal.lengthM > 30 ? `, ${fmtDistance(route.safe.lengthM - route.normal.lengthM)} longer than the usual way` : ''}.</>
-                  : <>No route avoids water deeper than 30 cm in this scenario.</>}
-                {route.normal && route.normal.floodedEdges > 0 && <span className="muted"> The usual way (grey) crosses {route.normal.floodedEdges} flooded stretch{route.normal.floodedEdges > 1 ? 'es' : ''}.</span>}
+              <p className="small" role="status">
+                {route.safe && route.leaveBy ? <>
+                  <b>Leave by {clockLabel(scenario.start, route.leaveBy)}</b>: dry route to {route.to}, {fmtDistance(route.safe.lengthM)}
+                  {route.normal && route.safe.lengthM - route.normal.lengthM > 30 ? `, ${fmtDistance(route.safe.lengthM - route.normal.lengthM)} longer than the usual way` : ''}.
+                  {route.leaveBy === route.until && route.streetFloods && <span className="muted"> After that your own street passes 15 cm.</span>}
+                </> : <>No route to {route.to} stays under 30 cm at any hour before your street floods. Move the car early or stay put.</>}
               </p>
             )}
-
             <div className="divider" />
             <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />
           </>
