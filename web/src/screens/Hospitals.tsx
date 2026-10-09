@@ -12,7 +12,14 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
   const [msg, setMsg] = useState('')
   const run = `design_${mm}_mean`
 
-  useEffect(() => { loadHospitals().then(setData).catch(() => {}) }, [])
+  useEffect(() => {
+    loadHospitals().then((h) => {
+      setData(h)
+      // default to 300 mm, or the nearest total that has been computed
+      const avail = DESIGN_TOTALS.filter((t) => h.runs[`design_${t}_mean`])
+      if (avail.length && !avail.includes(300)) setMm(avail.reduce((a, b) => (Math.abs(b - 300) < Math.abs(a - 300) ? b : a)))
+    }).catch(() => {})
+  }, [])
   useEffect(() => {
     mv.map.easeTo({ center: [80.22, 13.04], zoom: 11.2, pitch: 35, bearing: 0, duration: 1400 })
     return () => { mv.setGeoJSON('hospitals', null); mv.setGeoJSON('route-safe', null) }
@@ -56,7 +63,8 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
       <h2>Hospitals</h2>
       {data && r && <p style={{ margin: '4px 0' }}><span className="stat" style={{ fontSize: 30 }}>{r.cut_off} of {data.hospitals.length}</span> hospitals cut off at {mm} mm<span className="chip">from the model</span></p>}
       <div className="seg" role="group" aria-label="Rainfall">
-        {DESIGN_TOTALS.map((t) => <button key={t} aria-pressed={t === mm} onClick={() => { setMm(t); setSel(null); setMsg('') }}>{t} mm</button>)}
+        {DESIGN_TOTALS.map((t) => <button key={t} aria-pressed={t === mm} disabled={!data?.runs[`design_${t}_mean`]}
+          onClick={() => { setMm(t); setSel(null); setMsg('') }}>{t} mm</button>)}
       </div>
       <p className="muted small">Cut off means no road under 30 cm links the hospital to the city’s main road network at the storm’s peak.</p>
       {msg && <p className="small">{msg}</p>}

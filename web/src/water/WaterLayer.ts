@@ -107,7 +107,7 @@ export class WaterLayer implements CustomLayerInterface {
         terrainExag: { value: this.terrainExag }, depthExag: { value: 1.5 }, time: { value: 0 },
         shallow: { value: new THREE.Color(TOKENS.shallow) }, deep: { value: new THREE.Color(TOKENS.deep) },
         amber: { value: new THREE.Color(TOKENS.amber) }, camPos: { value: new THREE.Vector3() },
-        lights: { value: lights }, opacity: { value: 1 },
+        lights: { value: lights }, opacity: { value: 1 }, minDepth: { value: 0.04 },
       },
     })
     this.water = new THREE.Mesh(geo, mat)
@@ -190,6 +190,7 @@ export class WaterLayer implements CustomLayerInterface {
     // rain follows the camera target and fades out when zoomed out
     this.rainLevel += (this.rainTarget - this.rainLevel) * 0.05
     const zoom = this.map.getZoom()
+    u.minDepth.value = 0.04 + 0.11 * Math.min(1, Math.max(0, (13.5 - zoom) / 1.5))
     const ru = this.rain.material.uniforms
     const c = MercatorCoordinate.fromLngLat(this.map.getCenter())
     const box = 2.2 / Math.pow(2, zoom)

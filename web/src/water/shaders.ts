@@ -38,6 +38,7 @@ uniform vec3 amber;
 uniform vec3 camPos;
 uniform vec2 lights[12];
 uniform float opacity;
+uniform float minDepth;      // zoomed out: only show water that matters (>= 15 cm)
 varying float vDepth;
 varying vec2 vUv;
 varying vec3 vWorld;
@@ -50,7 +51,7 @@ float noise(vec2 p) {
 }
 
 void main() {
-  if (vDepth < 0.04) discard;
+  if (vDepth < minDepth) discard;
   float t = smoothstep(0.03, 1.2, vDepth);
   vec3 col = mix(shallow, deep, t);
   // scrolling ripples -> perturbed normal
@@ -68,7 +69,7 @@ void main() {
     glint += exp(-d * d * 9000.0) * (0.6 + 0.4 * n1);
   }
   col += amber * glint * 0.55;
-  float edge = smoothstep(0.04, 0.15, vDepth);
+  float edge = smoothstep(minDepth, minDepth + 0.11, vDepth);
   float a = opacity * edge * (0.5 + 0.42 * t);
   col *= 1.12;
   gl_FragColor = vec4(col * a, a);  // premultiplied

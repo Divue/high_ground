@@ -49,7 +49,9 @@ export default function WhatIf({ mv, runs }: { mv: MapView; runs: Runs }) {
         )}
       </div>
       <p className="muted small" style={{ marginTop: 10 }}>
-        {blended ? `Blended between the ${runs[sc.mix[0].run]?.total_mm} mm and ${runs[sc.mix[1].run]?.total_mm} mm model runs.` : `The ${runs[sc.mix[0].run]?.total_mm} mm model run.`}
+        {blended && runs[sc.mix[0].run] && runs[sc.mix[1].run]
+          ? `Blended between the ${runs[sc.mix[0].run].total_mm} mm and ${runs[sc.mix[1].run].total_mm} mm model runs.`
+          : runs[dom] ? `The ${runs[dom].total_mm} mm model run.` : ''}
         {' '}Storms are front-loaded: most rain falls in the first eight hours.
       </p>
     </div>
