@@ -14,7 +14,7 @@ HighGround answers four questions for one street: will it flood tonight and how 
 
 The solver is a 2D local-inertial shallow-water scheme (Bates et al. 2010), written in about 150 lines of numba. It runs on 1.2 million cells over the Greater Chennai Corporation area and conserves mass to better than 0.01% on every run. We ran 12 design storms (50–400 mm in 24 hours, at mean and high tide) and three real ones: 1–2 December 2015 with and without the Chembarambakkam reservoir release, Cyclone Michaung (2023) and Cyclone Fengal (2024).
 
-**One tuned number, tested on wards it never saw.** Storm-drain capacity is the only calibrated parameter. We tuned it on the odd-numbered GCC wards against 7,924 streets that residents reported flooded in 2015, and we report results only on the even-numbered wards.
+**Held-out testing.** We split the GCC wards in half, used one half for any tuning and report only on the other half.
 
 **AWS does the live work.**
 - Amazon EventBridge Scheduler runs an AWS Lambda every 3 hours. It reads the Open-Meteo forecast for four Chennai points, picks the two nearest precomputed storms, and writes `current.json` to Amazon S3.
@@ -25,23 +25,28 @@ The solver is a 2D local-inertial shallow-water scheme (Bates et al. 2010), writ
 
 **The browser only blends pictures.** MapLibre GL draws a dark 3D city. A three.js layer drapes one water mesh over the terrain and drives it with precomputed hourly depth textures. Scrubbing the night, dragging the what-if rainfall slider or replaying a cyclone just blends two textures, at around 60 fps on an integrated laptop GPU. Routing that avoids water is A* in the browser over a 206,000-edge road graph.
 
-## Does it work?
+## Does it work? An honest answer
 
-On wards the model never saw, with the 2015 rain and the reservoir release, it floods **39%** of the streets residents reported. Flooding everything would score 100%, so we compare against a map that floods *the same amount of land* chosen by elevation alone: it catches **26%**. The naive "lowest 20% of the city floods" map catches **10%**.
+We tested the model against 7,924 street segments that residents reported flooded in December 2015, on wards we never tuned on. The fair question is a ranking one: pick a street residents reported flooded and one they did not, and see whether the model says the reported one gets deeper water.
 
-Splitting reports by cause shows where the model is strong and where it is not:
-- For rain-driven streets (more than 500 m from the Adyar and Cooum), the model gets 41% against 25% for the matched elevation map.
-- For river-driven streets, the model gets 14% without the reservoir release and 19% with it, while an elevation map gets 33%. The release matters, and river flooding is where our model is weakest; other tanks' surplus water in 2015 is not included.
+- **The model: 53%** of the time (95% range 52%–54%). Chance is 50%.
+- Elevation alone: 47%. Plain distance to the nearest canal or river: **56%**, better than our model.
+- On streets near the Adyar and Cooum, the 2015 Chembarambakkam release lifts the model from 51% to 53%.
+- Against the satellite (NRSC) flood extent, the model covers 33%. A random map of the same size covers 31%; the lowest ground covers 21%.
+- On GCC's own 2015 flood hotspots, the model scores 52% against random road points.
 
-A second hydraulic model, ANUGA from Geoscience Australia, run on a triangular mesh over Velachery and Pallikaranai, agrees with ours on about nine in ten cells about whether water passes 15 cm. *(Final figure from `proof.json`.)*
+So at street level the 2015 reports put the model only slightly above chance. The reports mark where people reported, not every street that flooded. And 30 m satellite terrain cannot see the kerbs, culverts and drains that decide which street floods. We say this on the Proof screen in the same type size as the result.
+
+A second hydraulic model, ANUGA from Geoscience Australia, run on a triangular mesh over Velachery and Pallikaranai, agrees with ours on about nine in ten cells about whether water passes 15 cm. That checks the arithmetic, not the terrain.
 
 ## What fought back
 
 1. **Satellite elevation is full of fake lakes.** Our first runs flooded scattered pits everywhere. Closed hollows in the 30 m data could hold 124 million m³ of water, about 70% of a whole 200 mm storm. We capped artificial hollows at 1 m, carved drains at realistic depths (a street drain is not the Adyar), and opened the edges of the model box so valleys could drain out.
 2. **Our channels leaked before the rain started.** We had filled every river to its "spill level" at the start, and in some reaches that sat above the measured water surface. About 2% of the city was flooded at 6 PM in every scenario, before any rain. We caught it while picking demo streets, fixed it, and reran everything.
-3. **Citizen reports only say where it flooded.** Unreported does not mean dry; reports cluster where more people were online. Hit rate minus false-alarm rate came out near zero for every map, including plain elevation. So we pre-registered a fairer score, the gain over an elevation map that floods the same area, before looking at the calibration results.
-4. **A 2-core laptop.** The first solver needed 35 minutes per storm. Vectorised float32 kernels, a Halley-iteration cube root in place of `cbrt`, and removing the fake pits brought it to about 11 minutes.
-5. **The honest answer is sometimes "your street stays dry".** At street level, flooding is patchy. The card now also says how many streets within 500 m pass 15 cm.
+3. **Our first validation metric was wrong, and a reviewer caught it.** We first scored the model by the share of reported streets it floods, compared with an elevation map flooding the same area. The model "won" 39% to 26%. An independent review then showed that a random speckle of the same size scores 64% on that metric. It rewards patchy maps, not correct ones. Worse, calibrating drain capacity on it pushed the drains to zero and overstated every storm. We withdrew it, switched to the ranking test above, and now call drain capacity (10 mm/h) an assumption, because the reports cannot tell 0 from 30 mm/h apart.
+4. **A 2-core laptop, and a timestep that was slightly too bold.** The first solver needed 35 minutes per storm. Vectorised float32 kernels and a Halley-iteration cube root brought it to about 11. The same review then found water sloshing in flat ponds: at our timestep, peak depths were inflated by up to 1.6 m. A halving test showed a CFL number of 0.5 matches a four-times-smaller step to 0.1 cm, so that is what ships, at about 15 minutes per storm.
+5. **The model's edges leaked.** About a third of the 2015 reservoir release drained straight out of the model's west edge. At high tide, sea water also ran through Ennore and out of the north edge. Both are fixed, and the release now visibly helps on river-side streets.
+6. **The honest answer is sometimes "your street stays dry".** At street level, flooding is patchy. The card now also says how many streets within 500 m pass 15 cm.
 
 ## Limits
 
