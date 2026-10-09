@@ -24,6 +24,14 @@ Rivers sit 4.5 m below banks; DSM−DTM is 1.6 m on buildings vs 0.24 m on open 
 5. **Subscribe once from the live site** with the `.env` email → **click the AWS Notifications confirmation link** in that inbox. Then `#admin` → "Run and send alerts" (e.g. 300 mm) sends a real alert email for the video.
 6. Verify student status on AWS Builder Center (eligibility). Teammates: video (script in `docs/DEMO.md`) and blog.
 
+## Review workflow (user instruction, Fri 15:30 IST)
+
+After each piece of work, run the relevant reviewer and fix every blocker and major issue it reports:
+- `model-reviewer` for pipeline changes; `design-critic` and `qa-tester` for frontend/backend changes.
+- `judge` at the end of each phase; act on its top suggestion.
+
+The definitions live in `.Claude/Agents/` (capitalised), which Claude Code does not discover, so they were copied to `.claude/agents/`. In this session they run as general-purpose agents briefed with each definition. Reviewer reports and fixes are logged below under "Reviews".
+
 ## Current phase
 
 P2 Model — in progress.
