@@ -25,6 +25,7 @@ storm because nobody tells them where the water will go. We do not claim a bette
 claim a tested one, built for citizens.
 
 **Tagline ideas (pick or rewrite):**
+
 - "Where the water goes tonight, street by street."
 - "Know before the water does."
 - "Every monsoon, Chennai parks its cars on flyovers. Now you know why, and where."
@@ -85,6 +86,7 @@ Rain scenarios + 3 real storms ────────────┘    → cu
 A clean architecture diagram is in `docs/landing-assets/10_architecture.png` (also `docs/architecture.png`).
 
 ### The flood model, in plain words
+
 1. **Ground:** the satellite elevation model (Copernicus GLO-30, 30 m) includes rooftops and trees. We
    removed 371,679 OpenStreetMap buildings, tree canopy (ESA WorldCover), bridges and other tall objects,
    filled the gaps from surrounding ground, carved rivers, canals and drains into it, and put buildings
@@ -125,6 +127,7 @@ measured on an integrated-GPU laptop with the water flowing).
 ## 6. Key numbers you may quote (with their caveats)
 
 **Validation (the honest headline)**
+
 - Test: on wards **never used for tuning**, pick a street residents reported flooded in Dec 2015 and one
   they did not. How often does the model put more water on the reported one?
 - **Model: 53%** (95% range 51–55%, resampling whole wards). **Coin toss: 50%.** Low ground alone: 47%.
@@ -137,6 +140,7 @@ measured on an integrated-GPU laptop with the water flowing).
   flooded area (critical success index), depth correlation 0.90. *This checks the maths, not the terrain.*
 
 **Storm outcomes (share of the city's land under ≥15 cm, "too deep for scooters")**
+
 | Storm | Rain | Land ≥15 cm | Hospitals cut off (of 46) |
 |---|---|---|---|
 | 100 mm design storm | 100 mm / 24 h | 2.4% | 0 |
@@ -148,6 +152,7 @@ measured on an integrated-GPU laptop with the water flowing).
 | Cyclone Fengal 2024 | 114 mm | 3.6% | 0 |
 
 **Scale**
+
 - ~1.2 million 30 m cells; 371,679 buildings removed from the elevation model; 168,156 street pieces;
   206,223 road edges; 168 dry-parking candidates (122 flyovers); 46 hospitals; 16 storm runs; mass error
   0.000% on every run.
