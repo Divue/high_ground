@@ -1,8 +1,12 @@
 """Build docs/HighGround_landing_context.pdf: LANDING_PAGE_CONTEXT.md plus the screenshots, one shareable file.
 
     python docs/make_context_pdf.py            # writes docs/_context.html, then prints it to PDF with Playwright
+    python docs/make_context_pdf.py docs/OFFLINE_AND_NAVIGATION_PLAN.md docs/HighGround_offline_navigation_plan.pdf
+                                               # any other Markdown doc, text only
 """
+import sys
 import base64
+import re
 import io
 import subprocess
 from pathlib import Path
@@ -37,10 +41,26 @@ figcaption { font-size: 9pt; color: #444; margin-top: 2pt; } .shots h2 { page-br
 """
 
 
+def loosen_lists(text):
+    """Python-Markdown needs a blank line before a list that follows a paragraph (GitHub does not)."""
+    out, fenced = [], False
+    item = re.compile(r"^\s*([-*]|\d+\.)\s")
+    for line in text.splitlines():
+        if line.startswith("```"):
+            fenced = not fenced
+        if not fenced and item.match(line) and out and out[-1].strip() and not item.match(out[-1]) \
+                and not out[-1].startswith(("|", "  ")):
+            out.append("")
+        out.append(line)
+    return "\n".join(out)
+
+
 def main():
-    body = markdown.markdown((DOCS / "LANDING_PAGE_CONTEXT.md").read_text(), extensions=["tables", "fenced_code"])
+    md = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DOCS / "LANDING_PAGE_CONTEXT.md"
+    out = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else DOCS / "HighGround_landing_context.pdf"
+    body = markdown.markdown(loosen_lists(md.read_text()), extensions=["tables", "fenced_code"])
     figs = []
-    for f, cap in ASSETS:
+    for f, cap in (ASSETS if len(sys.argv) == 1 else []):
         im = Image.open(DOCS / "landing-assets" / f).convert("RGB")
         im.thumbnail((1400, 1400))
         b = io.BytesIO()
@@ -48,11 +68,10 @@ def main():
         figs.append(f'<figure><img src="data:image/jpeg;base64,{base64.b64encode(b.getvalue()).decode()}">'
                     f"<figcaption>{cap}</figcaption></figure>")
     html = (f'<!doctype html><html><head><meta charset="utf-8"><title>HighGround context</title><style>{CSS}</style>'
-            f'</head><body>{body}<div class="shots"><h2>Screenshots (full-size files are in docs/landing-assets/)</h2>'
-            f'{"".join(figs)}</div></body></html>')
+            f'</head><body>{body}' + (f'<div class="shots"><h2>Screenshots (full-size files are in docs/landing-assets/)</h2>'
+            f'{"".join(figs)}</div>' if figs else '') + '</body></html>')
     src = DOCS / "_context.html"
     src.write_text(html)
-    out = DOCS / "HighGround_landing_context.pdf"
     js = (f"const {{ chromium }} = require('@playwright/test');(async () => {{ const b = await chromium.launch({{ channel: 'chromium' }});"
           f"const p = await b.newPage(); await p.goto('file://{src}'); await p.waitForTimeout(500);"
           f"await p.pdf({{ path: '{out}', format: 'A4', printBackground: true, margin: {{ top: '16mm', bottom: '16mm', left: '14mm', right: '14mm' }} }});"
