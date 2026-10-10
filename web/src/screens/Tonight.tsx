@@ -7,7 +7,11 @@ import { distM, fmtDistance } from '../lib/geo'
 import { frameName } from '../lib/frames'
 import { leaveByPlan, type Route } from '../lib/routing'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
-import { nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
+import { depthStreets, nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
+import { forecastAge } from '../offline/status'
+import HelpCard from '../ui/HelpCard'
+import OfflineSave from '../ui/OfflineSave'
+import PlanCard, { type PlanInput } from '../ui/PlanCard'
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
 import DepthGlyph from '../ui/DepthGlyph'
@@ -27,11 +31,14 @@ interface Props {
   setReplayRun: (r: string | null) => void
   place: Place | null
   setPlace: (p: Place) => void
+  online: boolean
+  lite: boolean
+  setLite: (on: boolean) => void
 }
 
 interface ParkOpt { name: string; kind: string; lon: number; lat: number; d: number }
 
-export default function Tonight({ mv, runs, current, scenario, replayRun, setReplayRun, place, setPlace }: Props) {
+export default function Tonight({ mv, runs, current, scenario, replayRun, setReplayRun, place, setPlace, online, lite, setLite }: Props) {
   const [seg, setSeg] = useState<Segment | null>(null)
   const [ans, setAns] = useState<StreetAnswer | null>(null)
   const [ansKey, setAnsKey] = useState('')        // place + storm the answer was computed for
@@ -49,6 +56,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const fadeMs = useRef(450)
   const [rising, setRising] = useState(false)    // the night is playing to the peak
   const [morePark, setMorePark] = useState(false)
+  const [sheet, setSheet] = useState<'help' | 'plan' | null>(null)
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -226,8 +234,16 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     let r = 0
     for (const { run, w } of scenario.mix) r += w * (runs[run]?.rain_mm_h[hour - 1] ?? 0)
     // any real rain is visible; heavier hours get denser, brighter streaks
-    mv.water?.setRain(r < 0.5 ? 0 : 0.35 + 0.65 * Math.min(1, r / 20))
-  }, [scenario, hour, runs, mv])
+    mv.water?.setRain(lite || r < 0.5 ? 0 : 0.35 + 0.65 * Math.min(1, r / 20))
+  }, [scenario, hour, runs, mv, lite])
+
+  // battery saver / offline: the streets themselves carry the water, coloured by depth at the hour shown
+  useEffect(() => {
+    if (!(lite || mv.waterMissing) || !place || !scenario.mix.length) { mv.setGeoJSON('depth-streets', null); return }
+    let dead = false
+    depthStreets(place.lon, place.lat, scenario.mix, hour).then((fc) => { if (!dead) mv.setGeoJSON('depth-streets', fc) }).catch(() => {})
+    return () => { dead = true }
+  }, [lite, place, scenario, hour, mv])
 
   // Nearest dry parking for the dominant run
   useEffect(() => {
@@ -287,6 +303,23 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   // while the night plays, the number is the model's depth at the hour shown; then it settles on the peak
   const shownCm = useTweened(ans ? (rising ? ans.seriesCm[hour - 1] ?? 0 : ans.maxCm) : 0, rising ? 320 : 0, nightKey)
   const dryTonight = scenario.kind === 'dry'
+  const age = forecastAge(current?.updated_at)
+
+  // the same decision as the card, as plain text for the flood plan
+  const decisionText = !ans?.hoursTo15 || !route ? null
+    : route.safe && route.leaveBy === 0
+      ? ans.preWet ? `Water already stands here before the rain. Park at ${route.to} instead.`
+        : `Floods in the first hour. Move your car to ${route.to} before the rain starts, by ${clockLabel(scenario.start, 0)}.`
+      : route.safe && route.leaveBy ? `Move your car to ${route.to} by ${clockLabel(scenario.start, route.leaveBy)}.`
+        : ans.hoursTo15 === 1 ? `Water reaches scooter level here in the first hour, and no dry route to ${route.to} stays open.`
+          : `No dry way out to ${route.to} before your street floods.`
+  const planInput: PlanInput | null = place && seg && ans && fresh ? {
+    street: seg.name, place: { lon: place.lon, lat: place.lat }, ans, scenario,
+    forecastAt: scenario.kind === 'forecast' && age ? `${age.time}, ${new Date(current!.updated_at).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}` : null,
+    decision: decisionText,
+    park: (route ? park.find((o) => o.name === route.to) : park[0]) ?? null,
+    route: route?.safe ? { coords: route.safe.coords, edges: route.safe.edges, lengthM: route.safe.lengthM } : null,
+  } : null
 
   return (
     <>
@@ -306,6 +339,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             : scenario.label}
           {scenario.kind === 'forecast' && current && <> · forecast updated {new Date(current.updated_at).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</>}
         </div>
+        {(!online || (age?.stale && scenario.kind !== 'replay')) && (
+          <div className="offline-chip" role="status">
+            {!online ? <><span className="off-dot" />Offline</> : null}
+            {age && scenario.kind !== 'replay' ? <>{!online ? ' · ' : ''}forecast from {age.time} ({age.ago}){age.stale ? ', may be out of date' : ''}</> : null}
+            {!online && scenario.kind === 'replay' ? ' · saved model answers' : ''}
+          </div>
+        )}
         {lapseRun && lapse !== 'off' && (
           <Timelapse run={runs[lapseRun]} hour={hour} state={lapse} onBack={endLapse}
             onPause={pauseLapse} onResume={resumeLapse} onAgain={() => watchStorm(1)}
@@ -396,14 +436,23 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             )}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
             <div className="divider" />
-            <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />
+            <div className="row">
+              <button className="btn" onClick={() => setSheet('plan')}>My flood plan</button>
+              {online && <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />}
+            </div>
+            <OfflineSave place={{ label: seg.name, lon: place!.lon, lat: place!.lat }} online={online} />
           </div>
         )}
         {!place && !dryTonight && <p className="muted" style={{ marginTop: 12 }}>Type your street to see how deep the water gets there tonight, when, and where to move your car.</p>}
         <div className="sticky-foot">
-          <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <span className="emergency">112</span>.</p>
+          <p className="muted small" style={{ margin: 0 }}>Not an official warning. Follow GCC and IMD advisories. In danger, call <a className="emergency" href="tel:112">112</a>.
+            <button className="linkbtn" onClick={() => setSheet('help')}>Help numbers</button>
+            <button className="linkbtn" aria-pressed={lite} onClick={() => setLite(!lite)}>{lite ? 'Battery saver on' : 'Battery saver'}</button>
+          </p>
         </div>
       </div>
+      {sheet === 'help' && <HelpCard onClose={() => setSheet(null)} street={seg?.name} fallback={place ?? undefined} />}
+      {sheet === 'plan' && planInput && <PlanCard inp={planInput} onClose={() => setSheet(null)} />}
       {scenario.mix.length > 0 && <Timeline runs={runs} hour={hour} setHour={scrub}
         // during the time-lapse the timeline shows the storm's real dates, like the caption card
         scenario={lapse !== 'off' && lapseRun && runs[lapseRun]?.start_local ? { ...scenario, start: new Date(runs[lapseRun].start_local!) } : scenario}

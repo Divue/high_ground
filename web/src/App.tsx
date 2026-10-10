@@ -13,6 +13,7 @@ import WhatIf from './screens/WhatIf'
 import Assistant from './ui/Assistant'
 import { Legend } from './ui/Legend'
 import type { Place } from './ui/Search'
+import { useOnline } from './offline/status'
 
 type Screen = 'tonight' | 'whatif' | 'proof' | 'hospitals' | 'about' | 'admin'
 const NAV: [Screen, string][] = [['tonight', 'Tonight'], ['whatif', 'What if'], ['proof', 'Proof'], ['hospitals', 'Hospitals'], ['about', 'About']]
@@ -31,6 +32,14 @@ export default function App() {
   const [replayRun, setReplayRun] = useState<string | null>(new URLSearchParams(location.search).get('replay'))
   const [place, setPlace] = useState<Place | null>(null)
   const [intro, setIntro] = useState(true)
+  const online = useOnline()
+  // battery saver: remembered; on by default when the app opens with no network
+  const [lite, setLiteState] = useState(() => {
+    try { const v = localStorage.getItem('hg-lite'); if (v) return v === 'on' } catch { /* private mode */ }
+    return !navigator.onLine
+  })
+  const setLite = (on: boolean) => { setLiteState(on); try { localStorage.setItem('hg-lite', on ? 'on' : 'off') } catch { /* private mode */ } }
+  useEffect(() => { mv?.setLite(lite) }, [mv, lite])
   // reduced motion: the device asked and the viewer has not chosen yet
   const [motionOffer, setMotionOffer] = useState(() => systemReducesMotion() && motionChoice() === null)
   useEffect(() => { document.documentElement.classList.toggle('reduce-motion', prefersReducedMotion()) }, [])
@@ -47,6 +56,9 @@ export default function App() {
     const v = new MapView(mapEl.current!)
     Promise.all([loadRuns(), loadCurrent(), v.ready]).then(async ([r, c]) => {
       if (!alive) return
+      // offline with no water saved: the low-power map shows depth on the streets instead
+      if (v.waterMissing) setLiteState(true)
+      v.setLite(v.waterMissing || lite)
       setRuns(r)
       setCurrent(c)
       setMv(v)
@@ -119,13 +131,13 @@ export default function App() {
       {mv && runs && scenario && !intro && (
         <>
           {screen === 'tonight' && <Tonight mv={mv} runs={runs} current={current} scenario={scenario} replayRun={replayRun}
-            setReplayRun={setReplayRun} place={place} setPlace={setPlace} />}
+            setReplayRun={setReplayRun} place={place} setPlace={setPlace} online={online} lite={lite} setLite={setLite} />}
           {screen === 'whatif' && <WhatIf mv={mv} runs={runs} />}
           {screen === 'proof' && <Proof mv={mv} />}
           {screen === 'hospitals' && <Hospitals mv={mv} runs={runs} />}
           {screen === 'about' && <About />}
           {screen === 'admin' && <Admin onDone={() => loadCurrent().then(setCurrent)} />}
-          {screen !== 'proof' && screen !== 'about' && <Assistant place={place} scenario={scenario} />}
+          {screen !== 'proof' && screen !== 'about' && online && <Assistant place={place} scenario={scenario} />}
           {(screen === 'tonight' || screen === 'whatif' || screen === 'hospitals') && <Legend />}
         </>
       )}

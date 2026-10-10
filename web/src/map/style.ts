@@ -41,12 +41,14 @@ export function baseStyle(): StyleSpecification {
     .map((l) => (l.type === 'symbol' ? { ...l, layout: { ...(l.layout ?? {}), 'text-transform': 'none' } } : l)) as ReturnType<typeof layers>
   return {
     version: 8,
-    glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
-    sprite: 'https://protomaps.github.io/basemaps-assets/sprites/v4/dark',
+    // label fonts and icons ship with the app (public/basemap-assets), so the map has labels offline
+    glyphs: `${window.location.origin}/basemap-assets/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${window.location.origin}/basemap-assets/sprites/v4/dark`,
     sources: {
       protomaps: {
         type: 'vector',
-        url: `pmtiles://${new URL(`${DATA_BASE}/basemap/chennai.pmtiles`, window.location.href).href}`,
+        // cut at zoom 14 (7 MB instead of 17): MapLibre overzooms it, and it fits in the offline pack
+        url: `pmtiles://${new URL(`${DATA_BASE}/basemap/chennai-z14.pmtiles`, window.location.href).href}`,
         attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://protomaps.com">Protomaps</a>',
       },
       // a second copy of the elevation tiles for relief colour and shading (the 3D terrain keeps its own)

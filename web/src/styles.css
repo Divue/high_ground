@@ -10,7 +10,7 @@
   --line: rgba(201, 212, 216, 0.14);
   --panel: #0A171D;
   --red: #E5484D;
-  --head: 'Anek Latin', system-ui, sans-serif;
+  --head: 'Anek Latin Variable', 'Anek Latin', system-ui, sans-serif;
   --body: 'Hind', system-ui, sans-serif;
 }
 
@@ -327,3 +327,24 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .motion-offer { position: absolute; z-index: 12; top: 64px; left: 50%; translate: -50% 0; display: flex; align-items: center; gap: 12px;
   padding: 10px 14px; background: rgba(8, 19, 25, 0.95); border: 1px solid rgba(214, 224, 228, 0.18); border-radius: 12px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5); font-size: 14px; max-width: calc(100% - 24px); }
+
+/* ---------------------------------------------------------------- offline, help, flood plan */
+.offline-chip { margin-top: 8px; display: inline-block; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--line); font-size: 12.5px; color: var(--grey); }
+.off-dot, .saved-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.off-dot { background: var(--grey-dim); }
+.saved-dot { background: var(--shallow); }
+.offline-save { margin-top: 10px; }
+.offline-save .lapse-progress { margin: 6px 0 2px; }
+.sticky-foot .linkbtn { font-size: 12.5px; }
+.sheet { position: fixed; inset: 0; z-index: 40; background: rgba(2, 6, 9, 0.62); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sheet-card { width: min(420px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.sheet-card.wide { width: min(520px, 100%); }
+.numbers { list-style: none; padding: 0; margin: 10px 0 0; }
+.numbers li { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); }
+.numbers li:first-child { border-top: 0; }
+.numbers a { font-family: var(--head); font-size: 22px; font-weight: 600; min-width: 150px; white-space: nowrap; color: var(--grey); text-decoration: none; font-variant-numeric: tabular-nums; }
+.numbers a.emergency { color: var(--red); }
+.numbers span { font-size: 13.5px; color: var(--grey-dim); }
+.msg { white-space: pre-wrap; font-family: var(--body); font-size: 13.5px; background: rgba(16, 32, 40, 0.9); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; margin: 6px 0 8px; }
+.plan-img { width: 100%; border-radius: 10px; border: 1px solid var(--line); margin-top: 8px; display: block; }
+a.btn { text-decoration: none; color: inherit; }

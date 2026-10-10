@@ -55,28 +55,43 @@ export class MapView {
     this.ready = new Promise((resolve) => {
       this.map.on('load', async () => {
         this.map.setTerrain({ source: 'terrain', exaggeration: 1.5 })
-        const meta = await loadWaterMeta()
-        this.meta = meta
-        const ev = await loadPixels('water/elev.png')
-        const elev = new Float32Array(meta.width * meta.height)
-        for (let i = 0; i < elev.length; i++) elev[i] = (ev.data[4 * i] * 256 + ev.data[4 * i + 1]) / 100 - 10
-        // the sea is never floodwater (also masked in the export; this keeps old exports honest too)
-        const sea = await loadGray('water/sea.png').catch(() => new Uint8Array(meta.width * meta.height))
         if (this.map.getLayer('flood-water')) return resolve()
-        this.water = new WaterLayer(meta, elev, sea)
-        this.water.setTerrainExag(1.5)
-        this.map.addLayer(this.water, 'buildings-3d')
+        // offline without a saved pack the water files may be missing: the map still starts, and the
+        // streets are coloured by depth instead (see setLite)
+        try {
+          const meta = await loadWaterMeta()
+          const ev = await loadPixels('water/elev.png')
+          const elev = new Float32Array(meta.width * meta.height)
+          for (let i = 0; i < elev.length; i++) elev[i] = (ev.data[4 * i] * 256 + ev.data[4 * i + 1]) / 100 - 10
+          // the sea is never floodwater (also masked in the export; this keeps old exports honest too)
+          const sea = await loadGray('water/sea.png').catch(() => new Uint8Array(meta.width * meta.height))
+          if (this.map.getLayer('flood-water')) return resolve()
+          this.meta = meta
+          this.water = new WaterLayer(meta, elev, sea)
+          this.water.setTerrainExag(1.5)
+          this.map.addLayer(this.water, 'buildings-3d')
+        } catch { this.waterMissing = true }
         this.addOverlays()
         resolve()
       })
     })
   }
 
+  /** The water layer could not load (offline before anything was saved). */
+  waterMissing = false
+
   private addOverlays() {
     const m = this.map
-    for (const id of ['route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'here']) {
+    for (const id of ['depth-streets', 'route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'here']) {
       m.addSource(id, { type: 'geojson', data: EMPTY })
     }
+    // low-power map: streets coloured by the model's depth at the hour shown (same numbers as the card)
+    m.addLayer({ id: 'depth-streets', type: 'line', source: 'depth-streets', layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
+      paint: {
+        'line-color': ['interpolate', ['linear'], ['get', 'cm'], 5, TOKENS.shallow, 30, '#3FA8D8', 90, TOKENS.deep],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, ['case', ['>=', ['get', 'cm'], 15], 1.6, 0.8], 16, ['case', ['>=', ['get', 'cm'], 15], 7, 3.5]],
+        'line-opacity': ['interpolate', ['linear'], ['get', 'cm'], 5, 0.55, 30, 0.95],
+      } })
     m.addLayer({ id: 'proof-crowd', type: 'line', source: 'proof-crowd', layout: { visibility: 'none', 'line-cap': 'round' },
       paint: { 'line-color': TOKENS.rainGrey, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 15, 3], 'line-opacity': 0.85 } })
     m.addLayer({ id: 'route-normal', type: 'line', source: 'route-normal', layout: { 'line-cap': 'round', 'line-join': 'round' },
@@ -136,7 +151,7 @@ export class MapView {
   /** After landing, the camera drifts round the street once, slowly, so the city reads in 3D.
    *  Any drag, zoom or click stops it (MapLibre ends camera animations on interaction). */
   settleOrbit(deg = 24, ms = 9000) {
-    if (prefersReducedMotion()) return
+    if (prefersReducedMotion() || this.lite) return
     const go = () => this.map.easeTo({ bearing: this.map.getBearing() + deg, duration: ms,
       easing: (t) => 0.5 - Math.cos(Math.PI * t) / 2, essential: false })
     if (this.map.isMoving()) this.map.once('moveend', go)
@@ -168,6 +183,24 @@ export class MapView {
       if (p < 1) requestAnimationFrame(step)
     }
     requestAnimationFrame(step)
+  }
+
+  /** Low-power map: flat, no terrain, no 3D buildings, no water animation or rain; floodwater is drawn
+   *  as streets coloured by depth. Used offline and when the viewer turns on battery saver. */
+  lite = false
+  setLite(on: boolean) {
+    if (on === this.lite) return
+    this.lite = on
+    const m = this.map
+    m.setTerrain(on ? null : { source: 'terrain', exaggeration: 1.5 })
+    for (const id of ['relief-colour', 'relief-shade', 'buildings-3d', 'flood-water']) this.setVisible(id, !on)
+    this.setVisible('depth-streets', on || this.waterMissing)
+    if (on) this.water?.setRain(0)
+    if (on) m.setSky({})
+    else m.setSky({ 'sky-color': '#02070A', 'horizon-color': '#1F3946', 'fog-color': '#0C1B22',
+      'sky-horizon-blend': 0.55, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.35, 'atmosphere-blend': 0.6 })
+    m.easeTo({ pitch: on ? 0 : STREET_VIEW.pitch, bearing: on ? 0 : m.getBearing(), duration: on ? 0 : 900 })
+    m.setMaxPitch(on ? 0 : 75)
   }
 
   setGeoJSON(id: string, data: GeoJSON.FeatureCollection | GeoJSON.Feature | null) {
@@ -212,7 +245,12 @@ export class MapView {
   private travelToken = 0
   async flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
     const target = LngLat.convert(center)
-    if (prefersReducedMotion()) { this.map.jumpTo({ center: target, ...STREET_VIEW, padding: viewPadding() }); return }
+    if (prefersReducedMotion()) { this.map.jumpTo({ center: target, ...STREET_VIEW, ...(this.lite ? { pitch: 0, bearing: 0 } : {}), padding: viewPadding() }); return }
+    if (this.lite) {
+      // battery saver: one short flat move, no 3D travel
+      await new Promise<void>((res) => { this.map.once('moveend', () => res()); this.map.easeTo({ center: target, zoom: STREET_VIEW.zoom, pitch: 0, bearing: 0, padding: viewPadding(), duration: 700 }) })
+      return
+    }
     const token = ++this.travelToken
     const stop = () => { this.travelToken++ }
     const events = ['mousedown', 'touchstart', 'wheel'] as const
@@ -249,7 +287,7 @@ export class MapView {
    *  where the corrected 2015 run floods land that rain alone does not. */
   showWide() {
     const reduced = prefersReducedMotion()
-    this.map.easeTo({ center: [80.185, 12.975], zoom: 12.9, pitch: 60, bearing: -40, duration: reduced ? 0 : 2200,
+    this.map.easeTo({ center: [80.185, 12.975], zoom: 12.9, pitch: this.lite ? 0 : 60, bearing: this.lite ? 0 : -40, duration: reduced ? 0 : 2200,
       padding: viewPadding(), essential: true })
     return new Promise<void>((res) => { if (reduced) res(); else this.map.once('moveend', () => res()) })
   }
@@ -270,8 +308,8 @@ export class MapView {
   private flightTarget: [number, number] | null = null
 
   async openingSequence() {
-    if (prefersReducedMotion()) {
-      this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW, padding: viewPadding() })
+    if (prefersReducedMotion() || this.lite) {
+      this.map.jumpTo({ center: VELACHERY, ...STREET_VIEW, ...(this.lite ? { pitch: 0, bearing: 0 } : {}), padding: viewPadding() })
       return
     }
     await new Promise((r) => setTimeout(r, 300))

@@ -229,9 +229,33 @@ Resources:
       Name: highground
       Platform: WEB
       CustomRules:
-        - Source: "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|pmtiles|bin)$)([^.]+$)/>"
+        # files with these extensions are served as they are; any other path is the app (index.html).
+        # mjs = MapLibre's worker, pbf = map label fonts, webmanifest = the installable app
+        - Source: "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|mjs|png|txt|svg|woff|woff2|ttf|map|json|webp|pmtiles|bin|pbf|webmanifest)$)([^.]+$)/>"
           Target: /index.html
           Status: "200"
+      # offline: the service worker and the page are never cached by the CDN or the browser, so a new
+      # version reaches phones; hashed assets are immutable
+      CustomHeaders: |
+        customHeaders:
+          - pattern: '/sw.js'
+            headers:
+              - key: Cache-Control
+                value: no-cache
+          - pattern: '/index.html'
+            headers:
+              - key: Cache-Control
+                value: no-cache
+          - pattern: '/manifest.webmanifest'
+            headers:
+              - key: Cache-Control
+                value: no-cache
+              - key: Content-Type
+                value: application/manifest+json
+          - pattern: '/assets/**'
+            headers:
+              - key: Cache-Control
+                value: public, max-age=31536000, immutable
 
   SiteBranch:
     Type: AWS::Amplify::Branch

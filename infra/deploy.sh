@@ -75,8 +75,19 @@ BUCKET=$(out DataBucketName); CDN=$(out CdnDomain); API=$(out ApiUrl); APP=$(out
 echo "bucket $BUCKET  cdn $CDN  api $API  site $SITE"
 
 echo "== upload model outputs"
-aws s3 sync "$ROOT/data/out/web/" "s3://$BUCKET/data/" --exclude "current.json" --size-only --no-progress | tail -3
-aws s3 cp "$ROOT/data/out/web/basemap/chennai.pmtiles" "s3://$BUCKET/data/basemap/chennai.pmtiles" --content-type application/octet-stream --no-progress >/dev/null
+# size + time (not --size-only): a re-export that keeps a file's size must still upload
+aws s3 sync "$ROOT/data/out/web/" "s3://$BUCKET/data/" --exclude "current.json" --exclude "graph/*.bin" --no-progress | tail -3
+for f in basemap/chennai.pmtiles basemap/chennai-z14.pmtiles; do
+  aws s3 cp "$ROOT/data/out/web/$f" "s3://$BUCKET/data/$f" --content-type application/octet-stream --no-progress >/dev/null
+done
+# routing binaries gzipped at rest: CloudFront does not compress application/octet-stream, and these
+# are most of the offline pack (browsers decode Content-Encoding: gzip transparently)
+GZ=$(mktemp -d)
+for f in "$ROOT"/data/out/web/graph/*.bin; do
+  gzip -6 -c "$f" > "$GZ/$(basename "$f")"
+done
+aws s3 sync "$GZ/" "s3://$BUCKET/data/graph/" --content-encoding gzip --content-type application/octet-stream --no-progress | tail -2
+rm -rf "$GZ"
 
 echo "== site URL into the stack (alert emails link to it)"
 sam deploy --stack-name "$STACK" --region "$AWS_REGION" --profile "$AWS_PROFILE" --resolve-s3 \

@@ -2,6 +2,7 @@
 import { getJSON, loadStreetIndex, type StreetGeom, type StreetVals } from './data'
 import type { MixPart } from './scenario'
 import { distM, pointSegM } from './geo'
+import type * as GeoJSON from 'geojson'
 
 export interface Segment {
   tile: string
@@ -103,4 +104,50 @@ export async function nearbyShare(lon: number, lat: number, mix: MixPart[], radi
     })
   }
   return { wet, total }
+}
+
+// ---------------------------------------------------------------- low-power map
+// Streets coloured by depth: every segment near a point, blended for the mix, at one model hour.
+// Decoded series are kept per tile and mix, so moving the timeline only rebuilds the features.
+const seriesCache = new Map<string, Promise<{ coords: number[][]; series: Float32Array; hours: number }>>()
+function tileSeries(t: string, mix: MixPart[], bytes: number) {
+  const key = `${t}|${mix.map((m) => `${m.run}:${m.w}`).join()}`
+  if (!seriesCache.has(key)) {
+    seriesCache.set(key, (async () => {
+      const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`)
+      const vals = await Promise.all(mix.map((m) => getJSON<StreetVals>(`streets/${m.run}/${t}.json`)))
+      const hours = Math.max(...vals.map((v) => (v.series[0] ? decode(v.series[0], bytes).length : 0)), 1)
+      const series = new Float32Array(g.segs.length * hours)
+      vals.forEach((v, k) => v.series.forEach((b64, i) => {
+        const s = decode(b64, bytes)
+        for (let h = 0; h < Math.min(hours, s.length); h++) series[i * hours + h] += mix[k].w * s[h]
+      }))
+      return { coords: g.segs.map((sg) => sg[4]), series, hours }
+    })())
+    seriesCache.get(key)!.catch(() => seriesCache.delete(key))
+  }
+  return seriesCache.get(key)!
+}
+
+export async function depthStreets(lon: number, lat: number, mix: MixPart[], hour: number, radiusM = 2500): Promise<GeoJSON.FeatureCollection> {
+  const idx = await loadStreetIndex()
+  const bytes = idx.series_bytes ?? 1
+  const pad = radiusM / 100_000
+  const tiles = Object.entries(idx.tile_bounds_lonlat)
+    .filter(([, [w, s, e, n]]) => lon >= w - pad && lon <= e + pad && lat >= s - pad && lat <= n + pad)
+    .map(([t]) => t)
+  const features: GeoJSON.Feature[] = []
+  for (const t of tiles) {
+    const ts = await tileSeries(t, mix, bytes).catch(() => null)
+    if (!ts) continue      // a tile that was not saved for offline: those streets stay uncoloured
+    const h = Math.min(Math.max(1, hour), ts.hours) - 1
+    ts.coords.forEach((flat, i) => {
+      const cm = Math.round(ts.series[i * ts.hours + h])
+      if (cm < 5) return
+      const c: number[][] = []
+      for (let k = 0; k < flat.length; k += 2) c.push([flat[k], flat[k + 1]])
+      features.push({ type: 'Feature', properties: { cm }, geometry: { type: 'LineString', coordinates: c } })
+    })
+  }
+  return { type: 'FeatureCollection', features }
 }
