@@ -1,7 +1,7 @@
 import type * as GeoJSON from 'geojson'
 // Imperative wrapper around MapLibre: basemap, terrain, 3D buildings, water layer, overlays,
 // and the depth-frame controller (fetch hourly textures, blend runs, cross-fade).
-import { Map as MLMap, Marker, Popup, addProtocol, setWorkerUrl, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
+import { LngLat, Map as MLMap, Marker, NavigationControl, Popup, type IControl, addProtocol, setWorkerUrl, type FlyToOptions, type GeoJSONSource, type LngLatLike } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -47,6 +47,9 @@ export class MapView {
       canvasContextAttributes: { antialias: true },
       pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),   // HiDPI at full scale costs 2-4x fill rate
     })
+    // navigation: zoom, a compass that also shows and resets the tilt, then our own view buttons
+    this.map.addControl(new NavigationControl({ visualizePitch: true, showZoom: true, showCompass: true }), 'top-right')
+    this.map.addControl(new ViewControl(this), 'top-right')
     ;(window as unknown as { __map: MLMap; __mv: MapView }).__map = this.map
     ;(window as unknown as { __mv: MapView }).__mv = this
     this.ready = new Promise((resolve) => {
@@ -116,6 +119,9 @@ export class MapView {
       .setLngLat(at).setDOMContent(el).addTo(this.map)
   }
   clearPeek() { this.peekPopup?.remove(); this.peekPopup = null }
+
+  /** The street the card is about, for the "back to my street" button. */
+  home: [number, number] | null = null
 
   /** Rings that spread from the point you just landed on. */
   pulse(at: [number, number]) {
@@ -201,15 +207,42 @@ export class MapView {
     next(0)
   }
 
-  flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
-    const reduced = prefersReducedMotion()
-    // a high arc between places: you see the city pass underneath, then come down on the street
-    this.map.flyTo({ center, ...STREET_VIEW, padding: viewPadding(), duration: reduced ? 0 : 3800, curve: 1.6, essential: true, ...opts,
-      ...(reduced ? { duration: 0 } : {}) })
-    return new Promise<void>((res) => {
-      if (reduced) return res()
-      this.map.once('moveend', () => res())
+  /** Camera move to a street: from wherever you are, pull up, turn and travel across the city, then
+   *  come down onto the street. Any drag, scroll or tap during the move stops it where it is. */
+  private travelToken = 0
+  async flyTo(center: LngLatLike, opts: Partial<FlyToOptions> = {}) {
+    const target = LngLat.convert(center)
+    if (prefersReducedMotion()) { this.map.jumpTo({ center: target, ...STREET_VIEW, padding: viewPadding() }); return }
+    const token = ++this.travelToken
+    const stop = () => { this.travelToken++ }
+    const events = ['mousedown', 'touchstart', 'wheel'] as const
+    events.forEach((e) => this.map.once(e, stop))
+    const ease = (o: Parameters<MLMap['easeTo']>[0]) => new Promise<boolean>((res) => {
+      if (token !== this.travelToken) return res(false)
+      this.map.once('moveend', () => res(token === this.travelToken))
+      this.map.easeTo({ ...o, essential: true })
     })
+    const from = this.map.getCenter()
+    const km = from.distanceTo(target) / 1000
+    try {
+      if (km < 0.6) {
+        await ease({ center: target, ...STREET_VIEW, padding: viewPadding(), duration: 1500, ...opts })
+        return
+      }
+      // 1. pull up and level out
+      if (!(await ease({ zoom: Math.min(this.map.getZoom(), 14) - 1.4, pitch: 36, duration: 900,
+        easing: (t) => 1 - Math.pow(1 - t, 2) }))) return
+      // 2. turn to face the destination and travel over the city
+      const lat = (from.lat + target.lat) / 2 * Math.PI / 180
+      const heading = Math.atan2((target.lng - from.lng) * Math.cos(lat), target.lat - from.lat) * 180 / Math.PI
+      if (!(await ease({ center: target, zoom: Math.max(11.6, Math.min(13, 13.4 - km / 12)), bearing: heading, pitch: 48,
+        duration: Math.min(2600, 1300 + km * 90), easing: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2) }))) return
+      // 3. come down onto the street
+      await ease({ center: target, ...STREET_VIEW, padding: viewPadding(), duration: 1700,
+        easing: (t) => 1 - Math.pow(1 - t, 3), ...opts })
+    } finally {
+      events.forEach((e) => this.map.off(e, stop))
+    }
   }
 
   /** Wide view for the storm time-lapse: looking north-west from Pallikaranai over Velachery to the upper Adyar,
@@ -252,4 +285,41 @@ export class MapView {
   }
 
 
+}
+
+/** 3D/2D, slow spin and "back to my street" buttons, in the same style as the zoom buttons. */
+class ViewControl implements IControl {
+  private el = document.createElement('div')
+  private mv: MapView
+  private spinning = false
+  constructor(mv: MapView) { this.mv = mv }
+  onAdd(map: MLMap) {
+    this.el.className = 'maplibregl-ctrl maplibregl-ctrl-group view-ctrl'
+    const btn = (label: string, svg: string, onClick: (b: HTMLButtonElement) => void) => {
+      const b = document.createElement('button')
+      b.type = 'button'; b.title = label; b.setAttribute('aria-label', label)
+      b.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true">${svg}</svg>`
+      b.addEventListener('click', () => onClick(b))
+      this.el.appendChild(b)
+      return b
+    }
+    btn('Switch between 3D and flat map',
+      '<path d="M10 3 3 7l7 4 7-4-7-4Zm-7 6 7 4 7-4M3 11l7 4 7-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+      () => map.easeTo({ pitch: map.getPitch() > 20 ? 0 : 60, duration: 1200 }))
+    btn('Spin the view slowly',
+      '<path d="M15.5 7.5A6 6 0 1 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 3.5v4h-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+      (b) => {
+        this.spinning = !this.spinning
+        b.classList.toggle('on', this.spinning)
+        if (this.spinning) {
+          map.easeTo({ bearing: map.getBearing() + 360, duration: 72000, easing: (t) => t })
+          map.once('mousedown', () => { this.spinning = false; b.classList.remove('on') })
+        } else map.stop()
+      })
+    btn('Back to my street',
+      '<circle cx="10" cy="10" r="3" fill="currentColor"/><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+      () => { if (this.mv.home) this.mv.flyTo(this.mv.home) })
+    return this.el
+  }
+  onRemove() { this.el.remove() }
 }

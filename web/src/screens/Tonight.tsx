@@ -113,6 +113,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     const hours = Array.from({ length: steps }, (_, k) => Math.max(1, Math.round(((k + 1) * peak) / steps)))
     const stepMs = Math.round(3000 / steps)
     // arrival: a pulse where you landed, a slow orbit, and the night starts again at 6 PM
+    mv.home = [place.lon, place.lat]
     mv.pulse([place.lon, place.lat])
     mv.settleOrbit()
     setRising(true)
@@ -155,21 +156,27 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   // scrubbing by hand stops the playback
   const scrub = useCallback((h: number) => {
     playToken.current++; fadeMs.current = 450; setHour(h); setRising(false); setPlayingNight(false)
-    setLapse((l) => (l === 'playing' ? 'done' : l))
+    setLapse((l) => (l === 'playing' ? 'paused' : l))
+    lapseFrom.current = h
   }, [])
 
   // "Watch the whole storm": a replay played hour by hour over a wide view of the city
-  const [lapse, setLapse] = useState<'off' | 'playing' | 'done'>('off')
+  const [lapse, setLapse] = useState<'off' | 'playing' | 'paused' | 'done'>('off')
   const lapseRun = scenario.kind === 'replay' && scenario.mix.length === 1 ? scenario.mix[0].run : null
   useEffect(() => { setLapse('off'); setMorePark(false) }, [place, scenario])
-  const watchStorm = async () => {
+  const lapseFrom = useRef(1)
+  const watchStorm = async (from = 1) => {
     if (!lapseRun) return
     const token = ++playToken.current
     setLapse('playing')
     const H = scenario.hours
     const stepMs = prefersReducedMotion() ? 0 : Math.min(800, Math.max(450, Math.round(30000 / H)))
-    await mv.showWide()
-    for (let h = 1; h <= H; h++) {
+    // the city drains back to the start hour WHILE the camera pulls out, so the storm then only rises
+    fadeMs.current = 1400
+    setHour(from)
+    if (from === 1) await mv.showWide()
+    for (let h = from; h <= H; h++) {
+      lapseFrom.current = h
       await Promise.all(scenario.mix.map(({ run }) => loadGray(`water/${run}/${frameName(h)}.png`).catch(() => null)))
       if (playToken.current !== token) return
       fadeMs.current = stepMs
@@ -180,6 +187,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     fadeMs.current = 450
     setLapse('done')
   }
+  const pauseLapse = () => { playToken.current++; fadeMs.current = 450; setLapse('paused') }
+  const resumeLapse = () => watchStorm(Math.min(lapseFrom.current + 1, scenario.hours))
   const endLapse = () => {
     playToken.current++
     fadeMs.current = 450
@@ -297,7 +306,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
           {scenario.kind === 'forecast' && current && <> · forecast updated {new Date(current.updated_at).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</>}
         </div>
         {lapseRun && lapse !== 'off' && (
-          <Timelapse run={runs[lapseRun]} hour={hour} playing={lapse === 'playing'} onStop={endLapse}
+          <Timelapse run={runs[lapseRun]} hour={hour} state={lapse} onBack={endLapse}
+            onPause={pauseLapse} onResume={resumeLapse} onAgain={() => watchStorm(1)}
             onProof={lapseRun.startsWith('dec2015') ? () => { window.location.hash = 'proof' } : null} />
         )}
 
@@ -325,7 +335,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <div className="feel">
               {depthFeel(shownCm)}{' '}
               <span className="when-word">{rising ? `at ${clockLabel(scenario.start, hour)}`
-                : ans.maxCm >= 5 && ans.peakHour ? `at its worst, around ${clockLabel(scenario.start, ans.peakHour)}` : 'all night'}</span>
+                : ans.maxCm >= 5 && ans.peakHour ? `at worst, ${clockLabel(scenario.start, ans.peakHour)}` : 'all night'}</span>
             </div>
             <div className="when">
               {ans.hoursTo15 ? <>Too deep for scooters from {clockLabel(scenario.start, ans.hoursTo15)}</> :
@@ -357,7 +367,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             )}
             {nearby && nearby.total > 0 && (
               <div className="small" style={{ marginTop: 6 }}>
-                {nearby.wet} of {nearby.total} streets around you get too deep for scooters<span className="chip">from the model</span>
+                {nearby.wet} of {nearby.total} nearby streets too deep for scooters<span className="chip">model</span>
               </div>
             )}
 
@@ -404,7 +414,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
               ? <path d="M4 3h3v10H4zM9 3h3v10H9z" /> : <path d="M4 2.5v11l9.5-5.5z" />}</svg>
           </button>}
           {lapseRun && lapse === 'off' && runs[lapseRun]?.wet_share_15cm_hourly
-            ? <button className="btn small-btn" onClick={watchStorm}>Watch the whole storm</button> : null}
+            ? <button className="btn small-btn" onClick={() => watchStorm(1)}>Watch the whole storm</button> : null}
         </>} />}
     </>
   )

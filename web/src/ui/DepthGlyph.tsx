@@ -68,7 +68,7 @@ export default function DepthGlyph({ cm }: { cm: number }) {
         <line x1="-0.1" x2="6.5" y1={y(0.30)} y2={y(0.30)} className="iso bold" />
         <line x1="-0.1" x2="6.5" y1={TOP} y2={TOP} className="ground" />
       </svg>
-      <figcaption className="small muted">Typical heights, for scale</figcaption>
+      <figcaption className="small muted">Typical heights</figcaption>
     </figure>
   )
 }

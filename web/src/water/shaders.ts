@@ -46,9 +46,16 @@ uniform float opacity;
 uniform float minDepth;      // zoomed out: only show water that matters (>= 15 cm)
 uniform float detail;        // 0 zoomed out .. 1 zoomed in: smooth shorelines and depth contours
 uniform vec2 texSize;
+uniform sampler2D elevTex;
+uniform float flowOn;        // 1 when the water is animated (zoomed in, visible, recently touched)
 varying float vDepth;
 varying vec2 vUv;
 varying vec3 vWorld;
+
+// water surface (terrain + depth), metres
+float surfAt(vec2 uv) {
+  return texture2D(elevTex, uv).r + mix(texture2D(depthA, uv).r, texture2D(depthB, uv).r, mixT) * 2.55 * rise;
+}
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
@@ -96,7 +103,27 @@ void main() {
   float n1 = noise(q * 0.35 + vec2(time * 0.6, time * 0.4));
   float n2 = noise(q * 0.9 - vec2(time * 0.9, -time * 0.5));
   float rip = 1.0 - smoothstep(0.05, 0.14, minDepth);   // ripples only when zoomed in
-  vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35 * rip, (n2 - 0.5) * 0.35 * rip, 1.0));
+
+  // flow: the water runs down the slope of its own surface (terrain + depth). The ripple pattern is
+  // carried along that direction with two offset phases cross-faded (a flow map, Vlachos 2010).
+  float fn = 0.5;
+  float speed = 0.0;
+  if (flowOn > 0.5 && detail > 0.05) {
+    vec2 px = 1.0 / texSize;
+    vec2 g = vec2(surfAt(vUv + vec2(px.x, 0.0)) - surfAt(vUv - vec2(px.x, 0.0)),
+                  surfAt(vUv + vec2(0.0, px.y)) - surfAt(vUv - vec2(0.0, px.y))) / 60.0;   // m per m
+    vec2 dq = -g * vec2(900.0, 1500.0);
+    speed = clamp(length(g) * 250.0, 0.0, 1.0) * clamp(depth * 5.0, 0.0, 1.0);
+    vec2 dir = length(dq) > 1e-6 ? normalize(dq) : vec2(0.0);
+    float ph0 = fract(time * 0.3), ph1 = fract(time * 0.3 + 0.5);
+    float w = abs(ph0 - 0.5) * 2.0;
+    float f0 = noise(q * 0.7 - dir * ph0 * 2.6 * (0.25 + speed));
+    float f1 = noise(q * 0.7 - dir * ph1 * 2.6 * (0.25 + speed));
+    fn = mix(f0, f1, w);
+  }
+  float flowAmt = (0.35 + 0.65 * speed) * detail * flowOn;
+  vec3 nrm = normalize(vec3((n1 - 0.5) * 0.35 * rip + (fn - 0.5) * 0.6 * flowAmt,
+                            (n2 - 0.5) * 0.35 * rip + (fn - 0.5) * 0.6 * flowAmt, 1.0));
   vec3 view = normalize(camPos - vWorld);
   float fres = pow(1.0 - clamp(dot(nrm, view), 0.0, 1.0), 3.0);
   col = mix(col, vec3(0.78, 0.86, 0.9), fres * 0.12);   // a hint of sky, not a haze over deep water
@@ -107,6 +134,8 @@ void main() {
     glint += exp(-d * d * 9000.0) * (0.6 + 0.4 * n1);
   }
   col += amber * glint * 0.55 * detail;   // street-light glints only up close; at city zoom they read as stains
+  // moving streaks where the water runs fastest
+  col += vec3(0.72, 0.9, 1.0) * smoothstep(0.6, 0.92, fn) * 0.28 * speed * detail * flowOn;
   float edge = smoothstep(minDepth, minDepth + 0.11, depth);
   // deeper water carries more weight: shallow is translucent, deep is opaque
   float a = opacity * edge * mix(0.45, 1.0, t);

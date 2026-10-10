@@ -227,7 +227,7 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 
 /* human-scale glyph */
 .glyph { margin: 8px 0 4px; }
-.glyph svg { display: block; width: 100%; max-width: 290px; height: 66px; }
+.glyph svg { display: block; width: 100%; max-width: 270px; height: 56px; }
 .glyph .figs { fill: rgba(201, 212, 216, 0.55); }
 .glyph .figs .wheel { fill: rgba(201, 212, 216, 0.4); }
 .glyph .outline, .glyph .outline .wheel { fill: none; stroke: rgba(201, 212, 216, 0.7); stroke-width: 0.025; }
@@ -284,7 +284,7 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 
 /* depth in words */
 .feel { font-family: var(--head); font-size: 24px; font-weight: 600; color: var(--grey); margin: 2px 0 2px; letter-spacing: 0.005em; }
-.feel .when-word { font-weight: 400; color: var(--grey-dim); font-size: 17px; }
+.feel .when-word { font-weight: 400; color: var(--grey-dim); font-size: 15px; font-family: var(--body); }
 
 /* tap-a-street card */
 .peek-popup .maplibregl-popup-content { background: #0A171D; color: var(--grey); border: 1px solid var(--line); border-radius: 12px;
@@ -305,3 +305,20 @@ details.tests summary { cursor: pointer; font-family: var(--head); font-size: 15
 .proof-q { font-family: var(--head); font-size: 24px; font-weight: 620; margin: 0 0 6px; }
 .timeline { animation: panel-in 480ms cubic-bezier(.2,.7,.2,1) both; }
 .legend { animation: panel-in 520ms 120ms cubic-bezier(.2,.7,.2,1) both; }
+
+.lapse-progress { height: 3px; margin: 10px 0 0; border-radius: 2px; background: rgba(214, 224, 228, 0.12); overflow: hidden; }
+.lapse-progress i { display: block; height: 100%; background: var(--shallow); transition: width 400ms linear; }
+.lapse-event { animation: rise-in 420ms ease-out both; }
+
+/* map navigation: right edge, vertically centred, in the panel style */
+/* .map prefix: MapLibre's own CSS loads after ours */
+.map .maplibregl-ctrl-top-right { top: 50%; right: 12px; translate: 0 -50%; z-index: 5; }
+.map .maplibregl-ctrl-top-right .maplibregl-ctrl { margin: 0 0 10px 0; float: none; }
+.maplibregl-ctrl-top-right .maplibregl-ctrl-group { background: rgba(8, 19, 25, 0.88) !important; border: 1px solid rgba(214, 224, 228, 0.12);
+  border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); overflow: hidden; }
+.maplibregl-ctrl-top-right .maplibregl-ctrl-group button { width: 36px; height: 36px; }
+.maplibregl-ctrl-top-right .maplibregl-ctrl-group button + button { border-top: 1px solid rgba(214, 224, 228, 0.1); }
+.view-ctrl button { color: var(--grey); display: grid; place-items: center; }
+.view-ctrl button svg { width: 18px; height: 18px; }
+.view-ctrl button.on { background: var(--grey); color: var(--sky-deep); }
+@media (max-width: 900px) { .map .maplibregl-ctrl-top-right { top: 110px; translate: 0 0; } }

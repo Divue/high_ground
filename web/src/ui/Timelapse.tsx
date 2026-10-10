@@ -52,8 +52,9 @@ export function lapseEvents(run: RunInfo): LapseEvent[] {
   return merged.map((e) => ({ ...e, text: start ? `${fmtShort(start, e.hour)}: ${e.text}` : e.text }))
 }
 
-export default function Timelapse({ run, hour, playing, onStop, onProof }: {
-  run: RunInfo; hour: number; playing: boolean; onStop: () => void; onProof: (() => void) | null
+export default function Timelapse({ run, hour, state, onBack, onPause, onResume, onAgain, onProof }: {
+  run: RunInfo; hour: number; state: 'playing' | 'paused' | 'done' | 'off'
+  onBack: () => void; onPause: () => void; onResume: () => void; onAgain: () => void; onProof: (() => void) | null
 }) {
   const events = lapseEvents(run)
   const now = [...events].reverse().find((e) => e.hour <= hour)
@@ -67,15 +68,16 @@ export default function Timelapse({ run, hour, playing, onStop, onProof }: {
           <span className="small muted">of the city too deep for scooters <span className="chip">from the model</span></span>
         </div>
       )}
-      <p className="lapse-event" aria-live="polite">{now?.text ?? 'The storm is about to begin.'}</p>
+      <div className="lapse-progress" aria-hidden="true"><i style={{ width: `${(100 * hour) / run.hours}%` }} /></div>
+      <p className="lapse-event" aria-live="polite" key={now?.text}>{now?.text ?? 'The storm is about to begin.'}</p>
       <div className="lapse-actions">
-        {playing
-          ? <button className="btn" onClick={onStop}>Stop</button>
-          : <>
-              <button className="btn" onClick={onStop}>Back to my street</button>
-              {onProof && <button className="btn" onClick={onProof}>How we tested this</button>}
-            </>}
+        {state === 'playing' && <button className="btn" onClick={onPause}>Pause</button>}
+        {state === 'paused' && <button className="btn primary" onClick={onResume}>Resume</button>}
+        {state === 'done' && <button className="btn primary" onClick={onAgain}>Watch again</button>}
+        <button className="btn" onClick={onBack}>Back to my street</button>
       </div>
+      {state === 'done' && onProof && <button className="linkbtn" style={{ marginTop: 8 }} onClick={onProof}>How we tested this model against 2015</button>}
+      {state !== 'done' && <p className="small muted" style={{ marginTop: 8 }}>Drag the timeline to any hour.</p>}
     </div>
   )
 }

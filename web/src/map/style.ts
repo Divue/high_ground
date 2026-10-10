@@ -49,6 +49,12 @@ export function baseStyle(): StyleSpecification {
         url: `pmtiles://${new URL(`${DATA_BASE}/basemap/chennai.pmtiles`, window.location.href).href}`,
         attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a> · <a href="https://protomaps.com">Protomaps</a>',
       },
+      // a second copy of the elevation tiles for relief colour and shading (the 3D terrain keeps its own)
+      'dem-shade': {
+        type: 'raster-dem',
+        tiles: [`${new URL(`${DATA_BASE}/terrain/`, window.location.href).href}{z}/{x}/{y}.png`],
+        tileSize: 256, encoding: 'mapbox', minzoom: 8, maxzoom: 14, bounds: DOMAIN_BBOX,
+      },
       terrain: {
         type: 'raster-dem',
         // keep the {z}/{x}/{y} braces literal (new URL() would percent-encode them)
@@ -58,7 +64,24 @@ export function baseStyle(): StyleSpecification {
       },
     },
     layers: [
-      ...base.filter((l) => l.type !== 'symbol'),
+      // colour the ground by height (low ground, where water collects, in deep blue; higher ground warmer)
+      // and shade its relief, under everything else
+      ...base.filter((l) => l.type !== 'symbol').flatMap((l) => (l.id === 'water' ? [
+        {
+          id: 'relief-colour', type: 'color-relief', source: 'dem-shade',
+          paint: {
+            'color-relief-color': ['interpolate', ['linear'], ['elevation'],
+              -2, '#0A2A3A', 2, '#0C2836', 5, '#10262E', 9, '#15282A', 15, '#1B2B28', 25, '#222E28', 45, '#2B3329'],
+            'color-relief-opacity': 0.75,
+          },
+        },
+        {
+          id: 'relief-shade', type: 'hillshade', source: 'dem-shade',
+          paint: { 'hillshade-exaggeration': 0.45, 'hillshade-shadow-color': '#000407', 'hillshade-highlight-color': '#3A6070',
+            'hillshade-accent-color': '#0A1B22', 'hillshade-illumination-direction': 315 },
+        },
+        l,
+      ] : [l])),
       {
         id: 'buildings-3d',
         type: 'fill-extrusion',
@@ -68,7 +91,8 @@ export function baseStyle(): StyleSpecification {
         paint: {
           'fill-extrusion-color': [
             'interpolate', ['linear'], ['coalesce', ['get', 'height'], 8],
-            4, '#17262D', 12, '#1D2F37', 30, '#253A44', 60, '#2E4652',
+            // coloured by height: low houses slate blue, mid-rise steel teal, towers pale steel
+            4, '#26344A', 10, '#2D4560', 20, '#36607A', 40, '#4F7F98', 80, '#86A8BF',
           ],
           'fill-extrusion-height': ['coalesce', ['get', 'height'], 8],
           'fill-extrusion-base': ['coalesce', ['get', 'min_height'], 0],

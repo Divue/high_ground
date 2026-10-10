@@ -49,6 +49,7 @@ export class WaterLayer implements CustomLayerInterface {
 
   onAdd(map: MLMap, gl: WebGL2RenderingContext) {
     this.map = map
+    for (const e of ['mousedown', 'touchstart', 'wheel', 'move'] as const) map.on(e, () => { this.lastTouch = performance.now() })
     // software rasterisers (SwiftShader, llvmpipe): coarser mesh, no idle animation
     const dbg = gl.getExtension('WEBGL_debug_renderer_info')
     const rname = String(dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER))
@@ -111,7 +112,7 @@ export class WaterLayer implements CustomLayerInterface {
         shallow: { value: new THREE.Color(TOKENS.shallow) }, deep: { value: new THREE.Color(TOKENS.deep) },
         amber: { value: new THREE.Color(TOKENS.amber) }, camPos: { value: new THREE.Vector3() },
         lights: { value: lights }, opacity: { value: 1 }, minDepth: { value: 0.04 },
-        detail: { value: 0 }, texSize: { value: new THREE.Vector2(W, H) },
+        detail: { value: 0 }, texSize: { value: new THREE.Vector2(W, H) }, flowOn: { value: 0 },
       },
     })
     this.water = new THREE.Mesh(geo, mat)
@@ -139,6 +140,7 @@ export class WaterLayer implements CustomLayerInterface {
     this.texA.needsUpdate = true
     this.texB.needsUpdate = true
     u.mixT.value = 0
+    this.lastTouch = performance.now()
     this.animate('mixT', 0, 1, ms)
   }
 
@@ -186,9 +188,18 @@ export class WaterLayer implements CustomLayerInterface {
     this.camera.projectionMatrixInverse.copy(this.camera.projectionMatrix).invert()
     this.renderer.resetState()
     this.renderer.render(this.scene, this.camera)
-    // render on demand: repaint again only while the water rises or cross-fades; a still map costs nothing
+    // flowing water: animated while you are zoomed in on it, the tab is visible and you touched the map
+    // in the last minute (~30 fps); otherwise render on demand, so a still map costs nothing
+    const flow = !this.lowPower && !prefersReducedMotion() && u.detail.value > 0.05 && document.visibilityState === 'visible'
+      && now - this.lastTouch < 60_000
+    u.flowOn.value = flow ? 1 : 0
     if (this.anim.length) this.map.triggerRepaint()
+    else if (flow && !this.flowTimer) {
+      this.flowTimer = window.setTimeout(() => { this.flowTimer = 0; this.map.triggerRepaint() }, 33)
+    }
   }
+  private flowTimer = 0
+  private lastTouch = performance.now()
 
   onRemove() {
     this.rain?.dispose()
