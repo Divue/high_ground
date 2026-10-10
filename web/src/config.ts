@@ -33,5 +33,23 @@ export function bandFor(cm: number) {
   return BANDS.find((b) => cm < b.max) ?? BANDS[BANDS.length - 1]
 }
 
-export const prefersReducedMotion = () =>
+/** The device asks for less motion (e.g. GNOME "animations off", which Firefox passes on). */
+export const systemReducesMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/** The viewer's own choice, remembered: it overrides the device setting either way. ?motion=on|off also works. */
+export function motionChoice(): 'on' | 'off' | null {
+  if (typeof window === 'undefined') return null
+  const q = new URLSearchParams(window.location.search).get('motion')
+  if (q === 'on' || q === 'off') return q
+  try { const v = window.localStorage.getItem('hg-motion'); return v === 'on' || v === 'off' ? v : null } catch { return null }
+}
+export function setMotionChoice(v: 'on' | 'off') {
+  try { window.localStorage.setItem('hg-motion', v) } catch { /* private mode: the choice lasts this page only */ }
+}
+
+/** Skip animations: the viewer said so, or the device asks for less motion and the viewer has not chosen. */
+export const prefersReducedMotion = () => {
+  const c = motionChoice()
+  return c ? c === 'off' : systemReducesMotion()
+}

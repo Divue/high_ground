@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { API_BASE, REPLAYS, VELACHERY, prefersReducedMotion } from './config'
+import { API_BASE, REPLAYS, VELACHERY, motionChoice, prefersReducedMotion, setMotionChoice, systemReducesMotion } from './config'
 import { loadCurrent, loadParking, loadRuns, postAPI, type Current, type Runs } from './lib/data'
 import { loadGraph } from './lib/routing'
 import { nearestSegment, segmentValues } from './lib/streets'
@@ -31,6 +31,9 @@ export default function App() {
   const [replayRun, setReplayRun] = useState<string | null>(new URLSearchParams(location.search).get('replay'))
   const [place, setPlace] = useState<Place | null>(null)
   const [intro, setIntro] = useState(true)
+  // reduced motion: the device asked and the viewer has not chosen yet
+  const [motionOffer, setMotionOffer] = useState(() => systemReducesMotion() && motionChoice() === null)
+  useEffect(() => { document.documentElement.classList.toggle('reduce-motion', prefersReducedMotion()) }, [])
   // one line over the empty sky while Chennai loads; fades as the descent begins
   const [title, setTitle] = useState(() => {
     // a replay link names its storm straight away, before any data loads
@@ -106,6 +109,13 @@ export default function App() {
       </header>
       {intro && !mv && <div className="loading" aria-live="polite"><span className="sr-only">Loading Chennai</span></div>}
       {intro && screen === 'tonight' && <p className={`intro-title${titleOn ? '' : ' out'}`} aria-live="polite">{title}</p>}
+      {motionOffer && (
+        <div className="motion-offer" role="dialog" aria-label="Animations">
+          <span>Animations are off because your device asks for less motion.</span>
+          <button className="btn primary small-btn" onClick={() => { setMotionChoice('on'); window.location.reload() }}>Play animations</button>
+          <button className="btn small-btn" onClick={() => { setMotionChoice('off'); setMotionOffer(false) }}>Keep them off</button>
+        </div>
+      )}
       {mv && runs && scenario && !intro && (
         <>
           {screen === 'tonight' && <Tonight mv={mv} runs={runs} current={current} scenario={scenario} replayRun={replayRun}

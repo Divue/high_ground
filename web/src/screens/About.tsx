@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getJSON } from '../lib/data'
+import { prefersReducedMotion, setMotionChoice } from '../config'
 
 export default function About() {
   const [drain, setDrain] = useState<number | null>(null)
@@ -7,6 +8,11 @@ export default function About() {
   return (
     <div className="panel about">
       <h2>About the model</h2>
+      <div className="seg" role="group" aria-label="Animations" style={{ margin: '4px 0 10px' }}>
+        <span className="muted small" style={{ alignSelf: 'center', marginRight: 4 }}>Animations</span>
+        <button aria-pressed={!prefersReducedMotion()} onClick={() => { setMotionChoice('on'); window.location.reload() }}>On</button>
+        <button aria-pressed={prefersReducedMotion()} onClick={() => { setMotionChoice('off'); window.location.reload() }}>Off</button>
+      </div>
       <p>Chennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we claim a tested one, built for citizens.</p>
       <h3>How it works</h3>
       <ul>
