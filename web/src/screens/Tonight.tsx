@@ -225,7 +225,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   useEffect(() => {
     let r = 0
     for (const { run, w } of scenario.mix) r += w * (runs[run]?.rain_mm_h[hour - 1] ?? 0)
-    mv.water?.setRain(Math.min(1, r / 25))
+    // any real rain is visible; heavier hours get denser, brighter streaks
+    mv.water?.setRain(r < 0.5 ? 0 : 0.35 + 0.65 * Math.min(1, r / 20))
   }, [scenario, hour, runs, mv])
 
   // Nearest dry parking for the dominant run

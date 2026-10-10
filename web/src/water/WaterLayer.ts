@@ -103,7 +103,10 @@ export class WaterLayer implements CustomLayerInterface {
       return new THREE.Vector2((m.x - x0) / (x1 - x0), (m.y - yTop) / (yBot - yTop))
     })
     const mat = new THREE.ShaderMaterial({
-      vertexShader: waterVert, fragmentShader: waterFrag, transparent: true, depthWrite: false,
+      // no depth test against MapLibre's terrain: the two surfaces are built at different resolutions,
+      // so from some angles the terrain hid the water and it flickered as terrain tiles loaded.
+      // Buildings are drawn after the water, so they still stand in front of it.
+      vertexShader: waterVert, fragmentShader: waterFrag, transparent: true, depthWrite: false, depthTest: false,
       blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
       uniforms: {
         elevTex: { value: elevTex }, seaTex: { value: seaTex }, depthA: { value: this.texA }, depthB: { value: this.texB },
