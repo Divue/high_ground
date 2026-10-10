@@ -24,7 +24,7 @@ Type the street name in the search box with **Replay Michaung 2023** selected (o
 - **1:50–2:30 Proof:** say it plainly: "We tested it on wards we never tuned on. Pick a street residents reported flooded in 2015 and one they didn't: the model ranks the reported one deeper **53%** of the time. Chance is 50%, elevation alone 47%, and the distance to the nearest canal 56%. So the model is slightly better than chance at street level, and we show you that."
   - The Chembarambakkam release matters on river-side streets: ranking 51% without it, 53% with it.
   - One sentence: "Storm-drain capacity (10 mm/h) is a stated assumption: on the tuning half of the wards, every value from 0 to 30 mm/h scored the same within its error bars."
-  - ANUGA (Geoscience Australia) cross-check in Velachery: 94% of cells agree on ≥15 cm, depth correlation 0.90.
+  - ANUGA (Geoscience Australia) cross-check in Velachery: where either model has ≥15 cm, they agree on 73% of those cells (critical success index), depth correlation 0.90. Same terrain, so it checks the arithmetic, not the terrain.
 - **2:30–3:00 Architecture + limits:** `docs/architecture.png`; read two limits from *About the model*; end on the What-if slider dragged back to 50 mm (water recedes).
 
 ## AWS services visible in the product (say each one)

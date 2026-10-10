@@ -27,9 +27,9 @@ The solver is a 2D local-inertial shallow-water scheme (Bates et al. 2010), writ
 
 ## Does it work? An honest answer
 
-We tested the model against 7,924 street segments that residents reported flooded in December 2015, on wards we never tuned on. The fair question is a ranking one: pick a street residents reported flooded and one they did not, and see whether the model says the reported one gets deeper water.
+We tested the model against the 3,200 street segments that residents reported flooded in December 2015 on wards we never tuned on (7,894 reported segments citywide). The fair question is a ranking one: pick a street residents reported flooded and one they did not, and see whether the model says the reported one gets deeper water.
 
-- **The model: 53%** of the time (95% range 52%–54%). Chance is 50%.
+- **The model: 53%** of the time (95% range 51%–55%, resampling whole wards). Chance is 50%.
 - Elevation alone: 47%. Plain distance to the nearest canal or river: **56%**, better than our model.
 - On streets near the Adyar and Cooum, the 2015 Chembarambakkam release lifts the model from 51% to 53%.
 - Against the satellite (NRSC) flood extent, the model covers 33%. A random map of the same size covers 31%; the lowest ground covers 21%.
