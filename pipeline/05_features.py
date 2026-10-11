@@ -44,6 +44,8 @@ class Collector(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
         self.ways = []         # (cls, is_bridge, [(ref, lon, lat)], name, wid)
+        self.waytags = {}      # wid -> tags navigation needs (one-way, roundabout, tunnel, ref, link)
+        self.pois = []         # [kind, name, lon, lat] for pharmacies, fuel, police, fire stations
         self.hospitals = []
         self.parking = []
         self.places = []
@@ -58,6 +60,9 @@ class Collector(osmium.SimpleHandler):
                 return
             br = tags.get("bridge", "no") not in ("no",) or tags.get("layer", "0")[:1] in "123456789"
             self.ways.append((DRIVE[hw], bool(br), nodes, en_name(tags), w.id))
+            self.waytags[w.id] = dict(oneway=tags.get("oneway", ""), junction=tags.get("junction", ""),
+                                      tunnel=tags.get("tunnel", ""), covered=tags.get("covered", ""),
+                                      layer=tags.get("layer", "0"), ref=tags.get("ref", ""), link=hw.endswith("_link"))
         if tags.get("amenity") == "hospital" or tags.get("healthcare") == "hospital":
             try:
                 lons = np.array([n.lon for n in w.nodes])
@@ -92,6 +97,9 @@ class Collector(osmium.SimpleHandler):
 
     def node(self, n):
         t = n.tags
+        kind = {"pharmacy": "pharmacy", "fuel": "fuel", "police": "police", "fire_station": "fire"}.get(t.get("amenity", ""))
+        if kind:
+            self.pois.append([kind, en_name(t), round(n.location.lon, 6), round(n.location.lat, 6)])
         if t.get("amenity") == "hospital" or t.get("healthcare") == "hospital":
             self.hospitals.append(dict(id=f"n{n.id}", name=en_name(t), lon=n.location.lon,
                                        lat=n.location.lat, beds=t.get("beds", ""), area=0.0))
@@ -113,6 +121,7 @@ def build_graph(ways):
     nid = {}
     nodes_ll = []
     edges, cls, brg, geoms, names = [], [], [], [], []
+    build_graph.wids = []      # the OSM way of each edge (edges run in the way's own direction)
     for c, br, nodes, name, wid in ways:
         start = 0
         for k in range(1, len(nodes)):
@@ -130,6 +139,7 @@ def build_graph(ways):
                     brg.append(br)
                     geoms.append([(lon, lat) for _, lon, lat in seg])
                     names.append(name)
+                    build_graph.wids.append(wid)
                 start = k
     return np.array(nodes_ll), np.array(edges), np.array(cls), np.array(brg), geoms, names
 

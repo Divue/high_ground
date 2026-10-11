@@ -82,7 +82,7 @@ export class MapView {
 
   private addOverlays() {
     const m = this.map
-    for (const id of ['depth-streets', 'route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'here']) {
+    for (const id of ['depth-streets', 'route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'nav-dest', 'here']) {
       m.addSource(id, { type: 'geojson', data: EMPTY })
     }
     // low-power map: streets coloured by the model's depth at the hour shown (same numbers as the card)
@@ -114,6 +114,12 @@ export class MapView {
     m.addLayer({ id: 'parking-label', type: 'symbol', source: 'parking', minzoom: 13,
       layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 12, 'text-offset': [0, 1.2], 'text-anchor': 'top' },
       paint: { 'text-color': TOKENS.amber, 'text-halo-color': TOKENS.stormSky, 'text-halo-width': 1.5 } })
+    // where "Take me to dry ground" is going
+    m.addLayer({ id: 'nav-dest', type: 'circle', source: 'nav-dest',
+      paint: { 'circle-radius': 9, 'circle-color': TOKENS.amber, 'circle-stroke-color': '#050D12', 'circle-stroke-width': 3 } })
+    m.addLayer({ id: 'nav-dest-label', type: 'symbol', source: 'nav-dest',
+      layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 13, 'text-offset': [0, 1.3], 'text-anchor': 'top' },
+      paint: { 'text-color': TOKENS.amber, 'text-halo-color': '#050D12', 'text-halo-width': 1.5 } })
     m.addLayer({ id: 'here', type: 'circle', source: 'here',
       paint: { 'circle-radius': 9, 'circle-color': TOKENS.stormSky, 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3.5 } })
   }
@@ -201,6 +207,16 @@ export class MapView {
       'sky-horizon-blend': 0.55, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.35, 'atmosphere-blend': 0.6 })
     m.easeTo({ pitch: on ? 0 : STREET_VIEW.pitch, bearing: on ? 0 : m.getBearing(), duration: on ? 0 : 900 })
     m.setMaxPitch(on ? 0 : 75)
+  }
+
+  /** Frame a route in the open part of the map. */
+  fitRoute(b: [number, number, number, number]) {
+    const p = viewPadding()
+    this.map.fitBounds([[b[0], b[1]], [b[2], b[3]]], {
+      padding: { left: p.left + 60, right: p.right + 80, top: p.top + 90, bottom: p.bottom + 40 },
+      maxZoom: 16, pitch: this.lite ? 0 : Math.min(this.map.getPitch(), 50), bearing: this.map.getBearing(),
+      duration: prefersReducedMotion() ? 0 : 1100, essential: true,
+    })
   }
 
   setGeoJSON(id: string, data: GeoJSON.FeatureCollection | GeoJSON.Feature | null) {

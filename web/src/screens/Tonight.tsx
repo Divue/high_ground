@@ -12,6 +12,8 @@ import { forecastAge } from '../offline/status'
 import HelpCard from '../ui/HelpCard'
 import OfflineSave from '../ui/OfflineSave'
 import PlanCard, { type PlanInput } from '../ui/PlanCard'
+import GoPanel from '../ui/GoPanel'
+import { packRecord } from '../offline/pack'
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
 import DepthGlyph from '../ui/DepthGlyph'
@@ -57,6 +59,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [rising, setRising] = useState(false)    // the night is playing to the peak
   const [morePark, setMorePark] = useState(false)
   const [sheet, setSheet] = useState<'help' | 'plan' | null>(null)
+  const [going, setGoing] = useState(false)
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -172,6 +175,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [lapse, setLapse] = useState<'off' | 'playing' | 'paused' | 'done'>('off')
   const lapseRun = scenario.kind === 'replay' && scenario.mix.length === 1 ? scenario.mix[0].run : null
   useEffect(() => { setLapse('off'); setMorePark(false) }, [place, scenario])
+  useEffect(() => { if (lapse !== 'off') setGoing(false) }, [lapse])
   const lapseFrom = useRef(1)
   const watchStorm = async (from = 1) => {
     if (!lapseRun) return
@@ -435,6 +439,11 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
               </p>
             )}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
+            <div className="divider" />
+            {going
+              ? <GoPanel mv={mv} from={{ lon: place!.lon, lat: place!.lat, label: seg.name }} scenario={scenario} hour={hour}
+                  saved={packRecord()?.places ?? []} onClose={() => setGoing(false)} />
+              : <button className="btn amber" onClick={() => { playToken.current++; setRising(false); setGoing(true) }}>Take me to dry ground</button>}
             <div className="divider" />
             <div className="row">
               <button className="btn" onClick={() => setSheet('plan')}>My flood plan</button>

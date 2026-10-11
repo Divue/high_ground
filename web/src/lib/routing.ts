@@ -175,7 +175,7 @@ export async function loadGraphMeta() {
 // Hour-by-hour edge depths from the model grid (05_features.py): the same samples and p90 as the
 // answer card, for edges that ever reach 15 cm (all others stay under every routing limit).
 const hourlyCache = new Map<string, Promise<{ ids: Uint32Array; vals: Uint8Array; hours: number } | null>>()
-function hourlyDepths(run: string) {
+export function hourlyDepths(run: string) {
   if (!hourlyCache.has(run)) {
     hourlyCache.set(run, (async () => {
       const m = (await loadGraphMeta()).hourly?.[run]

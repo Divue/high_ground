@@ -50,7 +50,7 @@ def manifest():
     # water/meta + elevation + sea mask: the map needs them to start, even when it shows no water
     core = ["runs.json", "streets/index.json", "parking.json", "hospitals.json", "places.json",
             "basemap/chennai-z14.pmtiles", "water/meta.json", "water/elev.png", "water/sea.png",
-            "graph/meta.json", "graph/names.json"]
+            "graph/meta.json", "graph/names.json", "graph/refs.json", "pois.json"]
     core += [f"graph/{f}.bin" for f in ("nodes", "edges", "len", "cls", "geom_off", "geom", "bridge")]
     core += [f"graph/{f}.bin" for f in ("flags",) if (WEB / "graph" / f"{f}.bin").exists()]
     core += [f"graph/depth_{r}.bin" for r in runs]
