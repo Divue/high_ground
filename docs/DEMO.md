@@ -4,16 +4,22 @@ Live app: (live URL after infra/deploy.sh)
 
 ## Velachery streets that flood in the Cyclone Michaung replay (pick one for the video)
 
-| Street | Peak depth (cm) | Reaches 15 cm after (h from 6 PM) | Distance from Velachery station |
+Each street below was typed into the search box with the Michaung replay on, and the answer card showed this depth (`web/tests/demo_streets.mjs`).
+
+| Street (type exactly this) | Card shows | Too deep for scooters from | The card's decision |
 |---|---|---|---|
-| 3rd Street | 121 | 33 | 2179 m |
-| 10th Main Road | 121 | 33 | 2008 m |
-| Dhandeeswaram Nagar 8th Cross Road | 118 | 32 | 656 m |
-| Dhandeeswaram Nagar 4th Avenue [west] 2 cross street | 118 | 32 | 678 m |
-| Dhandeeswaram Nagar 4th Avenue [west] 1 cross street | 118 | 32 | 749 m |
-| Dhandeeswaram Nagar 4th Avenue [west] | 118 | 32 | 749 m |
-| Dhandeeshwaram Nagar 3rd Main Road | 118 | 32 | 672 m |
-| Dhandeeshwaram 3rd Main Road | 118 | 32 | 746 m |
+| Dhandeeswaram Nagar 8th Cross Road | 118 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 600 m) by Tue 1 AM. |
+| Dhandeeswaram Nagar 4th Avenue [west] 2 cross street | 118 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 600 m) by Tue 1 AM. |
+| Dhandeeswaram Nagar 4th Avenue [west] | 118 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 600 m) by Tue 1 AM. |
+| Dhandeeshwaram Nagar 3rd Main Road | 118 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 600 m) by Tue 1 AM. |
+| Dhandeeshwaram 3rd Main Road | 118 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 750 m) by Tue 1 AM. |
+| Kuberan Nagar 8th Street | 117 cm | Tue 4 AM | Move your car to Major Mukund Varadharajan Road Flyover (flyover, 1.1 km) by Tue 3 AM. |
+| Velachery Main Road | 116 cm | Tue 2 AM | Move your car to Phoenix Marketcity Chennai Parking (multi-storey, 450 m) by Tue 1 AM. |
+| Veerabandiya Kattabomman Street | 116 cm | Tue 2 AM | Move your car to Phoenix Marketcity Chennai Parking (multi-storey, 300 m) by Tue 12 AM. |
+| Murugappa Street | 111 cm | Tue 2 AM | Move your car to Inner Ring Road (Southern Sector) (flyover, 1.3 km) by Tue 12 AM. |
+| Officers Colony 5th Street | 109 cm | Tue 2 AM | Move your car to Maduvankarai Bridge (flyover, 1.1 km) by Tue 12 AM. |
+| Kakkan Nagar Main Road | 109 cm | Tue 2 AM | Move your car to Inner Ring Road (Southern Sector) (flyover, 1.1 km) by Tue 1 AM. |
+| Bharani Street | 107 cm | Tue 2 AM | Move your car to Velachery Upper Flyover (flyover, 1.2 km) by Tue 1 AM. |
 
 Type the street name in the search box with **Replay Michaung 2023** selected (or open the app with `?replay=michaung2023`).
 

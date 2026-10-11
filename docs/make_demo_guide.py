@@ -1,5 +1,6 @@
 """Write docs/DEMO.md for the video team. Every number is read from model outputs."""
 import json
+import re
 import math
 from pathlib import Path
 
@@ -51,10 +52,26 @@ def main():
         "",
         "## Velachery streets that flood in the Cyclone Michaung replay (pick one for the video)",
         "",
-        "| Street | Peak depth (cm) | Reaches 15 cm after (h from 6 PM) | Distance from Velachery station |",
-        "|---|---|---|---|",
     ]
-    lines += [f"| {n} | {cm} | {t:.0f} | {d} m |" for cm, n, t, d in vel]
+    ver = OUT / "demo_streets_verified.json"
+    if ver.exists():
+        # checked by typing each name into the real search box (web/tests/demo_streets.mjs)
+        rows = [r for r in json.loads(ver.read_text())
+                if r.get("found") and abs(r.get("card_cm", -99) - r["cm"]) <= 3 and "subway" not in r["name"].lower()
+                and r["d"] <= 2600 and not re.match(r"^\d+(st|nd|rd|th) (street|main road|cross street)$", r["name"], re.I)]
+        lines += [
+            "Each street below was typed into the search box with the Michaung replay on, and the answer card showed this depth (`web/tests/demo_streets.mjs`).",
+            "",
+            "| Street (type exactly this) | Card shows | Too deep for scooters from | The card's decision |",
+            "|---|---|---|---|",
+        ]
+        lines += [f"| {r['name']} | {r['card_cm']} cm | {r['when'].replace('Too deep for scooters from ', '')} | {r['decision'].split('Take me there')[0].strip()} |" for r in rows[:12]]
+    else:
+        lines += [
+            "| Street | Peak depth (cm) | Reaches 15 cm after (h from 6 PM) | Distance from Velachery station |",
+            "|---|---|---|---|",
+        ]
+        lines += [f"| {n} | {cm} | {t:.0f} | {d} m |" for cm, n, t, d in vel]
     lines += [
         "",
         "Type the street name in the search box with **Replay Michaung 2023** selected (or open the app with `?replay=michaung2023`).",

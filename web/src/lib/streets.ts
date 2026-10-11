@@ -62,6 +62,31 @@ function decode(b64: string, bytes: number): number[] {
   return out
 }
 
+/** Every stretch of a named street within `radiusM` of a point (OSM splits a street into many pieces). */
+export async function namedPieces(name: string, lon: number, lat: number, radiusM = 600): Promise<Segment[]> {
+  const idx = await loadStreetIndex()
+  const pad = radiusM / 100_000 + 0.002
+  const tiles = Object.entries(idx.tile_bounds_lonlat)
+    .filter(([, [w, s, e, n]]) => lon >= w - pad && lon <= e + pad && lat >= s - pad && lat <= n + pad)
+    .map(([t]) => t)
+  const out: Segment[] = []
+  const want = name.toLowerCase()
+  for (const t of tiles) {
+    const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`).catch(() => null)
+    if (!g) continue
+    g.segs.forEach(([id, nm, hw, br, flat], i) => {
+      if ((nm || '').toLowerCase() !== want) return
+      let d = Infinity
+      for (let k = 0; k < flat.length; k += 2) d = Math.min(d, distM(lon, lat, flat[k], flat[k + 1]))
+      if (d > radiusM) return
+      const coords: [number, number][] = []
+      for (let k = 0; k < flat.length; k += 2) coords.push([flat[k], flat[k + 1]])
+      out.push({ tile: t, index: i, id, name: nm, highway: hw, bridge: !!br, coords, distanceM: d })
+    })
+  }
+  return out
+}
+
 export async function segmentValues(seg: Segment, mix: MixPart[]): Promise<StreetAnswer> {
   const bytes = (await loadStreetIndex()).series_bytes ?? 1
   let max = 0

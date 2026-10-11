@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { API_BASE } from '../config'
 import { loadPlaces, postAPI } from '../lib/data'
 
-export interface Place { label: string; lon: number; lat: number }
+/** street: the place is a named street from the list (the answer covers that street, not one point) */
+export interface Place { label: string; lon: number; lat: number; street?: string }
 
 interface GeoResp { source: string; results: { label: string; lon: number; lat: number }[] }
 
@@ -27,7 +28,7 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
         (n.toLowerCase().startsWith(ql) ? 0 : 2) + (kind === 'street' ? 1 : 0)
       const local = places.filter(([n]) => n.toLowerCase().includes(ql))
         .sort((a, b) => rank(a) - rank(b) || a[0].length - b[0].length).slice(0, 6)
-        .map(([n, lon, lat]) => ({ label: `${n}, Chennai`, lon, lat }))
+        .map(([n, lon, lat, kind]) => ({ label: `${n}, Chennai`, lon, lat, street: kind === 'street' ? n : undefined }))
       if (my === seq.current) {
         setItems(local)
         setSource(local.length ? 'Places and streets from OpenStreetMap'

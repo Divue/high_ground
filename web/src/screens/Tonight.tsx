@@ -8,7 +8,7 @@ import { frameName } from '../lib/frames'
 import type { Route } from '../lib/routing'
 import { leaveByAsync } from '../lib/navClient'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
-import { depthStreets, lastMissingTiles, nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
+import { depthStreets, lastMissingTiles, namedPieces, nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
 import { forecastAge } from '../offline/status'
 import HelpCard from '../ui/HelpCard'
 import OfflineSave from '../ui/OfflineSave'
@@ -54,6 +54,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [routing, setRouting] = useState(false)
   const [error, setError] = useState('')
   const [nearby, setNearby] = useState<{ wet: number; total: number } | null>(null)
+  const [stretches, setStretches] = useState<{ n: number; min: number; max: number } | null>(null)
   const flown = useRef<string>('')
   const [arrived, setArrived] = useState('')     // place key the camera has reached
   const played = useRef('')                       // place+scenario whose night has been played
@@ -83,7 +84,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       setError('')
       setAns(null)          // never mix the previous street's answer with the new street
       setRoute(null)
-      const s = await nearestSegment(place.lon, place.lat).catch(() => null)
+      let s = await nearestSegment(place.lon, place.lat).catch(() => null)
       if (dead) return
       if (!s || s.distanceM > 600) {
         setSeg(null); setAns(null)
@@ -97,8 +98,23 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       mv.setGeoJSON('street', { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: s.coords } })
       mv.setGeoJSON('here', { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [place.lon, place.lat] } })
       if (!scenario.mix.length) { setAns(null); return }
-      const a = await segmentValues(s, scenario.mix).catch(() => null)
+      let a = await segmentValues(s, scenario.mix).catch(() => null)
       if (dead) return
+      // a searched street name: answer for the street, i.e. its deepest stretch near here, and say so
+      // (OSM splits streets into pieces; one piece can read 118 cm and the next 0 cm)
+      setStretches(null)
+      if (a && place.street && s.name.toLowerCase() === place.street.toLowerCase()) {
+        const pieces = await namedPieces(s.name, place.lon, place.lat).catch(() => [] as Segment[])
+        if (pieces.length > 1) {
+          const vals = (await Promise.all(pieces.map((pc) => segmentValues(pc, scenario.mix).then((v) => ({ pc, v })).catch(() => null)))).filter(Boolean) as { pc: Segment; v: StreetAnswer }[]
+          if (dead) return
+          const deepest = vals.reduce((x, y) => (y.v.maxCm > x.v.maxCm ? y : x), vals[0])
+          if (deepest && deepest.v.maxCm > a.maxCm) { s = deepest.pc; a = deepest.v; setSeg(s) }
+          const cms = vals.map((x) => x.v.maxCm)
+          setStretches({ n: vals.length, min: Math.min(...cms), max: Math.max(...cms) })
+          mv.setGeoJSON('street', { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: s.coords } })
+        }
+      }
       if (!a) {
         setError(!online ? `${scenario.label.replace(/^Replay: /, '')}: this street's answers were not saved for offline use. Connect to load them, or switch back to a storm you saved.`
           : 'Could not load this street’s answers. Check the connection and try again.')
@@ -414,6 +430,9 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         {lapse === 'off' && arrivedHere && fresh && seg && ans && band && scenario.mix.length > 0 && !going && (
           <div className="reveal" key={nightKey}>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
+            {stretches && stretches.max - stretches.min >= 5 && (
+              <div className="muted small">{stretches.n} stretches of this street near here reach {stretches.min}–{stretches.max} cm; the deepest is shown.</div>
+            )}
             <Readout cm={ans.maxCm} shown={shownCm} />
             <div className="feel">
               {depthFeel(shownCm)}{' '}
