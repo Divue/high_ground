@@ -24,6 +24,12 @@ for officials. HighGround is for the residents who still park their cars on the 
 storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we
 claim a tested one, built for citizens.
 
+**Positioning update (Sun 11 Oct):** the state's **Chennai Flood Monitor** (public, since Oct 2025) claims street-level
+inundation forecasts for some areas, and **TN-Alert** (state app, 5 lakh+ installs) sends official alerts. So never
+say HighGround is the only street-level forecast. Say what it adds: *Official systems tell you a flood is coming.
+HighGround tells you what to do on your street: where to move your car and by when, which way to go without
+crossing water, which hospitals you can still reach, and it keeps working when the power and the network go down.*
+
 **Tagline ideas (pick or rewrite):**
 
 - "Where the water goes tonight, street by street."
@@ -56,6 +62,9 @@ The whole app is one full-screen 3D night-time map of Chennai with floodwater on
 | **Hospitals** | 46 major hospitals; which are cut off from the main road network at each storm size, and the dry route to each one that is not. |
 | **Proof** | "Did the model get 2015 right?" — a swipe split-screen: the model's 2015 flood on the left, streets residents reported flooded on the right, and the honest result (see section 6). |
 | **About the model** | Plain-language limits and data credits. |
+| **Take me to dry ground** (new) | On foot, by two-wheeler or by car, to dry parking, a hospital, high ground or a saved place. The route avoids streets the model expects to flood at the hour you would reach them, closes subways in rain and keeps to one-way streets. Step-by-step directions; **Start** follows your GPS with one big instruction and voice; **Preview the drive** plays it. |
+| **Save for offline** (new) | One tap before the storm keeps the app, the map, your street (and two more places) for every storm, and the road network on the phone. When the power and the towers go, it still opens and still plans a way out. Battery-saver map with streets coloured by depth. |
+| **Help numbers + My flood plan** (new) | Tap-to-call 112, 1913, 1070, 1077, 108, 101 and the power line for fallen wires; send your location by SMS/WhatsApp. The flood plan is an image and text to send to family; replays are stamped "Practice plan, not a forecast". |
 | **Ask HighGround** | An AI assistant that only answers from the model's numbers (Amazon Bedrock + Strands Agents) and tells people in danger to call **112** first. |
 
 **Interaction details worth showing on the landing page:** tap any street for its depth; a play button
@@ -119,6 +128,7 @@ measured on an integrated-GPU laptop with the water flowing).
 | Frontend | Vite 8.3.4, React 19.3, TypeScript, **MapLibre GL JS 6.13.0** (3D terrain, extruded buildings, colour-relief, hillshade), **three.js 0.186.1** (custom water layer, GLSL shaders), PMTiles 4.5.0 + Protomaps basemaps 5.7.2 (dark basemap from one file on S3), Web Workers (image decoding), Canvas 2D (rain) |
 | Model pipeline | Python 3.11, numba (solver), NumPy, SciPy, rasterio/GDAL, GeoPandas, pyproj, scikit-image, pandas; **ANUGA 4.0.1** (cross-check) |
 | AWS | **Amazon S3** + **Amazon CloudFront** (tiles, model outputs), **AWS Amplify Hosting** (site), **AWS Lambda** (Python 3.12: subscribe, forecast-check, assistant, geocode), **Amazon API Gateway** (HTTP API), **Amazon DynamoDB** (subscribers), **Amazon SNS** (alert email with per-street filter policy), **Amazon EventBridge Scheduler** (every 3 h), **Amazon Bedrock** (Claude: alert text + assistant), **Strands Agents SDK** (AWS open source, the assistant), **Amazon Location Service** (address search, biased to Chennai), **AWS SAM** (whole stack in one template), **AWS Open Data Registry** (Copernicus DEM and ESA WorldCover read straight from S3) |
+| Offline + navigation | vite-plugin-pwa + Workbox (service worker), Cache API, self-hosted fonts and map glyphs, Web Workers (routing), Geolocation, Screen Wake Lock, Web Speech, Web Share |
 | Testing / tooling | Playwright (end-to-end tests, frame-perfect demo footage with a virtual clock), moto (AWS mocks for the Lambda tests), ffmpeg |
 | Other data/services | OpenStreetMap, Open-Meteo forecast API, ERA5 (storm timing via Open-Meteo), IMD rainfall totals, OpenCity datasets (2015 crowd-sourced flood reports, GCC flood hazard zones, NRSC 2015 inundation extent, GCC ward map) |
 
@@ -252,7 +262,12 @@ not there yet. Screenshots are 1440×900 or 1280×800 PNG.
   Chennai Corporation via OpenCity. 2015 inundation extent: NRSC via OpenCity.
 - Cross-check model: ANUGA, Geoscience Australia.
 
-## 13. Status today (Sat 10 Oct, evening)
+## 13. Status (updated Sun 11 Oct, morning)
+
+- **New since Saturday:** offline mode, flood-safe navigation with directions and live GPS, help numbers, flood plan image, two review rounds. Sourced Chennai facts for the page: on 4 Dec 2023, 712 of Chennai's 1,814 power feeders were switched off; on 5 Dec 2023, 30% of the city's 42,747 mobile towers were down (The News Minute; The Week/PTI).
+- Rough cut of the video: `review/p5/footage/rough_cut.mp4`, cut list `docs/VIDEO_CUT.md`.
+
+### Saturday evening
 
 - **Works locally:** the whole app (all screens, replays, time-lapse, routing, hospitals, Proof, About),
   the model and validation, the Lambda functions (tested end to end against mocked AWS).

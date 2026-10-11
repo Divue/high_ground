@@ -1,6 +1,6 @@
 # HighGround: full project audit
 
-**One file with everything:** what we built, how it works, the tech stack (used and planned), every number we may quote (with its caveat), what is done and what is not, how to run it, the pitch, the 3-minute video, and what to do next. Written Sun 11 Oct 2026, ~00:45 IST, for the team. Numbers are copied from the model output files (`data/out/web/proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `streets/index.json`, `graph/meta.json`) and the run logs. **If you quote a number, quote it as written here, with its caveat.**
+**Updated Sun 11 Oct, ~09:00 IST** (offline + navigation built and reviewed; judge #2; search fix; footage and rough cut). **One file with everything:** what we built, how it works, the tech stack (used and planned), every number we may quote (with its caveat), what is done and what is not, how to run it, the pitch, the 3-minute video, and what to do next. Written Sun 11 Oct 2026, ~00:45 IST, for the team. Numbers are copied from the model output files (`data/out/web/proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `streets/index.json`, `graph/meta.json`) and the run logs. **If you quote a number, quote it as written here, with its caveat.**
 
 Companion files: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` (next features, sourced), `docs/LANDING_PAGE_CONTEXT.md` (landing page), `docs/DEMO.md` (generated demo streets), `docs/blog_draft.md`, `PROGRESS.md` (full engineering log), `CLAUDE.md` (original spec).
 
@@ -16,7 +16,7 @@ Companion files: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` (next features, sourced),
 | AWS backend (SAM stack, 4 Lambdas, API, DynamoDB, SNS, Scheduler, Bedrock, Location, Amplify) | **Code done, tested against mocked AWS (moto). Not deployed.** |
 | What blocks the deploy | The team's AWS profile `highground` does not exist on this laptop yet; `.env` still has the placeholder email; Bedrock model access not confirmed. See section 16 |
 | Live URL, real alert email, live assistant | After deploy |
-| Demo video | Not recorded. Frame-perfect recorder ready (section 13) |
+| Demo video | Footage recording (opening done; search, navigate, timelapse, what-if, proof in progress). Rough cut builder `docs/make_rough_cut.py` → `review/p5/footage/rough_cut.mp4` + cut list `docs/VIDEO_CUT.md`, with two slots for the alert email and the assistant (need the deploy) |
 | Blog | Draft in `docs/blog_draft.md` (numbers corrected tonight) |
 | Landing page | Teammate; context in `docs/LANDING_PAGE_CONTEXT.md` + PDF |
 | Offline mode + flood-safe navigation | **Built Sun 11 Oct, 00:55–03:05 IST** (commits 4119956, fdcfb10, a7bbd2f, c8add5b): Save for offline, battery saver map, help card, flood plan, Take me to dry ground with directions, live GPS directions and Preview the drive. Offline gate and route-rule tests pass; reviewer pass running. Plan: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` |
@@ -402,11 +402,11 @@ What shipped, measured: offline gate (save → network off → reload → card, 
 |---|---|---|
 | 1 | Create AWS profile `highground` (us-east-1), real `ALERT_TEST_EMAIL` in `.env`, Bedrock Claude Sonnet access | **User** |
 | 2 | `infra/deploy.sh` → live URL; subscribe once, click the SNS confirmation link; `#admin` → Run and send alerts for the real email shot | Claude + user |
-| 3 | Record the 1080p footage (section 13) | Claude |
+| 3 | Record the 1080p footage (section 13): in progress, then the rough cut | Claude |
 | 4 | Edit the video; voice-over; submit | Teammate 1 |
 | 5 | Blog on AWS Builder Center (from `docs/blog_draft.md`); link in submission | Teammate 1 |
 | 6 | Landing page (context PDF already shared) — apply the positioning update in section 1 | Teammate |
-| 7 | Verify demo streets in the search box; regenerate `docs/DEMO.md` if needed | Claude |
+| 7 | ~~Verify demo streets in the search box~~ done: `docs/DEMO.md` lists only verified streets (search now answers a named street with its deepest stretch) | Claude |
 | 8 | Judge pass at the end; tag `p2` (with the documented place failure) and `p3` | Claude |
 | 9 | README and blog: add the latest UX work (motion offer, rain, flow, camera) | Claude |
 | 10 | Minor: assistant shows a raw error if Bedrock fails; mobile hides the timeline | Claude |
