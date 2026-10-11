@@ -162,6 +162,11 @@ export default function PlanCard({ inp, onClose }: { inp: PlanInput; onClose: ()
   const [img, setImg] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [onClose])
 
   useEffect(() => {
     let dead = false

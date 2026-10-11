@@ -68,7 +68,10 @@ export default function NavLive({ mv, coords, steps, dest, mode, simulate, onRer
   const show = (pos: [number, number], a: number, heading: number | null) => {
     setAlong(a)
     mv.setGeoJSON('me', { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: pos } })
+    // keep you in the open part of the map: below the banner, clear of the card on a desktop
+    const phone = window.innerWidth <= 900
     mv.map.easeTo({ center: pos, zoom: 16.4, bearing: heading ?? mv.map.getBearing(), pitch: mv.lite ? 0 : 50,
+      padding: phone ? { top: 250, bottom: 40, left: 0, right: 0 } : { top: 180, bottom: 120, left: 380, right: 0 },
       duration: prefersReducedMotion() ? 0 : 900, easing: (t) => t, essential: true })
     // announcements: ~300 m and ~50 m before a turn in a vehicle; ~50 m and at the turn on foot
     const k = stepAt.findIndex((s, i) => i > 0 && s > a + 5)
@@ -147,8 +150,11 @@ export default function NavLive({ mv, coords, steps, dest, mode, simulate, onRer
     const get = () => (navigator as unknown as { wakeLock?: { request: (t: 'screen') => Promise<WakeLockLike> } }).wakeLock?.request('screen').then((l) => { lock = l }).catch(() => {})
     get()
     const vis = () => { if (document.visibilityState === 'visible') get() }
+    // on a phone the card steps aside while you follow directions
+    document.documentElement.classList.add('nav-live-on')
     document.addEventListener('visibilitychange', vis)
-    return () => { document.removeEventListener('visibilitychange', vis); lock?.release().catch(() => {}); window.speechSynthesis?.cancel(); mv.setGeoJSON('me', null) }
+    return () => { document.removeEventListener('visibilitychange', vis); lock?.release().catch(() => {}); window.speechSynthesis?.cancel(); mv.setGeoJSON('me', null)
+      document.documentElement.classList.remove('nav-live-on') }
   }, [mv])
 
   const k = stepAt.findIndex((s, i) => i > 0 && s > along + 5)

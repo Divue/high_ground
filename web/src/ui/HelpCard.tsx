@@ -1,6 +1,6 @@
 // Help that works with no data at all: numbers to call, and your location as a message.
 // Which channel survives in a Chennai flood (calls, SMS, data) is unpredictable, so we offer all of them.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /** Checked 11 Oct 2026 against TNSDMA, GCC and TNPDCL sources (see docs/OFFLINE_AND_NAVIGATION_PLAN.md). */
 export const HELP_NUMBERS: { n: string; tel: string; what: string; red?: boolean }[] = [
@@ -19,6 +19,11 @@ export default function HelpCard({ onClose, street, fallback }: { onClose: () =>
   const [fix, setFix] = useState<Fix | null>(null)
   const [state, setState] = useState<'idle' | 'finding' | 'ok' | 'err'>('idle')
   const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [onClose])
 
   const locate = () => {
     setState('finding')

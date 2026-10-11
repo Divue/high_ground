@@ -369,3 +369,4 @@ a.btn { text-decoration: none; color: inherit; }
 .nav-meta { color: var(--grey-dim); margin-top: 6px; }
 .nav-honest { color: var(--grey-dim); margin-top: 4px; }
 @media (max-width: 900px) { .nav-live { top: 104px; } .nav-text { font-size: 19px; } .nav-dist { font-size: 24px; } }
+@media (max-width: 900px) { html.nav-live-on .panel.left, html.nav-live-on .timeline { display: none; } }
