@@ -359,3 +359,13 @@ a.btn { text-decoration: none; color: inherit; }
 .steps li { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: start; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
 .steps li svg { width: 16px; height: 16px; margin-top: 2px; color: var(--grey-dim); }
 .steps li em { font-style: normal; color: var(--grey-dim); font-size: 12.5px; white-space: nowrap; }
+
+/* live directions: one instruction, large, at the top of the map */
+.nav-live { position: fixed; z-index: 30; top: 70px; left: 50%; translate: -50% 0; width: min(520px, calc(100vw - 32px));
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; box-shadow: 0 18px 50px rgba(0,0,0,0.5); }
+.nav-next { display: flex; gap: 14px; align-items: baseline; }
+.nav-dist { font-family: var(--head); font-size: 30px; font-weight: 650; color: var(--grey); white-space: nowrap; font-variation-settings: 'wdth' 105; }
+.nav-text { font-family: var(--head); font-size: 22px; font-weight: 560; line-height: 1.15; color: #fff; }
+.nav-meta { color: var(--grey-dim); margin-top: 6px; }
+.nav-honest { color: var(--grey-dim); margin-top: 4px; }
+@media (max-width: 900px) { .nav-live { top: 104px; } .nav-text { font-size: 19px; } .nav-dist { font-size: 24px; } }

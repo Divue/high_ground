@@ -9,6 +9,7 @@ import { MODES, type DestKind, type Mode } from '../lib/nav'
 import { navigateAsync, type NavAnswer } from '../lib/navClient'
 import { clockLabel, type Scenario } from '../lib/scenario'
 import type { MapView } from '../map/MapView'
+import NavLive from './NavLive'
 
 const KINDS: [DestKind, string][] = [['parking', 'Dry parking'], ['hospital', 'Hospital'], ['high', 'High ground']]
 const ICON_ROT: Partial<Record<Step['icon'], number>> = {
@@ -46,6 +47,9 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
   const [ans, setAns] = useState<NavAnswer | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const [live, setLive] = useState<null | 'gps' | 'sim'>(null)
+  const [fromNow, setFromNow] = useState<{ lon: number; lat: number } | null>(null)   // re-planned from here
+  const start = fromNow ?? from
   const token = useRef(0)
   const box = useRef<HTMLDivElement>(null)
   const m = MODES[mode]
@@ -57,7 +61,7 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
     setBusy(true); setErr('')
     const place = kind.startsWith('place:') ? others[Number(kind.slice(6))] : undefined
     const id = window.setTimeout(() => {
-      navigateAsync({ from: [from.lon, from.lat], mode, kind: place ? 'place' : (kind as DestKind), mix: scenario.mix, hour,
+      navigateAsync({ from: [start.lon, start.lat], mode, kind: place ? 'place' : (kind as DestKind), mix: scenario.mix, hour,
         place: place ? { name: place.label, lon: place.lon, lat: place.lat } : undefined })
         .then((a) => {
           if (t !== token.current) return
@@ -66,7 +70,7 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
           mv.drawLine('route-safe', r.route ? r.route.coords : null)
           mv.setGeoJSON('route-normal', r.route && r.usual && r.avoided > 0 ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.usual.coords } } : null)
           mv.setGeoJSON('nav-dest', r.dest ? { type: 'Feature', properties: { name: r.dest.name }, geometry: { type: 'Point', coordinates: [r.dest.lon, r.dest.lat] } } : null)
-          if (r.route) {
+          if (r.route && !live) {
             const xs = r.route.coords.map((c) => c[0]), ys = r.route.coords.map((c) => c[1])
             mv.fitRoute([Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)])
           }
@@ -75,7 +79,7 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
         .finally(() => { if (t === token.current) setBusy(false) })
     }, 220)      // dragging the timeline: plan for where it stops
     return () => window.clearTimeout(id)
-  }, [mode, kind, hour, scenario, from.lon, from.lat]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mode, kind, hour, scenario, start.lon, start.lat]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // leaving the panel clears its lines
   useEffect(() => () => {
@@ -109,6 +113,12 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
           {r.route.maxCm >= m.soft && <div className="small">Shallow water possible on the way: up to {r.route.maxCm} cm in the model.</div>}
           {r.dest.kind === 'hospital' && <div className="muted small">Call ahead: hospitals can be cut off or short of power in a flood.</div>}
           {r.dest.detail === 'flyover' && <div className="muted small">Check local traffic advisories before parking on a flyover.</div>}
+          {!live && (
+            <div className="row" style={{ marginTop: 8 }}>
+              <button className="btn amber" onClick={() => setLive('gps')}>Start</button>
+              <button className="btn" onClick={() => setLive('sim')}>Preview the drive</button>
+            </div>
+          )}
           <ol className="steps">
             {ans!.steps.map((s, i) => (
               <li key={i}><StepIcon icon={s.icon} /><span>{s.text}</span>{s.distM > 0 && i < ans!.steps.length - 1 ? <em>{fmtDistance(s.distM)}</em> : null}</li>
@@ -125,6 +135,11 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
           <p className="small">If you are safe, stay where you are. If water enters your home, call <a className="emergency" href="tel:112">112</a>.</p>
         </div>
       ))}
+      {live && r?.route && r.dest && (
+        <NavLive key={`${live}|${r.route.edges.length}|${r.route.edges[0]}`} mv={mv} coords={r.route.coords} steps={ans!.steps} dest={r.dest.name}
+          mode={mode} simulate={live === 'sim'} onReroute={(p) => setFromNow(p)}
+          onEnd={() => { setLive(null); setFromNow(null) }} />
+      )}
       <p className="muted small" style={{ marginBottom: 0 }}>
         A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.
       </p>

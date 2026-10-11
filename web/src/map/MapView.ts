@@ -82,7 +82,7 @@ export class MapView {
 
   private addOverlays() {
     const m = this.map
-    for (const id of ['depth-streets', 'route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'nav-dest', 'here']) {
+    for (const id of ['depth-streets', 'route-normal', 'route-safe', 'street', 'proof-crowd', 'hospitals', 'parking', 'nav-dest', 'here', 'me']) {
       m.addSource(id, { type: 'geojson', data: EMPTY })
     }
     // low-power map: streets coloured by the model's depth at the hour shown (same numbers as the card)
@@ -114,6 +114,9 @@ export class MapView {
     m.addLayer({ id: 'parking-label', type: 'symbol', source: 'parking', minzoom: 13,
       layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Medium'], 'text-size': 12, 'text-offset': [0, 1.2], 'text-anchor': 'top' },
       paint: { 'text-color': TOKENS.amber, 'text-halo-color': TOKENS.stormSky, 'text-halo-width': 1.5 } })
+    // you, while following directions
+    m.addLayer({ id: 'me', type: 'circle', source: 'me',
+      paint: { 'circle-radius': 8, 'circle-color': '#FFFFFF', 'circle-stroke-color': TOKENS.shallow, 'circle-stroke-width': 4, 'circle-pitch-alignment': 'map' } })
     // where "Take me to dry ground" is going
     m.addLayer({ id: 'nav-dest', type: 'circle', source: 'nav-dest',
       paint: { 'circle-radius': 9, 'circle-color': TOKENS.amber, 'circle-stroke-color': '#050D12', 'circle-stroke-width': 3 } })
