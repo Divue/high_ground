@@ -2,8 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   HighGround: street-level flood answers for Chennai residents.
-  S3 + CloudFront (model outputs, tiles), Lambda + API Gateway, DynamoDB, SNS,
-  EventBridge Scheduler, Amazon Bedrock (Strands Agents SDK), Amazon Location Service, Amplify Hosting.
+  Amplify Hosting (site, model outputs, tiles), S3 (model outputs the Lambdas read), Lambda + API Gateway,
+  DynamoDB, SNS, EventBridge Scheduler, Amazon Bedrock (Strands Agents SDK), Amazon Location Service.
 
 Parameters:
   BedrockModelId:
@@ -33,7 +33,8 @@ Globals:
         MODEL_ID: !Ref BedrockModelId
 
 Resources:
-  # ------------------------------------------------------------------ data + CDN
+  # ------------------------------------------------------------------ data
+  # Private: only the Lambdas read it. Browsers get the same files from Amplify Hosting (see SiteApp).
   DataBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -53,60 +54,6 @@ Resources:
             ExposedHeaders: [ETag, Content-Length, Content-Range, Accept-Ranges]
             MaxAge: 3600
 
-  DataOAC:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties:
-      OriginAccessControlConfig:
-        Name: !Sub "${AWS::StackName}-data-oac"
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
-
-  DataCDN:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Enabled: true
-        Comment: HighGround model outputs, terrain tiles, basemap
-        HttpVersion: http2and3
-        PriceClass: PriceClass_All
-        Origins:
-          - Id: data
-            DomainName: !GetAtt DataBucket.RegionalDomainName
-            OriginAccessControlId: !GetAtt DataOAC.Id
-            S3OriginConfig: {OriginAccessIdentity: ""}
-        DefaultCacheBehavior:
-          TargetOriginId: data
-          ViewerProtocolPolicy: redirect-to-https
-          Compress: true
-          AllowedMethods: [GET, HEAD, OPTIONS]
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6          # CachingOptimized
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf  # CORS-S3Origin
-          ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c # SimpleCORS
-        CacheBehaviors:
-          - PathPattern: data/current.json
-            TargetOriginId: data
-            ViewerProtocolPolicy: redirect-to-https
-            Compress: true
-            AllowedMethods: [GET, HEAD, OPTIONS]
-            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad        # CachingDisabled
-            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
-            ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
-
-  DataBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref DataBucket
-      PolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal: {Service: cloudfront.amazonaws.com}
-            Action: s3:GetObject
-            Resource: !Sub "${DataBucket.Arn}/*"
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${DataCDN}"
-
   # ------------------------------------------------------------------ alerts
   SubscribersTable:
     Type: AWS::DynamoDB::Table
@@ -125,7 +72,7 @@ Resources:
     Properties:
       CorsConfiguration:
         AllowOrigins: ["*"]
-        AllowMethods: [POST, OPTIONS]
+        AllowMethods: [GET, POST, OPTIONS]
         AllowHeaders: [content-type]
         MaxAge: 3600
 
@@ -186,6 +133,9 @@ Resources:
         RunNow:
           Type: HttpApi
           Properties: {ApiId: !Ref Api, Path: /admin/run, Method: POST}
+        Current:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: /data/current.json, Method: GET}
 
   AssistantFunction:
     Type: AWS::Serverless::Function
@@ -229,9 +179,14 @@ Resources:
       Name: highground
       Platform: WEB
       CustomRules:
+        # tonight's forecast changes every 3 hours, so it is not part of the published site: the forecast-check
+        # Lambda writes it to S3 and this rule passes the request on to the API
+        - Source: /data/current.json
+          Target: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/data/current.json"
+          Status: "200"
         # files with these extensions are served as they are; any other path is the app (index.html).
         # mjs = MapLibre's worker, pbf = map label fonts, webmanifest = the installable app
-        - Source: "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|mjs|png|txt|svg|woff|woff2|ttf|map|json|webp|pmtiles|bin|pbf|webmanifest)$)([^.]+$)/>"
+        - Source: "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|mjs|png|txt|svg|woff|woff2|ttf|map|json|geojson|webp|pmtiles|bin|pbf|webmanifest)$)([^.]+$)/>"
           Target: /index.html
           Status: "200"
       # offline: the service worker and the page are never cached by the CDN or the browser, so a new
@@ -243,6 +198,10 @@ Resources:
               - key: Cache-Control
                 value: no-cache
           - pattern: '/index.html'
+            headers:
+              - key: Cache-Control
+                value: no-cache
+          - pattern: '/data/current.json'
             headers:
               - key: Cache-Control
                 value: no-cache
@@ -266,7 +225,6 @@ Resources:
 
 Outputs:
   DataBucketName: {Value: !Ref DataBucket}
-  CdnDomain: {Value: !GetAtt DataCDN.DomainName}
   ApiUrl: {Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com"}
   TopicArn: {Value: !Ref AlertsTopic}
   AmplifyAppId: {Value: !GetAtt SiteApp.AppId}

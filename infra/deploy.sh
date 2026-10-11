@@ -2,10 +2,12 @@
 # One-command AWS deploy for HighGround. Uses only the profile named in .env (currently AWS_PROFILE=default).
 #   1. checks credentials, creates the $30 budget alarm if missing
 #   2. picks the newest enabled Claude Sonnet model/inference profile on Bedrock
-#   3. sam deploy (S3, CloudFront, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amplify app)
-#   4. uploads model outputs to s3://<bucket>/data/
-#   5. builds the web app against CloudFront + API Gateway and deploys it to Amplify Hosting
-#   6. runs forecast-check once so current.json exists
+#   3. sam deploy (S3, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amplify app)
+#   4. uploads the model outputs the Lambdas read to s3://<bucket>/data/
+#   5. runs forecast-check once so current.json exists
+#   6. builds the web app against API Gateway and deploys it, with the model outputs, to Amplify Hosting
+# The site's data is served by Amplify Hosting, not by a CloudFront distribution of our own: AWS does not
+# create CloudFront resources on this account until Support has verified it.
 set -euo pipefail
 cd "$(dirname "$0")"
 ROOT=$(cd .. && pwd)
@@ -66,28 +68,25 @@ fi
 echo "== SAM deploy"
 ADMIN_TOKEN=${ADMIN_TOKEN:-$(cat "$ROOT/data/admin_token" 2>/dev/null || (openssl rand -hex 12 | tee "$ROOT/data/admin_token"))}
 [ -d layers/strands/python/strands ] || { echo "Strands layer missing: build it first (see README)"; exit 1; }
+# a first deploy that failed leaves an empty ROLLBACK_COMPLETE stack that cannot be updated
+if [ "$(aws cloudformation describe-stacks --stack-name "$STACK" --query 'Stacks[0].StackStatus' --output text 2>/dev/null || true)" = ROLLBACK_COMPLETE ]; then
+  aws cloudformation delete-stack --stack-name "$STACK"
+  aws cloudformation wait stack-delete-complete --stack-name "$STACK"
+fi
 sam deploy --stack-name "$STACK" --region "$AWS_REGION" --profile "$AWS_PROFILE" --resolve-s3 \
   --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --no-confirm-changeset --no-fail-on-empty-changeset \
   --parameter-overrides "BedrockModelId=$MODEL_ID" "AdminToken=$ADMIN_TOKEN" | tail -20
 
 out() { aws cloudformation describe-stacks --stack-name "$STACK" --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text; }
-BUCKET=$(out DataBucketName); CDN=$(out CdnDomain); API=$(out ApiUrl); APP=$(out AmplifyAppId); SITE=$(out SiteUrl)
-echo "bucket $BUCKET  cdn $CDN  api $API  site $SITE"
+BUCKET=$(out DataBucketName); API=$(out ApiUrl); APP=$(out AmplifyAppId); SITE=$(out SiteUrl)
+echo "bucket $BUCKET  api $API  site $SITE"
 
-echo "== upload model outputs"
-# size + time (not --size-only): a re-export that keeps a file's size must still upload
-aws s3 sync "$ROOT/data/out/web/" "s3://$BUCKET/data/" --exclude "current.json" --exclude "graph/*.bin" --no-progress | tail -3
-for f in basemap/chennai.pmtiles basemap/chennai-z14.pmtiles; do
-  aws s3 cp "$ROOT/data/out/web/$f" "s3://$BUCKET/data/$f" --content-type application/octet-stream --no-progress >/dev/null
-done
-# routing binaries gzipped at rest: CloudFront does not compress application/octet-stream, and these
-# are most of the offline pack (browsers decode Content-Encoding: gzip transparently)
-GZ=$(mktemp -d)
-for f in "$ROOT"/data/out/web/graph/*.bin; do
-  gzip -6 -c "$f" > "$GZ/$(basename "$f")"
-done
-aws s3 sync "$GZ/" "s3://$BUCKET/data/graph/" --content-encoding gzip --content-type application/octet-stream --no-progress | tail -2
-rm -rf "$GZ"
+echo "== upload the model outputs the Lambdas read"
+# size + time (not --size-only): a re-export that keeps a file's size must still upload.
+# Stored as they are (the Lambdas read the bytes directly); browsers get their copy from Amplify Hosting.
+aws s3 sync "$ROOT/data/out/web/" "s3://$BUCKET/data/" --exclude "*" --include "streets/*" \
+  --include "parking.json" --include "hospitals.json" --include "graph/nodes.bin" --include "graph/edges.bin" \
+  --include "graph/len.bin" --include "graph/depth_*.bin" --no-progress | tail -3
 
 echo "== site URL into the stack (alert emails link to it)"
 sam deploy --stack-name "$STACK" --region "$AWS_REGION" --profile "$AWS_PROFILE" --resolve-s3 \
@@ -97,21 +96,36 @@ sam deploy --stack-name "$STACK" --region "$AWS_REGION" --profile "$AWS_PROFILE"
 echo "== first forecast check"
 curl -s -X POST "$API/admin/run" -H 'content-type: application/json' -d "{\"token\":\"$ADMIN_TOKEN\"}" | head -c 600; echo
 
-echo "== build + deploy web (Amplify Hosting)"
+echo "== build + deploy web and model outputs (Amplify Hosting)"
 cd "$ROOT/web"
-VITE_DATA_BASE="https://$CDN/data" VITE_API_BASE="$API" npx vite build >/dev/null
-rm -rf dist/data          # model data is served from CloudFront, not bundled with the site
+VITE_API_BASE="$API" npx vite build >/dev/null
+rm -f dist/data/current.json   # tonight's forecast comes from the API (an Amplify rule passes it on), not from this copy
 rm -f "$ROOT/data/site.zip"; (cd dist && zip -qr "$ROOT/data/site.zip" .)
-DEP=$(aws amplify create-deployment --app-id "$APP" --branch-name main --output json)
-JOB=$(echo "$DEP" | python3 -c 'import json,sys; print(json.load(sys.stdin)["jobId"])')
-URL=$(echo "$DEP" | python3 -c 'import json,sys; print(json.load(sys.stdin)["zipUploadUrl"])')
-curl -s -T "$ROOT/data/site.zip" "$URL" -H 'Content-Type: application/zip' >/dev/null
-aws amplify start-deployment --app-id "$APP" --branch-name main --job-id "$JOB" >/dev/null
-for i in $(seq 1 60); do
+echo "site.zip $(du -h "$ROOT/data/site.zip" | cut -f1), $(find dist -type f | wc -l) files"
+# The bundle goes to our own bucket first, two 5 MB parts at a time, and Amplify fetches it from there.
+# One long upload to Amplify's own upload address timed out (HTTP 400) on a slow, lossy link, and ten parts
+# at once each ran too slowly to finish before the connection dropped.
+UPCFG=$(mktemp)
+[ "$AWS_PROFILE" = default ] && SECTION=default || SECTION="profile $AWS_PROFILE"
+printf '[%s]\nregion = %s\nretry_mode = standard\nmax_attempts = 10\ns3 =\n    max_concurrent_requests = 2\n    multipart_chunksize = 5MB\n    multipart_threshold = 5MB\n' \
+  "$SECTION" "$AWS_REGION" > "$UPCFG"
+AWS_CONFIG_FILE="$UPCFG" aws s3 cp "$ROOT/data/site.zip" "s3://$BUCKET/deploy/site.zip" --no-progress >/dev/null
+rm -f "$UPCFG"
+# a run that stopped half-way leaves an unfinished job, and Amplify refuses a new one until it is cancelled
+for j in $(aws amplify list-jobs --app-id "$APP" --branch-name main \
+    --query "jobSummaries[?status=='PENDING' || status=='CREATED' || status=='RUNNING'].jobId" --output text); do
+  aws amplify stop-job --app-id "$APP" --branch-name main --job-id "$j" >/dev/null
+done
+SRC=$(aws s3 presign "s3://$BUCKET/deploy/site.zip" --expires-in 3600)
+JOB=$(aws amplify start-deployment --app-id "$APP" --branch-name main --source-url "$SRC" --source-url-type ZIP \
+  --query jobSummary.jobId --output text)
+S=PENDING
+for i in $(seq 1 360); do
   S=$(aws amplify get-job --app-id "$APP" --branch-name main --job-id "$JOB" --query job.summary.status --output text)
   [ "$S" = SUCCEED ] && break; [ "$S" = FAILED ] && { echo "Amplify deploy failed"; exit 1; }; sleep 5
 done
+[ "$S" = SUCCEED ] || { echo "Amplify deploy still $S after 30 minutes"; exit 1; }
 echo "== live: $SITE"
 cat > "$ROOT/data/deploy_outputs.json" <<EOF
-{"bucket":"$BUCKET","cdn":"$CDN","api":"$API","site":"$SITE","model":"$MODEL_ID","amplify_app":"$APP"}
+{"bucket":"$BUCKET","api":"$API","site":"$SITE","model":"$MODEL_ID","amplify_app":"$APP"}
 EOF

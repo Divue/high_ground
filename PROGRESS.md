@@ -431,3 +431,24 @@ Team action (only they can): AWS profile + Bedrock access + real inbox, then `in
   - CloudFront fallback approved: Amplify Hosting serves the site's model data (same origin, the configuration every local gate ran on), S3 keeps only what the Lambdas read, and tonight's forecast reaches the site through an API route.
   - The search fix goes in with the fallback (Claude's recommendation; the user excluded only hiding the assistant panel).
 - **Next:** implement the fallback and the search fix, rehearse, deploy, check the live URL, subscribe and confirm the alert email, then Bedrock through the teammate's account.
+
+### LIVE (Sun 11 Oct, 14:43 IST): https://main.di6wqd7cpdu8q.amplifyapp.com
+
+- **What changed for the fallback.**
+  - `infra/template.yaml`: no CloudFront distribution, OAC or bucket policy; the data bucket is private and only the Lambdas read it. `GET /data/current.json` on the HTTP API is answered by forecast-check from S3, and an Amplify rule passes the site's `/data/current.json` on to it (the forecast changes every 3 hours, so it is not part of the published site). `.geojson` added to the Amplify file-extension list (the Proof screen's reported streets).
+  - `infra/functions/forecast_check/app.py`: the GET route; any other web call now needs the admin token (a POST with an empty body used to run the forecast without it).
+  - `infra/deploy.sh`: uploads to S3 only what the Lambdas read (streets, parking, hospitals, graph nodes/edges/len/depth, stored as they are, which also removes the gzipped-routing-file defect); builds with only `VITE_API_BASE`; bundles the model outputs into the site (167 MB zip, 5,894 files); deletes a ROLLBACK_COMPLETE shell before deploying; cancels unfinished Amplify jobs.
+  - `web/src/ui/Search.tsx`: the app's own streets stay on top and Amazon's addresses fill the rest; a pick no longer re-searches its own text, and a late address answer no longer reopens the list.
+- **Rehearsal before deploying** (site + data on one address, real geocode handler): the four demo streets show the guide's 118 / 116 / 109 / 109 cm; hero 9/9; offline 10/10.
+- **Deploy attempt 2 (13:31 IST).** Stack CREATE_COMPLETE within minutes (12 resource types, 4 Lambdas). The 3-hourly schedule fired by itself at 13:33 and wrote the real forecast (mean 1.0 mm: dry tonight). S3 upload of the Lambdas' files: 4,919 objects, 297 MB, no failures.
+- **The site upload fought back.** Uplink here is slow and lossy (ping to S3 420–730 ms). The single PUT to Amplify's upload address failed with HTTP 400 after ~5 minutes and ran at 55 KB/s on retry; a 10-way multipart upload to S3 lost a part; 6-way with adaptive retries moved 15 MB in 10 minutes. What worked: `aws s3 cp` to our own bucket with 5 MB parts, two at a time (468 s for 175 MB), then `amplify start-deployment --source-url <presigned S3 URL> --source-url-type ZIP` (job SUCCEED in 3 minutes). `deploy.sh` now does exactly this.
+- **Live checks (14:43–14:50 IST).**
+  - Files: page, `sw.js` (no-cache), manifest, `runs.json`, `proof.json`, the `.geojson`, street index, routing `.bin`, map fonts and the MapLibre worker all 200 with the right types; a missing data file is 404, not the app; basemap byte range 206; `/data/current.json` arrives through the API.
+  - Browser: the four demo streets show the guide's numbers with Amazon Location in use ("Streets from OpenStreetMap, addresses from Amazon Location Service"); `tests/hero.mjs` 9/9 (20 fps in this headless run while the laptop was uploading; first load 8.7 s on this link); `tests/offline.mjs` 10/10; no page errors.
+  - API: `/geocode` answers from Amazon Location; `/admin/run` without the token is 403; `/subscribe` for the `.env` test address returned `confirmation_sent`, the SNS subscription is PendingConfirmation and the DynamoDB row exists.
+  - **Not working: `/ask` returns 500** (Bedrock refuses every call on this account). The "Ask HighGround" panel is visible by the user's decision and shows "Sorry, that failed: HTTP 500".
+- **Open.**
+  1. User: click the AWS Notifications confirmation link, then `#admin` → "Run and send alerts" for the real email.
+  2. Bedrock through the teammate's account (cross-account role), with the assistant's `temperature` and token-limit settings fixed in the same pass.
+  3. Docs still describe our own CloudFront distribution: `docs/architecture.png`, `docs/HIGHGROUND_AUDIT.md`, `docs/LANDING_PAGE_CONTEXT.md`, `docs/VIDEO_CUT.md`, `docs/DEMO.md`, `docs/blog_draft.md`, and the spec in `CLAUDE.md`. The video must not name CloudFront as ours unless Support verifies the account and it is added back.
+  4. `data/site.zip` also sits in the data bucket under `deploy/` (private).

@@ -15,10 +15,12 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
   const [busy, setBusy] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   const seq = useRef(0)
+  const picked = useRef<string | null>(null)     // the text a pick put in the box: not something to search for
 
   useEffect(() => {
     window.clearTimeout(timer.current)
     if (q.trim().length < 3) { setItems([]); return }
+    if (q === picked.current) return
     timer.current = window.setTimeout(async () => {
       const my = ++seq.current
       let listMissing = false
@@ -42,13 +44,24 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
         const r = await postAPI<GeoResp>('/geocode', { q })
         if (my !== seq.current) return
         const remote = r.results.map((x) => ({ label: x.label, lon: x.lon, lat: x.lat }))
-        if (remote.length) { setItems([...remote, ...local].slice(0, 6)); setSource(`Address search: ${r.source}`) }
+        // the app's own streets stay on top: they carry the street's answer (its deepest stretch near here);
+        // addresses from the lookup fill the rest of the list
+        if (remote.length) {
+          setItems([...local, ...remote].slice(0, 6))
+          setSource(local.length ? `Streets from OpenStreetMap, addresses from ${r.source}` : `Address search: ${r.source}`)
+        }
       } catch { /* keep local results */ } finally { if (my === seq.current) setBusy(false) }
     }, 280)
     return () => window.clearTimeout(timer.current)
   }, [q])
 
-  const pick = (p: Place) => { setQ(p.label.split(',')[0]); setItems([]); onPick(p) }
+  const pick = (p: Place) => {
+    const text = p.label.split(',')[0]
+    picked.current = text
+    seq.current++                       // an address answer still on its way must not reopen the list
+    window.clearTimeout(timer.current)
+    setQ(text); setItems([]); setBusy(false); onPick(p)
+  }
 
   return (
     <div className="search">
@@ -56,7 +69,7 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
         aria-label="Search your address in Chennai"
         placeholder="Search your street or area"
         value={q}
-        onChange={(e) => { setQ(e.target.value); setActive(0) }}
+        onChange={(e) => { picked.current = null; setQ(e.target.value); setActive(0) }}
         onFocus={(e) => e.currentTarget.select()}        // typing replaces the last place
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') { setActive((a) => Math.min(a + 1, items.length - 1)); e.preventDefault() }

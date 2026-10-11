@@ -8,6 +8,8 @@ Chennai already has CFLOWS, a government flood warning system built for official
 
 Built for **Environmental Hacks** (Bharat Builds Tour, WeMakeDevs × AWS), Heat and Water track.
 
+**Live on AWS:** https://main.di6wqd7cpdu8q.amplifyapp.com
+
 ![Architecture](docs/architecture.png)
 
 ## What is in the box
@@ -15,7 +17,7 @@ Built for **Environmental Hacks** (Bharat Builds Tour, WeMakeDevs × AWS), Heat 
 | Part | What it does |
 |---|---|
 | `pipeline/` | Offline Python. Fetches open data, builds a bare-earth terrain from the Copernicus surface model, runs a 2D flood model for 12 design storms and 3 historical storms, tests the 2015 replay against citizen reports on wards held out from any tuning (drain capacity is a stated assumption, 10 mm/h), cross-checks Velachery with ANUGA, and exports tiles and JSON. |
-| `infra/` | AWS SAM stack: S3 + CloudFront, Lambda (forecast check, subscribe, assistant, geocode), API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amazon Bedrock via the Strands Agents SDK, Amazon Location Service, Amplify Hosting. |
+| `infra/` | AWS SAM stack: Amplify Hosting (the site and its model data), S3 (the model outputs the Lambdas read), Lambda (forecast check, subscribe, assistant, geocode), API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amazon Location Service, and the assistant on the Strands Agents SDK with Amazon Bedrock. Two things are not as first designed, because AWS has not yet verified this new account: there is no CloudFront distribution of our own (Amplify Hosting serves the data), and the assistant does not answer yet (Bedrock refuses every call). |
 | `web/` | Vite + React + TypeScript. MapLibre GL (dark Protomaps basemap, 3D terrain, extruded buildings) with a three.js custom layer for water and rain. Screens: Tonight, What if, Proof, Hospitals, About the model. |
 
 ## The model, briefly
