@@ -21,6 +21,7 @@ Type the street name in the search box with **Replay Michaung 2023** selected (o
 
 - **0:15–1:15 Tonight:** the load flight from the Bay of Bengal, Michaung replay, street search, depth and time, dry parking, the amber route, then *Email me if this changes*. Show the real SNS email arriving (trigger it from `#admin` → *Run and send alerts* with 300 mm).
 - **1:15–1:50 What if / Hospitals:** drag to 400 mm; open Hospitals at 300 mm.
+- **Offline + navigation (15–20 s, inside 1:15–1:50):** network off, the app still opens (*Offline*, battery-saver map), *Take me to dry ground* · Two-wheeler draws the amber route around the water with directions, *Preview the drive*, then *My flood plan* shared as an image. "Saved before the storm. Works without internet."
 - **1:50–2:30 Proof:** say it plainly: "We tested it on wards we never tuned on. Pick a street residents reported flooded in 2015 and one they didn't: the model ranks the reported one deeper **53%** of the time. Chance is 50%, elevation alone 47%, and the distance to the nearest canal 56%. So the model is slightly better than chance at street level, and we show you that."
   - The Chembarambakkam release matters on river-side streets: ranking 51% without it, 53% with it.
   - One sentence: "Storm-drain capacity (10 mm/h) is a stated assumption: on the tuning half of the wards, every value from 0 to 30 mm/h scored the same within its error bars."

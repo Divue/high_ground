@@ -19,7 +19,7 @@ Companion files: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` (next features, sourced),
 | Demo video | Not recorded. Frame-perfect recorder ready (section 13) |
 | Blog | Draft in `docs/blog_draft.md` (numbers corrected tonight) |
 | Landing page | Teammate; context in `docs/LANDING_PAGE_CONTEXT.md` + PDF |
-| Offline mode + flood-safe navigation | **Planned, not built.** Plan + build slices in `docs/OFFLINE_AND_NAVIGATION_PLAN.md` |
+| Offline mode + flood-safe navigation | **Built Sun 11 Oct, 00:55–03:05 IST** (commits 4119956, fdcfb10, a7bbd2f, c8add5b): Save for offline, battery saver map, help card, flood plan, Take me to dry ground with directions, live GPS directions and Preview the drive. Offline gate and route-rule tests pass; reviewer pass running. Plan: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` |
 | Phase gates | P1 passed and tagged `p1`. P2: mass balance, depth maps, Pallikaranai wet and T. Nagar mostly dry pass; **"Velachery wetter than T. Nagar" fails** (disclosed). P3 passed (ranking test). P4/P5 need the deploy. Tags p2/p3 not yet created |
 
 ---
@@ -84,6 +84,10 @@ The whole app is one full-screen 3D night map of Chennai with floodwater on it.
 | **About the model** | Limits in plain words; data credits; Animations on/off |
 | **Ask HighGround** | Assistant on Bedrock (Strands Agents) that answers only from model tools; every number is checked against tool output and marked "from the model"; tells people in danger to call 112 first. Shows "offline" until deployed |
 | **#admin** (hidden) | "Run and send alerts" for a chosen rainfall, to trigger a real alert email for the demo |
+| **Take me to dry ground** (new) | On the answer card: On foot / Two-wheeler (default) / Car to Dry parking, a Hospital, High ground or a saved place. The route avoids streets the model expects to be 10 cm deep (on foot, two-wheeler) or 20 cm (car) at the hour you would reach them, closes underpasses in rain and keeps to one-way streets; it plans for the hour on the timeline (drag to replan). Shows the dashed usual way it avoids, step-by-step directions, and the honesty line. **Start** follows your GPS with one big instruction and voice; **Preview the drive** plays the route for a demo |
+| **Save for offline** (new) | Keeps the app, the map, this street (and up to 2 more places, 3 km around each) for every storm, the road graph and the forecast on the phone. Offline, the app opens from the phone, says "Offline · forecast from 5:24 PM (6 h ago)", and the map switches to battery saver: flat, streets coloured by depth |
+| **Help numbers** (new) | Tap-to-call 112 (red), 1913, 1070, 1077, 108, 101 and Minnagam 94987 94987 for fallen wires; "Send my location" as SMS / WhatsApp / share / copy |
+| **My flood plan** (new) | The answer as an image and as plain text (depth, time, the decision, dry parking, the route and its streets, the nearest hospital cars can reach, numbers) to save or send to family; works with no app and no network |
 
 **Interaction details:** tap any street for its worst depth and "Make this my street"; play button on the timeline; map controls (zoom, compass/tilt, 3D/flat, slow spin, back to my street); buildings coloured by height; terrain colour-relief and hillshade; flowing water that runs downhill (flow map from the water-surface slope); screen-space rain; a "Play animations" offer for devices that ask for reduced motion (`?motion=on|off`, remembered).
 
@@ -210,17 +214,17 @@ ANUGA vs our solver, Velachery box, 200 mm storm, first 14 h: **they agree on 73
 | Data / services | OpenStreetMap (Tamil Nadu extract), Open-Meteo forecast + ERA5, IMD rainfall totals, OpenCity datasets (2015 crowd-sourced flood reports, GCC hazard zones, NRSC 2015 inundation, GCC wards, GCC flood hotspots and stagnation points) |
 | AI agents during the build | Claude Code with reviewer subagents: model-reviewer, design-critic, qa-tester, judge; research agents for creative ideas, offline, navigation and Chennai ground truth |
 
-### 6.2 Planned (offline + navigation; see the plan for details)
+### 6.2 Added for offline and navigation (built Sun 11 Oct)
 
 | Purpose | Tool |
 |---|---|
 | Service worker / PWA | `vite-plugin-pwa` 1.3.0 (injectManifest) + Workbox 7.4.1 |
-| Offline basemap | custom PMTiles `Source` reading the cached file; `pmtiles extract --maxzoom=14` (7.1 MB) |
-| Offline storage | Cache API + `navigator.storage.persist()`; `CompressionStream` |
-| Offline search | uFuzzy 1.0.19 (3.9 KB) |
-| Self-hosted fonts | `@fontsource-variable/anek-latin`, `@fontsource/hind` 5.3.0, Protomaps glyphs/sprites on S3 |
-| Navigation | Web Worker A* with per-mode cost, Geolocation `watchPosition`, Screen Wake Lock, Web Speech `speechSynthesis`, Web Share (files) |
-| AWS additions | versioned offline packs on S3/CloudFront (immutable), Amplify `customHttp.yml`, SACHET CAP official warnings via Lambda, later Web Push (VAPID in SSM), later AWS End User Messaging SMS (needs TRAI DLT) |
+| Offline basemap | basemap cut at zoom 14 with the `pmtiles` Python package (7.1 MB, used online too); the service worker answers its byte ranges from the saved copy (`workbox-range-requests`) |
+| Offline storage | Cache API (`hg-pack-<version>`, `hg-seen` with `workbox-expiration`) + `navigator.storage.persist()`/`estimate()` |
+| Offline search | the existing local place list (8,427 names) works offline; typo-tolerant search not added |
+| Self-hosted fonts | `@fontsource-variable/anek-latin`, `@fontsource/hind` 5.3.0; Protomaps glyphs (Noto Sans) and sprites in `web/public/basemap-assets/` |
+| Navigation | time-dependent search in a Web Worker (`lib/nav.ts`), own directions generator (`lib/directions.ts`, GraphHopper turn thresholds), OSM one-way/roundabout/tunnel flags (`pipeline/05b_navigation.py`), Geolocation `watchPosition`, Screen Wake Lock, Web Speech `speechSynthesis`, Web Share (files), canvas image of the plan |
+| AWS additions | offline pack files on S3/CloudFront with a version manifest; routing binaries gzipped at rest; Amplify custom headers (service worker never cached, assets immutable) and a fixed rewrite rule. Later: SACHET CAP official warnings via Lambda, Web Push (VAPID in SSM), AWS End User Messaging SMS (needs TRAI DLT) |
 
 ---
 
@@ -362,7 +366,7 @@ Gotcha: after swapping `data/out/web`, restart Vite (its public-file list goes s
 | 1:50–2:30 | Proof split-screen; "53% vs a coin toss's 50%"; one sentence on held-out wards; ANUGA 73% | Say the verdict word for word: "slightly better than chance"; "we show you that" |
 | 2:30–3:00 | Architecture diagram (name every AWS service); two limits from About; close on What if dragged back to 50 mm (water recedes) | "Not an official warning. In danger, call 112." |
 
-Optional (only if offline is built and tested on a phone): a 15 s beat with airplane mode on, the app still opening from the phone, "Offline · forecast from 6 PM", the plan card shared.
+**New beat (built; fit it into 1:15–1:50 or trim What if):** "When the power goes, the towers go." Network off (airplane mode on a real Android phone, or DevTools offline on the laptop): HighGround still opens, "Offline", the battery-saver map with streets coloured by depth, **Take me to dry ground · Two-wheeler** draws the amber route around the water with directions, **Preview the drive** plays it, **My flood plan** shared as an image. Caption: "Saved before the storm. Works without internet." Facts to show (sourced in the plan): 712 of 1,814 power feeders off on 4 Dec 2023; 30% of 42,747 towers down on 5 Dec 2023.
 
 **Footage commands (smooth 1080p/30 fps, virtual clock, waits for tiles):**
 
@@ -380,9 +384,10 @@ About 30 s of wall time per second of footage; run under `systemd-inhibit --what
 
 ---
 
-## 14. Next: offline mode and flood-safe navigation (summary)
+## 14. Offline mode and flood-safe navigation (built Sun 11 Oct; plan with sources: `docs/OFFLINE_AND_NAVIGATION_PLAN.md`)
 
-Full plan with sources: `docs/OFFLINE_AND_NAVIGATION_PLAN.md`.
+What shipped, measured: offline gate (save → network off → reload → card, battery-saver map, plan image, help, offline search, offline route) passes with 0 page errors; route rules hold on 36 random trips over 3 storms × 3 modes × 3 destination kinds (0 edges over the limit at the reached hour, 0 one-way violations, 0 underpasses), median 33 ms per plan; live directions follow emulated GPS and re-plan after 3 off-route fixes. Stored size after saving one place is about 83 MB (street files are stored uncompressed). Not built: rainfall ladder for an old forecast, typo-tolerant search, Web Push, relief centres (needs geocoding of the GCC PDF), SACHET warnings.
+
 - **Help card** (zero data): tap-to-call 112 (red), 1913, 1070, 1077, 108, 101, Minnagam 94987 94987; "Send my location" pre-filled SMS/WhatsApp.
 - **My flood plan** card: image + text, shared via the phone's share sheet (works phone to phone without internet).
 - **Save for offline:** ~18 MB (app, fonts, zoom-14 basemap 7.1 MB, 3 km of street answers for all 16 storms 2.0 MB, road graph 5.8 MB, edge depths); forecast updates are a 4 KB file; honest "forecast from 6 PM (5 h ago)"; rainfall ladder when stale.
@@ -405,7 +410,7 @@ Full plan with sources: `docs/OFFLINE_AND_NAVIGATION_PLAN.md`.
 | 8 | Judge pass at the end; tag `p2` (with the documented place failure) and `p3` | Claude |
 | 9 | README and blog: add the latest UX work (motion offer, rain, flow, camera) | Claude |
 | 10 | Minor: assistant shows a raw error if Bedrock fails; mobile hides the timeline | Claude |
-| 11 | Optional before the deadline: offline/navigation Slices 1–2 | Claude, if time |
+| 11 | Offline + navigation built; fix reviewer findings; film the new beat | Claude |
 | 12 | Student verification on AWS Builder Center (eligibility) | User |
 
 ---

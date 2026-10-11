@@ -58,6 +58,17 @@ pip install --platform manylinux2014_x86_64 --python-version 3.12 --implementati
   --only-binary=:all: --target infra/layers/strands/python strands-agents
 ```
 
+## Offline and navigation
+
+Floods in Chennai cut the power for days and take the mobile towers with them (on 5 Dec 2023, 30% of the city's 42,747 towers were down). So HighGround keeps working without a network:
+
+- **Save for offline** stores the app, the map and your street (plus up to two more places, 3 km around each) for every modelled storm, with the road graph and the latest forecast. Offline, the app opens from the phone, says how old its forecast is, and switches to a battery-saver map with streets coloured by depth. (Service worker built with vite-plugin-pwa and Workbox; files served from the Cache API.)
+- **Take me to dry ground**: on foot, by two-wheeler or by car, to dry parking, a hospital, high ground or a saved place. The route never uses a street the model expects to be 10 cm deep (on foot, two-wheeler) or 20 cm (car) at the hour you would reach it, looks an hour ahead, uses the worse of the blended storms, closes underpasses in rain and keeps to one-way streets. Directions are generated in the browser; **Start** follows your GPS (which needs no mobile data) with one large instruction and voice.
+- **Help numbers** (tap to call 112, 1913, 1070, 1077, 108, 101 and the power utility's line for fallen wires) and **Send my location** by SMS or WhatsApp.
+- **My flood plan**: the answer as an image and as plain text to keep in the gallery or send to family.
+
+The plan, its sources and its limits are in `docs/OFFLINE_AND_NAVIGATION_PLAN.md`. It is still a model estimate: routes avoid streets the model expects to flood; they are not official routes.
+
 ## Address search
 
 Amazon Location Service (Places API v2, biased to Velachery, filtered to India) answers first. If it returns nothing inside the model area, the Lambda falls back to OpenStreetMap Nominatim and the UI says which source answered. Without the API, the app still searches a local list of neighbourhood names from OpenStreetMap.

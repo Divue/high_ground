@@ -63,6 +63,7 @@ def main():
         "",
         "- **0:15–1:15 Tonight:** the load flight from the Bay of Bengal, Michaung replay, street search, depth and time, dry parking, the amber route, then *Email me if this changes*. Show the real SNS email arriving (trigger it from `#admin` → *Run and send alerts* with 300 mm).",
         "- **1:15–1:50 What if / Hospitals:** drag to 400 mm; open Hospitals at 300 mm.",
+        "- **Offline + navigation (15–20 s, inside 1:15–1:50):** network off, the app still opens (*Offline*, battery-saver map), *Take me to dry ground* · Two-wheeler draws the amber route around the water with directions, *Preview the drive*, then *My flood plan* shared as an image. \"Saved before the storm. Works without internet.\"",
         "- **1:50–2:30 Proof:** say it plainly: \"We tested it on wards we never tuned on. Pick a street residents reported "
         f"flooded in 2015 and one they didn't: the model ranks the reported one deeper **{pct(proof['honest_test']['model']['auc'])}** of the time. "
         f"Chance is 50%, elevation alone {pct(proof['honest_test']['low_elevation']['auc'])}, and the distance to the nearest canal "

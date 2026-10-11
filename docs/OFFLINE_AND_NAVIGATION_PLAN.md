@@ -2,6 +2,8 @@
 
 Written Sun 11 Oct 2026, 00:05 IST, about 20 hours before submissions close (Sun 11 Oct, 20:00 IST). Built from three research passes (offline web tech, flood-aware navigation, what actually happens in Chennai during floods), from measurements on our own data and router, and from counts on our OpenStreetMap extract. Sources are listed at the end.
 
+> **Status (Sun 11 Oct, 07:45 IST):** Slices 1, 2 and 3 are built and pushed (commits 4119956, fdcfb10, a7bbd2f, c8add5b). Not built yet: rainfall ladder, typo-tolerant search, relief centres, SACHET warnings, Web Push. See PROGRESS.md for what was measured.
+
 ## In one minute
 
 - **Why:** in Chennai floods the power is cut for days, mobile towers go down, and phones run flat. The moment people need HighGround most is the moment it stops loading.
