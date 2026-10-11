@@ -96,6 +96,7 @@ export default function Landing() {
         <a className="lp-brand" href="/">HighGround</a>
         <nav className="lp-links" aria-label="Page">
           <a href="#lp-answers">What it answers</a>
+          <a href="#lp-offline">Offline</a>
           <a href="#lp-proof">Proof</a>
           <a href="#lp-limits">Limits</a>
           <a className="lp-btn primary" href="/app">Open the map</a>
@@ -121,7 +122,7 @@ export default function Landing() {
 
             <div className="lp-step" data-in="0.1" data-out="0.25">
               <div className="lp-stepnum"><span>1 of 4</span> The city</div>
-              <h2>Chennai has a flood warning system. It was built for officials.</h2>
+              <h2>Flood warnings tell you a storm is coming. Not what to do on your street.</h2>
               <p>Every monsoon, residents still park their cars on the Velachery flyover, because nobody tells them where the water will go. HighGround is built for them.</p>
             </div>
 
@@ -208,10 +209,25 @@ export default function Landing() {
             <div className="lp-q"><h3>Will my street flood tonight?</h3><p>How deep, in plain words, with a picture of an adult, a scooter and a car against the water.</p></div>
             <div className="lp-q"><h3>When does it get too deep?</h3><p>The hour your road passes 15 cm, the point where scooters should stay off it.</p></div>
             <div className="lp-q safe"><h3>Where can I park on dry ground?</h3><p>The nearest dry parking, usually a flyover, and by when to move the car.</p></div>
-            <div className="lp-q safe"><h3>Which way avoids the water?</h3><p>A route that avoids flooded streets, on foot, by two-wheeler or by car, planned across 206,223 road links hour by hour.</p></div>
+            <div className="lp-q safe"><h3>Which way avoids the water?</h3><p>A route that avoids flooded streets, on foot, by two-wheeler or by car, planned across 206,223 road links hour by hour, with step-by-step directions that follow your GPS.</p></div>
             <div className="lp-q"><h3>Which hospitals get cut off?</h3><p>All 46 major hospitals, and whether a dry road still reaches each one.</p></div>
             <div className="lp-q"><h3>Tell me if this changes.</h3><p>Every three hours the forecast is checked. If your street's risk changes, you get an email.</p></div>
           </div>
+        </section>
+
+        <section className="lp-sec" id="lp-offline">
+          <div className="lp-head">
+            <div className="lp-eyebrow">When the power goes</div>
+            <h2>It keeps working without the internet.</h2>
+            <p>On 4 December 2023, 712 of Chennai's 1,814 power feeders were switched off. The next day, 30% of the city's 42,747 mobile towers were down. Save your area before the storm, and HighGround still opens on your phone.</p>
+          </div>
+          <div className="lp-qs">
+            <div className="lp-q"><h3>Save for offline</h3><p>One tap keeps the app, the map and your street (and two more places) for every storm on your phone. Offline it says how old its forecast is and switches to a battery-saver map with streets coloured by depth.</p></div>
+            <div className="lp-q safe"><h3>Take me to dry ground</h3><p>Still works offline: a way to dry parking, a hospital or high ground, on foot, by two-wheeler or by car. Live directions follow your GPS, which needs no mobile data.</p></div>
+            <div className="lp-q"><h3>Help numbers</h3><p>Tap to call 112, the Corporation's 1913, the state and district emergency lines, and the power line for fallen wires. Send your location by SMS or WhatsApp.</p></div>
+            <div className="lp-q"><h3>My flood plan</h3><p>Your street's depth, when to move the car, where to park and the way there, as one image to send to family. Works with no app and no network.</p></div>
+          </div>
+          <p className="lp-tnote">Sources: The News Minute, 4 Dec 2023; The Week / PTI, 5 Dec 2023. GPS works without mobile data, but the first fix can be slow; open HighGround once before the storm.</p>
         </section>
 
         <section className="lp-sec" id="lp-proof">

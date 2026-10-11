@@ -73,10 +73,17 @@ def find_street():
             continue
         segs = json.loads((WEB / "streets" / "geom" / f"{t}.json").read_text())["segs"]
         for k, (sid, name, hw, br, flat) in enumerate(segs):
-            if br:
-                continue
             xy = np.array(flat).reshape(-1, 2)
-            d = np.hypot((xy[:, 0] - pt_lon) * np.cos(np.radians(pt_lat)), xy[:, 1] - pt_lat).min() * 111_000
+            # the same choice as the app's answer card (web/src/lib/streets.ts nearestSegment): distance to
+            # the line, plus 25 m for service lanes and 40 m for unnamed pieces, so named streets win
+            k_ = np.cos(np.radians(pt_lat))
+            a, b = xy[:-1], xy[1:]
+            ab = (b - a) * [k_, 1]
+            ap = (np.array([pt_lon, pt_lat]) - a) * [k_, 1]
+            L = (ab ** 2).sum(1)
+            tt = np.clip(np.where(L > 0, (ap * ab).sum(1) / np.where(L > 0, L, 1), 0), 0, 1)
+            d = np.hypot(*(ap - ab * tt[:, None]).T).min() * 111_000 if len(xy) > 1 else 1e9
+            d += (25 if hw == "service" else 0) + (0 if name else 40)
             if best is None or d < best[0]:
                 best = (d, t, k, sid, name, hw, xy)
     if best is None:
