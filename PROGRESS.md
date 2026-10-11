@@ -453,7 +453,7 @@ Team action (only they can): AWS profile + Bedrock access + real inbox, then `in
   3. Docs still describe our own CloudFront distribution: `docs/architecture.png`, `docs/HIGHGROUND_AUDIT.md`, `docs/LANDING_PAGE_CONTEXT.md`, `docs/VIDEO_CUT.md`, `docs/DEMO.md`, `docs/blog_draft.md`, and the spec in `CLAUDE.md`. The video must not name CloudFront as ours unless Support verifies the account and it is added back.
   4. `data/site.zip` also sits in the data bucket under `deploy/` (private).
 
-### Deployment destroyed on the user's instruction (Sun 11 Oct, ~15:05 IST)
+### Deployment destroyed on the user's instruction (Sun 11 Oct, ~16:05 IST)
 
 - The user compared live with local, said "I want it exactly as the local", and then "destroy the deployment". What they saw differ was not established: the side-by-side capture (`compare.mjs`, plain address, with and without the reduce-motion device setting) was interrupted before it ran.
 - Removed: the `highground` stack (Amplify app and branch, HTTP API, 4 Lambdas, DynamoDB table, SNS topic, schedule, data bucket with 4,920 objects), both retained Lambda layers (2 versions each) and the 4 Lambda log groups. The address https://main.di6wqd7cpdu8q.amplifyapp.com no longer resolves; a new deploy gets a new address.
