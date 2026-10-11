@@ -1,3 +1,5 @@
+> Shivam, a former member of our team, left the team for personal reasons.
+
 # HighGround
 
 **Where the floodwater will go tonight in Chennai, street by street, and what to do about it.**
