@@ -402,3 +402,13 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - M9 three depths for one street → Go uses the card's own hour-by-hour depth for your street and warns when it is over the mode's limit at that hour.
 - Minors: closing Go restores the card's route; location-off message replaces the instruction; tap targets enlarged; route framing on phones; plan image grows to fit (never clipped); empty Indic glyph ranges served (no console noise).
 - Gates after fixes: offline (pack only) 10/10 OK, 0 page errors; route rules 0 violations (30 routes, 6 no-route); directions sweep clean; hero 9/9; live directions + replan OK; phone check OK.
+
+### Judge #2 (Sun 08:30 IST) → acted on
+Scores: idea 8 · built on AWS 4 (7–8 once deployed and filmed) · design 7 · execution 6 · demo readiness 4.
+Risks: the deploy slipping (AWS never yet shown working), credibility (one street read 118 cm on one OSM piece and 0 cm on the next; speckled city view), scope creep.
+Top suggestion (engineer, ≤8 h): fix street search so a named street answers for that street; regenerate the demo street list by typing names into the real search box; lock and shoot the video with slots for the email and the assistant.
+Done:
+- Searching a street name answers for its deepest stretch within 600 m of the searched point, with "N stretches of this street near here reach X–Y cm; the deepest is shown." Dhandeeswaram Nagar 8th Cross Road now reads 118 cm (was 0).
+- `web/tests/demo_streets.mjs` types 30 candidates into the search box; `docs/DEMO.md` now lists only streets whose card matched (generic numbered names dropped).
+- Footage: opening recorded 08:29–08:40 (660 frames); search, navigate, timelapse, what-if and proof re-recording on the fixed build. `docs/make_rough_cut.py` assembles a rough cut with sourced title cards, offline stills and two marked 10 s slots (alert email, assistant) for after the deploy.
+Team action (only they can): AWS profile + Bedrock access + real inbox, then `infra/deploy.sh`, then film the email and the assistant.
