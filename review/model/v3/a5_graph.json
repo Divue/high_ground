@@ -1,0 +1,47 @@
+{
+ "design_200_mean": {
+  "edges": 206223,
+  "served_vs_recomputed_mismatch": 605,
+  "impassable_served": 20377,
+  "impassable_if_standing_not_zeroed": 22565,
+  "edges_hidden_by_standing_mask": 2234,
+  "card_vs_routing_disagree": 249,
+  "card_says_unsafe_routing_says_ok": 102,
+  "routing_says_unsafe_card_says_ok": 147,
+  "peak_hour": 11,
+  "browser_vs_model_grid_same_hour_disagree": 6101,
+  "browser_misses_impassable": 5309,
+  "browser_extra_impassable": 792,
+  "model_grid_impassable_at_hour": 18895
+ },
+ "michaung2023": {
+  "edges": 206223,
+  "served_vs_recomputed_mismatch": 778,
+  "impassable_served": 38567,
+  "impassable_if_standing_not_zeroed": 40887,
+  "edges_hidden_by_standing_mask": 2392,
+  "card_vs_routing_disagree": 327,
+  "card_says_unsafe_routing_says_ok": 161,
+  "routing_says_unsafe_card_says_ok": 166,
+  "peak_hour": 46,
+  "browser_vs_model_grid_same_hour_disagree": 9258,
+  "browser_misses_impassable": 7443,
+  "browser_extra_impassable": 1815,
+  "model_grid_impassable_at_hour": 37225
+ },
+ "dec2015_reservoir": {
+  "edges": 206223,
+  "served_vs_recomputed_mismatch": 999,
+  "impassable_served": 50681,
+  "impassable_if_standing_not_zeroed": 52843,
+  "edges_hidden_by_standing_mask": 2220,
+  "card_vs_routing_disagree": 326,
+  "card_says_unsafe_routing_says_ok": 154,
+  "routing_says_unsafe_card_says_ok": 172,
+  "peak_hour": 10,
+  "browser_vs_model_grid_same_hour_disagree": 9783,
+  "browser_misses_impassable": 7571,
+  "browser_extra_impassable": 2212,
+  "model_grid_impassable_at_hour": 46906
+ }
+}

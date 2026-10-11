@@ -1,0 +1,214 @@
+{
+ "swControlled": true,
+ "firstCardMs": 28714,
+ "search": {
+  "items": [
+   "Velachery Main Road, Chennai",
+   "Velachery Main Road Flyover, Chennai"
+  ],
+  "source": "Places and streets from OpenStreetMap"
+ },
+ "card": "Places and streets from OpenStreetMap\nTonight\n2015\nMichaung 2023\nFengal 2024\nCyclone Michaung 2023, replayed from 6 PM tonight\nVelachery Main Road\n27cm\nShin-deep at worst, Tue 2 PM\nToo deep for scooters from Tue 8 AM\nTypical heights\nUnsafe for two-wheelersfrom the model\nMove your car to Phoenix Marketcity Chennai Parking by Tue 4 AM.\n35 of 147 nearby streets too deep for scootersmodel\nDry places to park nearby\nPhoenix Marketcity Chennai Parking, 450 m (multi-storey)\n1 more dry place nearby\n\nCheck local traffic advisories before parking on a flyover.\n\nTake me to dry ground\nMy flood plan\nEmail me if this changes\nSave for offline\n\nKeeps this street’s answers, the map and dry routes on your phone for when power and the network go down. About 17 MB; use Wi-Fi if you can.\n\nNot an official warning. Follow GCC and IMD advisories. In danger, call 112.Help numbersBattery saver",
+ "go": "Get to dry ground\nClose\nOn foot\nTwo-wheeler\nCar\nDry parking\nHospital\nHigh ground\n\nLeaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler.\n\nParking ground (open ground)\n4.4 km · about 15 min by two-wheeler\nAvoids 6 streets the shortest way would cross in water (dashed).\nShallow water possible on the way: up to 5 cm in the model.\nStart\nPreview the drive\nHead north-west on Velachery Main Road\n150 m\nTurn left onto Cart Track Road\n700 m\nTurn left onto Nethaji Road\n150 m\nTake the second right\n300 m\nTake the third left\n150 m\nTake the second right\n50 m\nTurn left onto City Link Road\n50 m\nTurn right onto Officers Colony 4th Main Road\n150 m\nTurn left onto Thiruvalluvar 3rd Street\n100 m\nBear right onto Balakrishnapuram Main Road\n50 m\nTurn right\n150 m\nTurn left\n200 m\nTake the third left\n100 m\nTurn right\n200 m\nTake the third right\n200 m\nTurn left onto Masthan Gori Road\n50 m\nTurn sharp right\n100 m\nTurn sharp left onto New Colony Main Road\n100 m\nTurn right\n450 m\nTurn left onto New Colony 8th Street\n100 m\nContinue straight\n150 m\nTurn right onto Brindavan Nagar Main Road\n550 m\nTurn left onto Thalambu Street\n100 m\nTurn right onto Bhuvaneswari Nager 2nd Street\n100 m\nArrive at Parking ground\n\nA route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+ "whatif": "What if\n\nDrag to set how much rain falls in a day. The map shows the worst water each street sees.\n\n200 mm\nin 24 hours\n50 mm\n400 mm\nMean tide\nHigh tide\n17%\nof the city too deep for scootersfrom the model\n9 of 46\nhospitals cars cannot reach at 200 mm\n\nOur 200 mm storm. Most of the rain falls in the first eight hours.",
+ "proof": "Did the model get 2015 right?\n\nWe took streets residents reported flooded in Dec 2015 and streets they did not, in neighbourhoods we never used to tune the model, and asked: does the model put more water on the reported one?\n\n53%\nour model\n50%\na coin toss\n47%\njust low ground\n56%\njust near a canal\n\nIt is right 53% of the time, where a coin toss is right 50%: slightly better than chance. Simply asking \"is it near a canal?\" does a little better. Treat your street's number as a guide to how your are",
+ "hospitals": "Hospitals\n\n15 of 46 hospitals cut off at 300 mmfrom the model\n\n50 mm\n100 mm\n150 mm\n200 mm\n300 mm\n400 mm\n\nCut off means no road under 30 cm links the hospital to the city’s main road network at the storm’s peak.\n\nAnna Nagar Government Hospital\nCut off\nAringar Anna Goverment Indian Medicine Hospital Arumbakkam Chennai\nCut off\nC.S.I. Rainy Multi Speciality Hospital\nCut off\nCommunicable Diseases Hospital\nCut off\nCSI Kalyani Hospital\nCut off\nESI Hospital\nCut off\nEV Kalyani Hospital\nCut off\nGleneagles",
+ "about": "About the model\nAnimations\nOn\nOff\n\nChennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we claim a tested one, built for citizens.\n\nHow it works\nA 2D shallow-water model (local-inertial scheme, Bates et al. 2010) runs over the whole Greater Chennai Corporation area on a 30 m grid",
+ "backToTonight": "Tonight\n2015\nMichaung 2023\nFengal 2024\nCyclone Michaung 2023, replayed from 6 PM tonight\nVelachery Main Road\n27cm\nShin-deep at worst, Tue 2 PM\nToo deep for scooters from Tue 8 AM\nTypical heights\nUnsafe for two-wheelersfrom the model\nMove your car to Phoenix Marketcity Chennai Parking by Tue 4 AM.\n35",
+ "caches": {
+  "workbox-precache-v2-http://127.0.0.1:4173/": 34,
+  "hg-seen": 202
+ },
+ "long": [
+  {
+   "t": 1731,
+   "d": 209
+  },
+  {
+   "t": 2058,
+   "d": 381
+  },
+  {
+   "t": 2441,
+   "d": 274
+  },
+  {
+   "t": 2769,
+   "d": 355
+  },
+  {
+   "t": 4199,
+   "d": 222
+  },
+  {
+   "t": 7404,
+   "d": 795
+  },
+  {
+   "t": 8298,
+   "d": 1852
+  },
+  {
+   "t": 10389,
+   "d": 352
+  },
+  {
+   "t": 10954,
+   "d": 239
+  },
+  {
+   "t": 13194,
+   "d": 417
+  },
+  {
+   "t": 13612,
+   "d": 425
+  },
+  {
+   "t": 15592,
+   "d": 454
+  },
+  {
+   "t": 16047,
+   "d": 3359
+  },
+  {
+   "t": 19583,
+   "d": 220
+  },
+  {
+   "t": 20892,
+   "d": 375
+  },
+  {
+   "t": 21369,
+   "d": 341
+  },
+  {
+   "t": 21919,
+   "d": 593
+  },
+  {
+   "t": 22808,
+   "d": 238
+  },
+  {
+   "t": 23114,
+   "d": 712
+  },
+  {
+   "t": 23998,
+   "d": 254
+  },
+  {
+   "t": 27662,
+   "d": 271
+  },
+  {
+   "t": 30463,
+   "d": 300
+  },
+  {
+   "t": 34747,
+   "d": 221
+  },
+  {
+   "t": 41798,
+   "d": 239
+  },
+  {
+   "t": 42103,
+   "d": 243
+  },
+  {
+   "t": 48360,
+   "d": 553
+  },
+  {
+   "t": 49109,
+   "d": 447
+  },
+  {
+   "t": 53675,
+   "d": 638
+  },
+  {
+   "t": 54497,
+   "d": 293
+  },
+  {
+   "t": 55234,
+   "d": 209
+  },
+  {
+   "t": 56613,
+   "d": 372
+  },
+  {
+   "t": 57056,
+   "d": 222
+  },
+  {
+   "t": 58954,
+   "d": 270
+  },
+  {
+   "t": 60844,
+   "d": 517
+  },
+  {
+   "t": 71031,
+   "d": 223
+  },
+  {
+   "t": 71557,
+   "d": 226
+  }
+ ],
+ "log": {
+  "pageErrors": [],
+  "consoleErrors": [
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0B95 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BA3 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BCD locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BA9 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BA8 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BB0 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BB5 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BA4 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BC1 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BAE locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BC6 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BAF locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BBF locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BCB locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0B9F locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0B9A locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BBE locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BB4 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BB1 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BAA locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BC7 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BC8 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0B9C locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BB2 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0BC2 locally instead. Error: Unimplemented type: 4",
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+0B86 locally instead. Error: Unimplemented type: 4"
+  ],
+  "failed": [
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11844/7595.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11844/7596.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11844/7594.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11844/7597.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11839/7597.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11841/7598.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11840/7598.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11840/7599.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/14/11842/7598.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/13/5919/3796.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/terrain/13/5918/3797.png",
+   "net::ERR_ABORTED http://127.0.0.1:4173/data/basemap/chennai-z14.pmtiles"
+  ],
+  "bad": []
+ }
+}

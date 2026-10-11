@@ -1,0 +1,44 @@
+{
+ "cutAtPct": 40,
+ "cutAtFiles": 126,
+ "offlineText": "Save for offline\n\nConnect once to save this street for offline use.\n\nSaving stopped. Tap again to carry on from where it stopped.",
+ "filesAfterCut": 151,
+ "recordAfterCut": null,
+ "onlineAgainText": "Save for offline\n\nKeeps this street’s answers, the map and dry routes on your phone for when power and the network go down. About 17 MB; use Wi-Fi if you can.\n\nSaving stopped. Tap again to carry on from where it stopped.",
+ "resumeMs": 2073,
+ "firstProgressLine": "Saving for offline… 1 KB\nStop",
+ "finalText": "Saved for offline: Velachery MRTS · Sun, 7:57 am\n\nThe browser may clear it if the phone runs low on space.\n\nRemove",
+ "record": {
+  "version": "b069463270",
+  "places": [
+   {
+    "label": "Velachery MRTS",
+    "lon": 80.21951,
+    "lat": 12.96762
+   }
+  ],
+  "radiusKm": 3,
+  "savedAt": "2026-10-11T02:27:26.675Z",
+  "files": 311,
+  "bytes": 14817535,
+  "forecastRuns": [],
+  "persisted": false
+ },
+ "filesFinal": 311,
+ "addText": "Saved for offline: Velachery MRTS · Sun, 7:57 am\n\nThe browser may clear it if the phone runs low on space.\n\nAdd this street\nRemove",
+ "afterStreetSwitchDuringSave": "Saved for offline: Velachery MRTS, Arumugam Road · Sun, 7:57 am\n\nThe browser may clear it if the phone runs low on space.\n\nAdd this street\nRemove",
+ "recordAfterSwitch": [
+  {
+   "label": "Velachery MRTS",
+   "lon": 80.21951,
+   "lat": 12.96762
+  },
+  {
+   "label": "Arumugam Road",
+   "lon": 80.21367,
+   "lat": 12.96328
+  }
+ ],
+ "textAfterSwitch15s": "Saved for offline: Velachery MRTS, Arumugam Road · Sun, 7:57 am\n\nThe browser may clear it if the phone runs low on space.\n\nAdd this street\nRemove",
+ "pageErrors": []
+}

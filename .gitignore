@@ -12,3 +12,8 @@ infra/.aws-sam/
 infra/functions/*/package/
 *.log
 infra/layers/strands/
+# demo footage: PNG frame masters and full-length shots stay local (GBs); the 720p rough cut is in docs/video/
+review/p5/footage/
+# older QA screenshot dumps (summarised in PROGRESS.md)
+review/qa/run3/
+review/qa/run4/

@@ -1,0 +1,40 @@
+{
+ "My flood plan": {
+  "sheet": {
+   "top": 0,
+   "bottom": 844
+  },
+  "cardScroll": {
+   "scrollH": 668,
+   "clientH": 668
+  },
+  "overflowX": 0,
+  "small": [
+   "Close 52x27",
+   "Save image 108x42",
+   "SMS 59x42",
+   "WhatsApp 99x42",
+   "Copy text 94x42"
+  ],
+  "offscreenNeedScroll": [],
+  "closedByEsc": true
+ },
+ "Help numbers": {
+  "sheet": {
+   "top": 0,
+   "bottom": 844
+  },
+  "cardScroll": {
+   "scrollH": 804,
+   "clientH": 804
+  },
+  "overflowX": 0,
+  "small": [
+   "Close 52x27",
+   "Share my location 145x42"
+  ],
+  "offscreenNeedScroll": [],
+  "closedByEsc": true
+ },
+ "pageErrors": []
+}

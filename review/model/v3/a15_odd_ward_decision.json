@@ -1,0 +1,29 @@
+{
+ "E0_base": {
+  "odd_wards": 50,
+  "wet_share": 0.144,
+  "gcc_modplus_share_of_wet": 0.326,
+  "gcc_modplus_share_of_land": 0.271,
+  "nrsc_hit_minus_random": 0.011,
+  "ward_spearman_vs_nrsc": -0.152,
+  "ward_spearman_vs_gcc_rank": -0.046
+ },
+ "E8_open": {
+  "odd_wards": 49,
+  "wet_share": 0.102,
+  "gcc_modplus_share_of_wet": 0.373,
+  "gcc_modplus_share_of_land": 0.272,
+  "nrsc_hit_minus_random": 0.011,
+  "ward_spearman_vs_nrsc": -0.119,
+  "ward_spearman_vs_gcc_rank": 0.088
+ },
+ "E9_fillall": {
+  "odd_wards": 50,
+  "wet_share": 0.14,
+  "gcc_modplus_share_of_wet": 0.403,
+  "gcc_modplus_share_of_land": 0.275,
+  "nrsc_hit_minus_random": -0.004,
+  "ward_spearman_vs_nrsc": -0.246,
+  "ward_spearman_vs_gcc_rank": -0.043
+ }
+}

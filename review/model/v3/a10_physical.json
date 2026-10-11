@@ -1,0 +1,236 @@
+{
+ "design_200_mean": {
+  "velachery_hour_wet_share_reaches_5pct": 5,
+  "velachery_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.004,
+   0.041,
+   0.091,
+   0.12,
+   0.129,
+   0.135
+  ],
+  "pallikaranai_hour_wet_share_reaches_5pct": 4,
+  "pallikaranai_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.016,
+   0.067,
+   0.099,
+   0.133,
+   0.156,
+   0.171
+  ],
+  "tnagar_hour_wet_share_reaches_5pct": 4,
+  "tnagar_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.005,
+   0.054,
+   0.092,
+   0.162,
+   0.176,
+   0.183
+  ],
+  "building_cells_wet15_share": 0.0001,
+  "building_cells_wet15_n": 2,
+  "building_cells_max_depth_m": 0.16,
+  "land_wet15_share": 0.1588,
+  "top10pct_elev_threshold_m": 25.0,
+  "top10pct_elev_wet15_share": 0.042,
+  "above25m_wet15_share": 0.0419,
+  "sea_outflow_share_within_1.5km_of_Adyar": 0.038,
+  "sea_outflow_share_within_1.5km_of_Cooum": 0.005,
+  "sea_outflow_share_within_1.5km_of_Ennore/Kosasthalaiyar": 0.0,
+  "sea_outflow_share_within_1.5km_of_Otteri/Buckingham N": 0.001,
+  "top_sea_outflow_cells": [
+   [
+    80.0996,
+    12.9613,
+    0.235
+   ],
+   [
+    80.0996,
+    12.9615,
+    0.235
+   ],
+   [
+    80.0996,
+    12.961,
+    0.235
+   ],
+   [
+    80.0996,
+    12.9618,
+    0.027
+   ],
+   [
+    80.0996,
+    12.98,
+    0.026
+   ],
+   [
+    80.0996,
+    12.9794,
+    0.026
+   ]
+  ]
+ },
+ "dec2015_reservoir": {
+  "velachery_hour_wet_share_reaches_5pct": 3,
+  "velachery_hourly_wet_share_first8": [
+   0.0,
+   0.006,
+   0.095,
+   0.145,
+   0.162,
+   0.175,
+   0.204,
+   0.216
+  ],
+  "pallikaranai_hour_wet_share_reaches_5pct": 3,
+  "pallikaranai_hourly_wet_share_first8": [
+   0.0,
+   0.005,
+   0.092,
+   0.166,
+   0.219,
+   0.268,
+   0.333,
+   0.383
+  ],
+  "tnagar_hour_wet_share_reaches_5pct": 3,
+  "tnagar_hourly_wet_share_first8": [
+   0.0,
+   0.007,
+   0.092,
+   0.188,
+   0.215,
+   0.242,
+   0.263,
+   0.279
+  ],
+  "building_cells_wet15_share": 0.0005,
+  "building_cells_wet15_n": 7,
+  "building_cells_max_depth_m": 0.28,
+  "land_wet15_share": 0.2832,
+  "top10pct_elev_threshold_m": 25.0,
+  "top10pct_elev_wet15_share": 0.063,
+  "above25m_wet15_share": 0.0629,
+  "sea_outflow_share_within_1.5km_of_Adyar": 0.04,
+  "sea_outflow_share_within_1.5km_of_Cooum": 0.002,
+  "sea_outflow_share_within_1.5km_of_Ennore/Kosasthalaiyar": 0.002,
+  "sea_outflow_share_within_1.5km_of_Otteri/Buckingham N": 0.0,
+  "top_sea_outflow_cells": [
+   [
+    80.0996,
+    12.9613,
+    0.083
+   ],
+   [
+    80.0996,
+    12.9615,
+    0.083
+   ],
+   [
+    80.0996,
+    12.961,
+    0.083
+   ],
+   [
+    80.0996,
+    12.9618,
+    0.046
+   ],
+   [
+    80.0996,
+    12.9713,
+    0.044
+   ],
+   [
+    80.0996,
+    12.9621,
+    0.039
+   ]
+  ]
+ },
+ "michaung2023": {
+  "velachery_hour_wet_share_reaches_5pct": 33,
+  "velachery_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "pallikaranai_hour_wet_share_reaches_5pct": 32,
+  "pallikaranai_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.001,
+   0.003,
+   0.007,
+   0.016
+  ],
+  "tnagar_hour_wet_share_reaches_5pct": 32,
+  "tnagar_hourly_wet_share_first8": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "building_cells_wet15_share": 0.0005,
+  "building_cells_wet15_n": 7,
+  "building_cells_max_depth_m": 0.19,
+  "land_wet15_share": 0.219,
+  "top10pct_elev_threshold_m": 25.0,
+  "top10pct_elev_wet15_share": 0.0527,
+  "above25m_wet15_share": 0.0526,
+  "sea_outflow_share_within_1.5km_of_Adyar": 0.026,
+  "sea_outflow_share_within_1.5km_of_Cooum": 0.011,
+  "sea_outflow_share_within_1.5km_of_Ennore/Kosasthalaiyar": 0.046,
+  "sea_outflow_share_within_1.5km_of_Otteri/Buckingham N": 0.001,
+  "top_sea_outflow_cells": [
+   [
+    80.0996,
+    12.9613,
+    0.174
+   ],
+   [
+    80.0996,
+    12.9615,
+    0.174
+   ],
+   [
+    80.0996,
+    12.961,
+    0.174
+   ],
+   [
+    80.0996,
+    12.9784,
+    0.043
+   ],
+   [
+    80.0996,
+    12.9778,
+    0.043
+   ],
+   [
+    80.0996,
+    12.9781,
+    0.043
+   ]
+  ]
+ }
+}

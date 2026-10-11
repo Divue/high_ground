@@ -1,0 +1,13 @@
+{
+ "cells": 245038,
+ "wet_cells": 46695,
+ "max_abs_diff_cm": 0.69,
+ "p99_abs_diff_wet_cm": 0.22,
+ "mean_abs_diff_wet_cm": 0.023,
+ "cells_absdiff_gt5cm": 0,
+ "cells_absdiff_gt2cm": 0,
+ "wet15_flips": 18,
+ "wet15_cells": 32042,
+ "hourly_snapshots_max_abs_diff_cm": 0.76,
+ "hourly_snapshots_p99_abs_diff_cm_wet": 0.2
+}

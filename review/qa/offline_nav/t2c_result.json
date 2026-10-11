@@ -1,0 +1,18 @@
+{
+ "saveMs": 4035,
+ "saveLongTasks": [],
+ "forecastRunsInPack": [],
+ "openedWithoutTouch": true,
+ "perHour": [
+  "2: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+  "10: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+  "20: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+  "30: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+  "40: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+  "50: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler"
+ ],
+ "pageErrors": [
+  "Error: 503 graph/hourly_michaung2023_ids.bin",
+  "Error: 503 graph/hourly_michaung2023_ids.bin"
+ ]
+}

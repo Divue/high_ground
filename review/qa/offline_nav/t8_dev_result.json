@@ -1,0 +1,122 @@
+{
+ "card": {
+  "label": "card",
+  "docOverflowX": 0,
+  "wide": [],
+  "small": [
+   "a \"OpenStreetMap contributors\" 138x12",
+   "a \"Protomaps\" 53x12",
+   "a \"112\" 16x20",
+   "button \"Help numbers\" 82x18",
+   "button \"Battery saver\" 78x18"
+  ],
+  "covered": [
+   "a \"OpenStreetMap contributo\" under div.sticky-foot",
+   "a \"Protomaps\" under div.sticky-foot"
+  ]
+ },
+ "panelScroll": {
+  "scrollH": 832,
+  "clientH": 462,
+  "top": 368,
+  "bottom": 832
+ },
+ "goOpenedWith": "Other places and ways",
+ "go": {
+  "label": "go",
+  "docOverflowX": 0,
+  "wide": [],
+  "small": [
+   "a \"OpenStreetMap contributors\" 138x12",
+   "a \"Protomaps\" 53x12",
+   "button \"Back to Velachery Main Road \" 198x19",
+   "a \"112\" 16x20",
+   "button \"Help numbers\" 82x18",
+   "button \"Battery saver\" 78x18"
+  ],
+  "covered": [
+   "a \"OpenStreetMap contributo\" under div.sticky-foot",
+   "a \"Protomaps\" under div.sticky-foot"
+  ]
+ },
+ "goVisible": {
+  "top": 721,
+  "bottom": 1884,
+  "inView": true
+ },
+ "live": {
+  "label": "live",
+  "docOverflowX": 0,
+  "wide": [],
+  "small": [],
+  "covered": []
+ },
+ "banner": {
+  "text": "150 m | Turn left onto Cart Track Road | 4.4 km · about 15 min left · GPS ± 10 m | Model estimate, not a sighting. If water is above your ankle, turn back. Keep clear of fallen wires and open drains. | Mute voice | End",
+  "top": 12,
+  "bottom": 224,
+  "h": 212
+ },
+ "panelDuringLive": {
+  "top": 0,
+  "bottom": 0,
+  "display": "none",
+  "visibility": "visible",
+  "transform": "none"
+ },
+ "timelineDuringLive": {
+  "top": 0,
+  "display": "none",
+  "visibility": "visible"
+ },
+ "Help numbers": {
+  "label": "Help numbers",
+  "docOverflowX": 0,
+  "wide": [],
+  "small": [
+   "a \"OpenStreetMap contributors\" 138x12",
+   "a \"Protomaps\" 53x12",
+   "button \"Back to Velachery Main Road \" 198x19",
+   "a \"112\" 16x20",
+   "button \"Help numbers\" 82x18",
+   "button \"Battery saver\" 78x18"
+  ],
+  "covered": [
+   "button \"Zoom in\" under div.sheet-card",
+   "button \"Zoom out\" under div.sheet-card",
+   "button \"Drag to rotate map, clic\" under div.sheet-card",
+   "button \"Switch between 3D and fl\" under div.sheet-card",
+   "button \"Spin the view slowly\" under div.sheet-card",
+   "button \"Back to my street\" under div.sheet-card",
+   "a \"OpenStreetMap contributo\" under div.sheet-card",
+   "a \"Protomaps\" under div.sheet-card",
+   "button \"Tonight\" under h2.",
+   "button \"What if\" under div.row",
+   "button \"Proof\" under div.row",
+   "button \"Hospitals\" under div.row",
+   "button \"About\" under div.sheet-card",
+   "input \"Search your address in C\" under div.row",
+   "button \"Tonight\" under p.muted small",
+   "button \"2015\" under p.muted small",
+   "button \"Michaung 2023\" under p.muted small",
+   "button \"Fengal 2024\" under p.muted small",
+   "button \"Back to Velachery Main R\" under b.emergency",
+   "button \"On foot\" under b."
+  ],
+  "sheet": {
+   "cls": "sheet",
+   "top": 0,
+   "bottom": 844,
+   "scrollH": 844,
+   "clientH": 844
+  },
+  "closeVisible": true
+ },
+ "My flood plan": "button not found",
+ "log": {
+  "pageErrors": [],
+  "console": [
+   "warning: Map cannot fit within canvas with the given bounds, padding, and/or offset."
+  ]
+ }
+}

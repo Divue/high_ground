@@ -1,0 +1,115 @@
+{
+ "tonightOff": {
+  "lite": false,
+  "pitch": 62,
+  "terrain": true,
+  "water": "visible",
+  "bld": "visible",
+  "depthStreetsVis": "none",
+  "depthStreets": 0,
+  "routeSafe": 14
+ },
+ "tonightOn": {
+  "lite": true,
+  "pitch": 0,
+  "terrain": false,
+  "water": "none",
+  "bld": "none",
+  "depthStreetsVis": "visible",
+  "depthStreets": 1624,
+  "routeSafe": 14
+ },
+ "hour3": {
+  "lite": true,
+  "pitch": 0,
+  "terrain": false,
+  "water": "none",
+  "bld": "none",
+  "depthStreetsVis": "visible",
+  "depthStreets": 92,
+  "routeSafe": 14
+ },
+ "hour20": {
+  "lite": true,
+  "pitch": 0,
+  "terrain": false,
+  "water": "none",
+  "bld": "none",
+  "depthStreetsVis": "visible",
+  "depthStreets": 106,
+  "routeSafe": 14
+ },
+ "whatif": {
+  "state": {
+   "lite": true,
+   "pitch": 0,
+   "terrain": false,
+   "water": "none",
+   "bld": "none",
+   "depthStreetsVis": "visible",
+   "depthStreets": 178,
+   "routeSafe": 0
+  },
+  "panel": "What if\n\nDrag to set how much rain falls in a day. The map shows the worst water each street sees.\n\n200 mm\nin 24 hours\n50 mm\n400 mm\nMean tide\nHigh tide\n17%\nof t"
+ },
+ "hospitals": {
+  "state": {
+   "lite": true,
+   "pitch": 0,
+   "terrain": false,
+   "water": "none",
+   "bld": "none",
+   "depthStreetsVis": "visible",
+   "depthStreets": 178,
+   "routeSafe": 0
+  },
+  "panel": "Hospitals\n\n15 of 46 hospitals cut off at 300 mmfrom the model\n\n50 mm\n100 mm\n150 mm\n200 mm\n300 mm\n400 mm\n\nCut off means no road under 30 cm links the hospital to"
+ },
+ "proof": {
+  "state": {
+   "lite": true,
+   "pitch": 0,
+   "terrain": false,
+   "water": "none",
+   "bld": "none",
+   "depthStreetsVis": "visible",
+   "depthStreets": 178,
+   "routeSafe": 0
+  },
+  "panel": "Did the model get 2015 right?\n\nWe took streets residents reported flooded in Dec 2015 and streets they did not, in neighbourhoods we never used to tune the mode"
+ },
+ "whatif50": {
+  "lite": true,
+  "pitch": 0,
+  "terrain": false,
+  "water": "none",
+  "bld": "none",
+  "depthStreetsVis": "visible",
+  "depthStreets": 178,
+  "routeSafe": 0
+ },
+ "whatif400": {
+  "lite": true,
+  "pitch": 0,
+  "terrain": false,
+  "water": "none",
+  "bld": "none",
+  "depthStreetsVis": "visible",
+  "depthStreets": 178,
+  "routeSafe": 0
+ },
+ "tonightBackOff": {
+  "lite": false,
+  "pitch": 62,
+  "terrain": true,
+  "water": "visible",
+  "bld": "visible",
+  "depthStreetsVis": "none",
+  "depthStreets": 0,
+  "routeSafe": 14
+ },
+ "log": {
+  "pageErrors": [],
+  "console": []
+ }
+}

@@ -1,0 +1,7 @@
+{
+ "run": "design_200_mean",
+ "segments_ge30cm": 18435,
+ "deepest_cell_in_closed_pit": 0.955,
+ "deepest_cell_in_pit_le_12_cells": 0.17,
+ "deepest_cell_in_exact_3x3_square_pit": 0.089
+}

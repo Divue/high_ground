@@ -1,0 +1,23 @@
+{
+ "model": {
+  "auc": 0.532,
+  "ward_block_ci95": [
+   0.514,
+   0.549
+  ]
+ },
+ "near_a_channel": {
+  "auc": 0.562,
+  "ward_block_ci95": [
+   0.526,
+   0.601
+  ]
+ },
+ "low_elevation": {
+  "auc": 0.469,
+  "ward_block_ci95": [
+   0.416,
+   0.521
+  ]
+ }
+}

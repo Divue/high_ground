@@ -1,0 +1,72 @@
+{
+ "cardDecision": "Move your car to Phoenix Marketcity Chennai Parking by Tue 4 AM.",
+ "cardRouteBefore": 14,
+ "routeVerts": 23,
+ "steps": [
+  "Head north-west on Velachery Main Road 300 m",
+  "Turn left onto Five Furlong Road 400 m",
+  "Arrive at Higher ground on Five Furlong Road"
+ ],
+ "liveAtStart": "300 m | Turn left onto Five Furlong Road | 650 m · about 2 min left · GPS ± 10 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+ "gps": [
+  "10%: 250 m | Turn left onto Five Furlong Road | 600 m · about 2 min left · GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "40%: 50 m | Turn left onto Five Furlong Road | 400 m · about 1 min left · GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "70%: 250 m | Arrive at Higher ground on Five Furlong Road | 250 m · about 1 min left · GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "98%: Arrived | You have arrived at Higher ground on Five Furlong Road | GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End"
+ ],
+ "meDot": [
+  80.21426391601562,
+  12.9996976852417
+ ],
+ "reroute": {
+  "banner": "(no banner)",
+  "replanned": true,
+  "panel": "Hospital | High ground | Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler."
+ },
+ "timelineVisibleWhileLive": true,
+ "liveAfterHour5": "50 m | Turn left onto Velachery Main Road | 850 m · about 3 min left · GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+ "liveAfterHour48": "(no banner)",
+ "panelAfterHour48": "Dry parking | Hospital | High ground | Leaving at Tue 6 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler.",
+ "afterEnd": {
+  "banner": "(no banner)",
+  "me": 0,
+  "route": 0,
+  "htmlClass": "reduce-motion"
+ },
+ "afterClose": {
+  "route": 0,
+  "dest": 0,
+  "cardDecision": "Move your car to Phoenix Marketcity Chennai Parking by Tue 4 AM."
+ },
+ "preview": [
+  "750 m | Take the fourth right | 750 m · about 3 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "650 m | Take the fourth right | 700 m · about 2 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "600 m | Take the fourth right | 600 m · about 2 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "500 m | Take the fourth right | 500 m · about 2 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "450 m | Take the fourth right | 450 m · about 1 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "350 m | Take the fourth right | 350 m · about 1 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "250 m | Take the fourth right | 300 m · about 1 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+  "200 m | Take the fourth right | 200 m · about 1 min left · preview, not your location | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End"
+ ],
+ "beforeStormSwitch": "800 m | Take the fourth right | 850 m · about 3 min left · GPS ± 8 m | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End",
+ "afterStormSwitch": {
+  "banner": "(no banner)",
+  "me": 0,
+  "route": 0,
+  "go": true,
+  "htmlClass": "reduce-motion"
+ },
+ "beforeStreetSwitch": "(no banner)",
+ "afterStreetSwitch": {
+  "banner": "(no banner)",
+  "me": 0,
+  "route": "drawn",
+  "go": true,
+  "htmlClass": "reduce-motion"
+ },
+ "log": {
+  "pageErrors": [],
+  "console": []
+ },
+ "denied": "150 m | Turn right onto Perungudi Station Road | 2.5 km · about 8 min left · Location is off or not allowed. Turn it on to follow the route. | Model estimate, not a sighting. If you see water above your ankle, turn back. | Voice on | End"
+}

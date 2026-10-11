@@ -1,0 +1,171 @@
+[
+ {
+  "name": "Chari Avenue",
+  "mode": "two_wheeler",
+  "kind": "parking",
+  "dest": "Multi-storey parking",
+  "len": 2817,
+  "rows": [
+   "    0 m  Head north on Chari Avenue  [next 220 m, line turns null°]",
+   "  221 m  Turn left onto Anna Salai  [next 21 m, line turns -82°]",
+   "  242 m  Turn right  [next 116 m, line turns 88°]",
+   "  358 m  Turn left onto 1st Main Road  [next 216 m, line turns -91°]",
+   "  574 m  Take the second right  [next 10 m, line turns 3°]",
+   "  585 m  Turn left  [next 112 m, line turns -12°]",
+   "  697 m  Turn left onto East Coast Road  [next 120 m, line turns -89°]",
+   "  818 m  Turn right onto Anna Salai  [next 10 m, line turns 168°]",
+   "  828 m  Turn right onto East Coast Road  [next 241 m, line turns 162°]",
+   " 1071 m  Turn left onto Periyar Salai  [next 445 m, line turns -84°]",
+   " 1515 m  Take the fifth right  [next 279 m, line turns 89°]",
+   " 1795 m  Continue onto Veeramani Salai  [next 360 m, line turns -5°]",
+   " 2155 m  Turn left onto Rajiv Gandhi Salai  [next 511 m, line turns -85°]",
+   " 2668 m  Take the second left  [next 8 m, line turns -4°]",
+   " 2676 m  Turn right onto Old Mahapalipuram Service Road  [next 148 m, line turns 7°]",
+   " 2824 m  Arrive at Multi-storey parking  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": [
+   {
+    "step": "Take the second right",
+    "counted": [
+     "cls 4 2nd Cross Street 59 m"
+    ]
+   },
+   {
+    "step": "Take the fifth right",
+    "counted": [
+     "cls 4 (unnamed) 115 m",
+     "cls 4 Dilli Street 115 m",
+     "cls 4 Balagangadhar Tilak Street 128 m",
+     "cls 4 Pasumponn Devarr Street 148 m"
+    ]
+   },
+   {
+    "step": "Take the second left",
+    "counted": [
+     "cls 4 (unnamed) 8 m"
+    ]
+   }
+  ]
+ },
+ {
+  "name": "Velachery Main Road",
+  "mode": "two_wheeler",
+  "kind": "parking",
+  "dest": "Phoenix Marketcity Chennai Parking",
+  "len": 550,
+  "rows": [
+   "    0 m  Head south-west on Madhavan Street  [next 44 m, line turns null°]",
+   "   44 m  Turn left  [next 61 m, line turns -91°]",
+   "  106 m  Turn right onto Veerabandiya Kattabomman Street  [next 258 m, line turns 73°]",
+   "  365 m  Continue onto Thiru Vi Ka Street  [next 186 m, line turns -5°]",
+   "  552 m  Arrive at Phoenix Marketcity Chennai Parking  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": []
+ },
+ {
+  "name": "T Nagar",
+  "mode": "foot",
+  "kind": "parking",
+  "dest": "South Usman Road",
+  "len": 519,
+  "rows": [
+   "    0 m  Head north on South Usman Road  [next 221 m, line turns null°]",
+   "  222 m  Continue straight  [next 69 m, line turns -2°]",
+   "  291 m  Make a U-turn  [next 230 m, line turns -179°]",
+   "  522 m  Arrive at South Usman Road  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": []
+ },
+ {
+  "name": "Ethiraj Salai",
+  "mode": "car",
+  "kind": "parking",
+  "dest": "Pantheon Road",
+  "len": 462,
+  "rows": [
+   "    0 m  Head north-west on Ethiraj Salai  [next 124 m, line turns null°]",
+   "  124 m  Take the fifth right  [next 322 m, line turns 81°]",
+   "  447 m  Turn right onto Montieth Road  [next 16 m, line turns 88°]",
+   "  463 m  Arrive at Pantheon Road  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": [
+   {
+    "step": "Take the fifth right",
+    "counted": [
+     "cls 5 (unnamed) 14 m",
+     "cls 2 Pantheon Road 18 m"
+    ]
+   }
+  ]
+ },
+ {
+  "name": "Kakkan Nagar Main Road",
+  "mode": "two_wheeler",
+  "kind": "hospital",
+  "dest": "Government Hospital, Saidapet",
+  "len": 4830,
+  "rows": [
+   "    0 m  Head north on Kakkan Nagar Main Road  [next 369 m, line turns null°]",
+   "  371 m  Take the fourth right  [next 204 m, line turns 91°]",
+   "  576 m  Turn left  [next 24 m, line turns -94°]",
+   "  600 m  Turn right  [next 74 m, line turns 95°]",
+   "  674 m  Turn left  [next 68 m, line turns -98°]",
+   "  742 m  Turn right  [next 138 m, line turns 81°]",
+   "  879 m  Turn left onto Nethaji Road  [next 516 m, line turns -96°]",
+   " 1398 m  Continue onto Pillayar koil street  [next 554 m, line turns -5°]",
+   " 1954 m  Turn left onto Five Furlong Road  [next 133 m, line turns -93°]",
+   " 2088 m  Bear right onto Chakrapani Street  [next 184 m, line turns 28°]",
+   " 2272 m  Continue onto Racecourse Road  [next 879 m, line turns 1°]",
+   " 3154 m  Continue onto Anna Salai (Mount Road)  [next 1170 m, line turns -9°]",
+   " 4325 m  Bear left onto Maraimalai Adigal Bridge  [next 237 m, line turns -11°]",
+   " 4563 m  Continue onto Anna Salai (Mount Road)  [next 88 m, line turns 1°]",
+   " 4652 m  Turn sharp left onto Abdul Razzak Street  [next 62 m, line turns -115°]",
+   " 4714 m  Take the second right  [next 130 m, line turns 92°]",
+   " 4845 m  Arrive at Government Hospital, Saidapet  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": [
+   {
+    "step": "Take the fourth right",
+    "counted": [
+     "cls 4 (unnamed) 52 m",
+     "cls 3 2nd Cross Street 46 m",
+     "cls 4 (unnamed) 48 m"
+    ]
+   },
+   {
+    "step": "Take the second right",
+    "counted": [
+     "cls 5 (unnamed) 7 m"
+    ]
+   }
+  ]
+ },
+ {
+  "name": "SINGARA GARDEN 8TH STREET",
+  "mode": "two_wheeler",
+  "kind": "parking",
+  "dest": "Royapuram Harbour Bridge",
+  "len": 1457,
+  "rows": [
+   "    0 m  Head south on SOMU CHETTY 5TH STREET  [next 170 m, line turns null°]",
+   "  171 m  Turn left onto Veerasamy Street  [next 81 m, line turns -90°]",
+   "  253 m  Turn right  [next 119 m, line turns 92°]",
+   "  372 m  Take the second right  [next 6 m, line turns 2°]",
+   "  379 m  Turn left onto Adam Sahib Street  [next 316 m, line turns -14°]",
+   "  696 m  Turn left onto Cemetry Road  [next 61 m, line turns -95°]",
+   "  757 m  Turn right onto Suryanarayana Street  [next 183 m, line turns 98°]",
+   "  941 m  Bear left  [next 98 m, line turns -15°]",
+   " 1040 m  Bear left onto North Terminus Road  [next 283 m, line turns -13°]",
+   " 1322 m  Continue onto Royapuram Harbour Bridge  [next 140 m, line turns -1°]",
+   " 1462 m  Arrive at Royapuram Harbour Bridge  [next 0 m, line turns null°]"
+  ],
+  "sideInfo": [
+   {
+    "step": "Take the second right",
+    "counted": [
+     "cls 4 Appier Lane 61 m"
+    ]
+   }
+  ]
+ }
+]

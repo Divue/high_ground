@@ -1,0 +1,82 @@
+{
+ "steps": [
+  {
+   "k": "seen entries online",
+   "v": 116
+  },
+  {
+   "k": "offline reload, no pack: card?",
+   "v": {
+    "opened": true,
+    "ms": 2121
+   }
+  },
+  {
+   "k": "panel",
+   "v": "Tonight\n2015\nMichaung 2023\nFengal 2024\nCyclone Michaung 2023, replayed from 6 PM tonight\nOffline · saved model answers\nVelachery MRTS\n28cm\nShin-deep at worst, Tue 11 AM\nToo deep for scooters from Tue 3 AM\nTypical heights\nUnsafe for two-wheelersfrom the model\nMove your car to Velachery MRTS Bridge by Tue 2 AM.\n42 of 158 nearby streets too deep for scootersmodel\nDry places to park nearby\nVelachery MRTS Bridge, 450 m (flyover)\n1 more dry place nearby\n\nCheck local traffic advisories before parking on a flyover.\n\nTake me to dry ground\nMy flood plan\nSave for offline\n\nConnect once to save this street"
+  },
+  {
+   "k": "save block offline",
+   "v": "Save for offline\n\nConnect once to save this street for offline use."
+  },
+  {
+   "k": "go michaung offline nopack",
+   "v": "Dry parking | Hospital | High ground |  | Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. |  | Could not plan a route: Error: 503 graph/bridge.bin | "
+  },
+  {
+   "k": "nopack storm 2015",
+   "v": "Tonight\n2015\nMichaung 2023\nFengal 2024\nThe Dec 2015 floods, replayed from 6 PM tonight\nOffline · saved model answers\n\nNot an official warning. Follow GCC and IMD advisories. In danger, call 112.Help numbersBattery saver on"
+  },
+  {
+   "k": "nopack storm Fengal 2024",
+   "v": "Tonight\n2015\nMichaung 2023\nFengal 2024\nCyclone Fengal 2024, replayed from 6 PM tonight\nOffline · saved model answers\n\nNot an official warning. Follow GCC and IMD advisories. In danger, call 112.Help numbersBattery saver on"
+  },
+  {
+   "k": "nopack search Arumugam Road",
+   "v": "No matching place or street. Try a street name or a neighbourhood.\nTonight\n2015\nMichaung 2023\nFengal 2024\nCyclone Fengal 2024, replayed from 6 PM tonight\nOffline · saved model answers\n\nNot an official warning. Follow GCC and IMD advisories. In danger, call 112.Help numbersBattery saver on"
+  },
+  {
+   "k": "nopack whatif",
+   "v": "What if\n\nDrag to set how much rain falls in a day. The map shows the worst water each street sees.\n\n200 mm\nin 24 hours\n50 mm\n400 mm\nMean tide\nHigh tide\n17%\nof the city too deep for scootersfrom the model\n\nOur 200 mm storm. Most of the rain falls in the first eight hours."
+  },
+  {
+   "k": "nopack proof",
+   "v": "Validation results are not available yet."
+  },
+  {
+   "k": "nopack hospitals",
+   "v": "Hospitals\n50 mm\n100 mm\n150 mm\n200 mm\n300 mm\n400 mm\n\nCut off means no road under 30 cm links the hospital to the city’s main road network at the storm’s peak."
+  },
+  {
+   "k": "nopack about",
+   "v": "About the model\nAnimations\nOn\nOff\n\nChennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than "
+  },
+  {
+   "k": "log",
+   "v": {
+    "pageErrors": [
+     "Error: missing /data/streets/dec2015_reservoir/6_15.json",
+     "Error: missing /data/streets/fengal2024/6_15.json"
+    ],
+    "consoleErrors": [
+     "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+… locally instead. Error: Unimplemented type: 4",
+     "error: Failed to load resource: the server responded with a status of 503 ()",
+     "error: Error: Bad response code: 503\n    at FetchSource.<anonymous> (http://127.0.0.1:4173/assets/index-BZOItZnj.js:822:220685)\n    at Generator.next (<anonymous>)\n    at a (http://127.0.0.1:4173/assets/index-BZOItZnj.js:822:213851)",
+     "error: qr: AJAXError:  (503): http://127.0.0.1:4173/data/terrain/z/x/y.png\n    at Xr (http://127.0.0.1:4173/assets/index-BZOItZnj.js:9:92106)\n    at async c (http://127.0.0.1:4173/assets/index-BZOItZnj.js:9:95453)"
+    ]
+   }
+  }
+ ],
+ "log": {
+  "pageErrors": [
+   "Error: missing /data/streets/dec2015_reservoir/6_15.json",
+   "Error: missing /data/streets/fengal2024/6_15.json"
+  ],
+  "consoleErrors": [
+   "warning: Unable to load glyph range 11, 2816-3071. Rendering codepoint U+… locally instead. Error: Unimplemented type: 4",
+   "error: Failed to load resource: the server responded with a status of 503 ()",
+   "error: Error: Bad response code: 503\n    at FetchSource.<anonymous> (http://127.0.0.1:4173/assets/index-BZOItZnj.js:822:220685)\n    at Generator.next (<anonymous>)\n    at a (http://127.0.0.1:4173/assets/index-BZOItZnj.js:822:213851)",
+   "error: qr: AJAXError:  (503): http://127.0.0.1:4173/data/terrain/z/x/y.png\n    at Xr (http://127.0.0.1:4173/assets/index-BZOItZnj.js:9:92106)\n    at async c (http://127.0.0.1:4173/assets/index-BZOItZnj.js:9:95453)"
+  ]
+ }
+}

@@ -1,0 +1,381 @@
+{
+ "matrix": [
+  {
+   "street": "Velachery Main Road",
+   "mode": "On foot",
+   "dest": "Dry parking",
+   "ms": 64,
+   "longTasks": [
+    69
+   ],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Maraimalai Adigal Bridge (flyover) | 3.5 km · about 47 min on foot | Avoids 1 street the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 9 cm in the model.",
+   "steps": 29
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "On foot",
+   "dest": "Hospital",
+   "ms": 95,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Government Hospital, Saidapet | 4.0 km · about 53 min on foot | Avoids 1 street the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 9 cm in the model.",
+   "steps": 33
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "On foot",
+   "dest": "High ground",
+   "ms": 89,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Higher ground on Five Furlong Road (stays under 5 cm all storm in the model) | 650 m · about 9 min on foot | Shallow water possible on the way: up to 6 cm in the model. | Start",
+   "steps": 7
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Two-wheeler",
+   "dest": "Dry parking",
+   "ms": 162,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Parking ground (open ground) | 4.4 km · about 15 min by two-wheeler | Avoids 6 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 5 cm in the model.",
+   "steps": 52
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Two-wheeler",
+   "dest": "Hospital",
+   "ms": 191,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | No route avoids deep water from here at Tue 2 PM (your street already has about 86 cm). A way out opens again around Tue 8 PM as the water drains. | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Two-wheeler",
+   "dest": "High ground",
+   "ms": 49,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Higher ground on Five Furlong Road (stays under 5 cm all storm in the model) | 650 m · about 2 min by two-wheeler | Shallow water possible on the way: up to 6 cm in the model. | Start",
+   "steps": 7
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Car",
+   "dest": "Dry parking",
+   "ms": 150,
+   "longTasks": [
+    64
+   ],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Parking ground (open ground) | 4.4 km · about 15 min by car | Avoids 6 streets the shortest way would cross in water (dashed). | Start",
+   "steps": 51
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Car",
+   "dest": "Hospital",
+   "ms": 93,
+   "longTasks": [
+    63
+   ],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Dr.Kamakshi Memorial Hospital | 10.2 km · about 34 min by car | Avoids 5 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 17 cm in the model.",
+   "steps": 101
+  },
+  {
+   "street": "Velachery Main Road",
+   "mode": "Car",
+   "dest": "High ground",
+   "ms": 197,
+   "longTasks": [
+    58,
+    108,
+    58
+   ],
+   "summary": "Leaving at Tue 2 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Higher ground on Five Furlong Road (stays under 5 cm all storm in the model) | 650 m · about 2 min by car | Start | Preview the drive",
+   "steps": 6
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "On foot",
+   "dest": "Dry parking",
+   "ms": 6,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "On foot",
+   "dest": "Hospital",
+   "ms": 26,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "On foot",
+   "dest": "High ground",
+   "ms": 6,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Two-wheeler",
+   "dest": "Dry parking",
+   "ms": 6,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Two-wheeler",
+   "dest": "Hospital",
+   "ms": 8,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Two-wheeler",
+   "dest": "High ground",
+   "ms": 5,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Car",
+   "dest": "Dry parking",
+   "ms": 5,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Car",
+   "dest": "Hospital",
+   "ms": 5,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Arumugam Road",
+   "mode": "Car",
+   "dest": "High ground",
+   "ms": 13,
+   "longTasks": [],
+   "summary": "Leaving at Tue 7 PM (drag the timeline to change). Avoids water 20 cm deep or more by car. | No route avoids deep water from here at Tue 7 PM (your street already has about 106 cm). | If you are safe, stay where you are. If water enters your home, call 112. | A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.",
+   "steps": 0
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "On foot",
+   "dest": "Dry parking",
+   "ms": 5,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Parking ground (open ground) | 1.9 km · about 25 min on foot | Avoids 1 street the shortest way would cross in water (dashed). | Start",
+   "steps": 21
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "On foot",
+   "dest": "Hospital",
+   "ms": 59,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Government Hospital, Saidapet | 5.8 km · about 77 min on foot | Avoids 3 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 9 cm in the model.",
+   "steps": 53
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "On foot",
+   "dest": "High ground",
+   "ms": 100,
+   "longTasks": [
+    54
+   ],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Higher ground on St Thomas Mount Subway (stays under 5 cm all storm in the model) | 850 m · about 11 min on foot | Start | Preview the drive",
+   "steps": 20
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Two-wheeler",
+   "dest": "Dry parking",
+   "ms": 83,
+   "longTasks": [
+    151
+   ],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Parking ground (open ground) | 1.9 km · about 6 min by two-wheeler | Avoids 1 street the shortest way would cross in water (dashed). | Start",
+   "steps": 21
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Two-wheeler",
+   "dest": "Hospital",
+   "ms": 122,
+   "longTasks": [
+    54
+   ],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Dr.Kamakshi Memorial Hospital | 8.3 km · about 28 min by two-wheeler | Avoids 2 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 6 cm in the model.",
+   "steps": 137
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Two-wheeler",
+   "dest": "High ground",
+   "ms": 93,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Higher ground on St Thomas Mount Subway (stays under 5 cm all storm in the model) | 850 m · about 3 min by two-wheeler | Start | Preview the drive",
+   "steps": 20
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Car",
+   "dest": "Dry parking",
+   "ms": 73,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Parking ground (open ground) | 1.9 km · about 6 min by car | Avoids 1 street the shortest way would cross in water (dashed). | Start",
+   "steps": 21
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Car",
+   "dest": "Hospital",
+   "ms": 88,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Government Hospital, Saidapet | 5.3 km · about 18 min by car | Avoids 3 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 14 cm in the model.",
+   "steps": 41
+  },
+  {
+   "street": "Kakkan Nagar Main Road",
+   "mode": "Car",
+   "dest": "High ground",
+   "ms": 83,
+   "longTasks": [],
+   "summary": "Leaving at Tue 2 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Higher ground on St Thomas Mount Subway (stays under 5 cm all storm in the model) | 850 m · about 3 min by car | Start | Preview the drive",
+   "steps": 20
+  },
+  {
+   "street": "T Nagar",
+   "mode": "On foot",
+   "dest": "Dry parking",
+   "ms": 5,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | South Usman Road (flyover) | 500 m · about 7 min on foot | Check local traffic advisories before parking on a flyover. | Start",
+   "steps": 9
+  },
+  {
+   "street": "T Nagar",
+   "mode": "On foot",
+   "dest": "Hospital",
+   "ms": 169,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Government Hospital, Saidapet | 4.0 km · about 53 min on foot | Avoids 4 streets the shortest way would cross in water (dashed). | Call ahead: hospitals can be cut off or short of power in a flood.",
+   "steps": 38
+  },
+  {
+   "street": "T Nagar",
+   "mode": "On foot",
+   "dest": "High ground",
+   "ms": 117,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more on foot. | Higher ground on South Usman Road (stays under 5 cm all storm in the model) | 200 m · about 3 min on foot | Start | Preview the drive",
+   "steps": 4
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Two-wheeler",
+   "dest": "Dry parking",
+   "ms": 38,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Unnamed flyover (flyover) | 750 m · about 2 min by two-wheeler | Check local traffic advisories before parking on a flyover. | Start",
+   "steps": 13
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Two-wheeler",
+   "dest": "Hospital",
+   "ms": 73,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | King's Institute of Preventive Medicine & Research | 5.9 km · about 20 min by two-wheeler | Avoids 7 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 7 cm in the model.",
+   "steps": 79
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Two-wheeler",
+   "dest": "High ground",
+   "ms": 21,
+   "longTasks": [
+    59
+   ],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Higher ground on South Usman Road (stays under 5 cm all storm in the model) | 200 m · about 1 min by two-wheeler | Start | Preview the drive",
+   "steps": 4
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Car",
+   "dest": "Dry parking",
+   "ms": 17,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Unnamed flyover (flyover) | 750 m · about 2 min by car | Check local traffic advisories before parking on a flyover. | Start",
+   "steps": 13
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Car",
+   "dest": "Hospital",
+   "ms": 84,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | King's Institute of Preventive Medicine & Research | 4.8 km · about 16 min by car | Avoids 7 streets the shortest way would cross in water (dashed). | Shallow water possible on the way: up to 13 cm in the model.",
+   "steps": 77
+  },
+  {
+   "street": "T Nagar",
+   "mode": "Car",
+   "dest": "High ground",
+   "ms": 57,
+   "longTasks": [],
+   "summary": "Leaving at Tue 11 AM (drag the timeline to change). Avoids water 20 cm deep or more by car. | Higher ground on South Usman Road (stays under 5 cm all storm in the model) | 200 m · about 1 min by car | Start | Preview the drive",
+   "steps": 4
+  }
+ ],
+ "drag": [
+  {
+   "nowLabel": "Tue 7 PM",
+   "leaving": "Tue 7 PM",
+   "match": true,
+   "duringStale": false,
+   "summary": "Hospital | High ground | Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Parking ground (open ground)"
+  },
+  {
+   "hourVal": "49",
+   "freshSummary": "Hospital | High ground | Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler. | Parking ground (open ground)",
+   "same": true
+  },
+  {
+   "perHour": [
+    "2: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "6: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "10: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "14: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "18: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "22: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "26: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "30: Phoenix Marketcity Chennai Parking (multi-storey) / 550 m · about 2 min by two-wheeler",
+    "40: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler",
+    "50: Parking ground (open ground) / 4.4 km · about 15 min by two-wheeler"
+   ]
+  }
+ ],
+ "noroute": "Dry parking | Hospital | High ground | Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler.",
+ "noroute2": "Dry parking | Hospital | High ground | Leaving at Tue 7 PM (drag the timeline to change). Avoids water 10 cm deep or more by two-wheeler.",
+ "allLong": [],
+ "log": {
+  "pageErrors": [],
+  "console": []
+ }
+}

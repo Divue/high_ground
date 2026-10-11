@@ -1,0 +1,50 @@
+{
+ "design_200_mean": {
+  "cells": 864199,
+  "cells_with_2plus_reversals_gt5cm": 0,
+  "cells_with_4plus_reversals_gt5cm": 0,
+  "max_hourly_rise_cm": 261.0,
+  "wettest_hour": 11,
+  "checkerboard_index_p99_cm": 9.38,
+  "checkerboard_cells_gt5cm": 8222,
+  "wet_cells": 173749,
+  "negative": 0,
+  "nan": 0
+ },
+ "design_400_mean": {
+  "cells": 864199,
+  "cells_with_2plus_reversals_gt5cm": 0,
+  "cells_with_4plus_reversals_gt5cm": 0,
+  "max_hourly_rise_cm": 237.0,
+  "wettest_hour": 10,
+  "checkerboard_index_p99_cm": 13.84,
+  "checkerboard_cells_gt5cm": 31153,
+  "wet_cells": 290541,
+  "negative": 0,
+  "nan": 0
+ },
+ "michaung2023": {
+  "cells": 863802,
+  "cells_with_2plus_reversals_gt5cm": 0,
+  "cells_with_4plus_reversals_gt5cm": 0,
+  "max_hourly_rise_cm": 272.0,
+  "wettest_hour": 46,
+  "checkerboard_index_p99_cm": 11.67,
+  "checkerboard_cells_gt5cm": 19084,
+  "wet_cells": 234037,
+  "negative": 0,
+  "nan": 0
+ },
+ "dec2015_reservoir": {
+  "cells": 864199,
+  "cells_with_2plus_reversals_gt5cm": 0,
+  "cells_with_4plus_reversals_gt5cm": 0,
+  "max_hourly_rise_cm": 235.0,
+  "wettest_hour": 10,
+  "checkerboard_index_p99_cm": 13.89,
+  "checkerboard_cells_gt5cm": 29541,
+  "wet_cells": 283406,
+  "negative": 0,
+  "nan": 0
+ }
+}

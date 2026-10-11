@@ -1,0 +1,12 @@
+{
+ "v3_pit_components": 5424,
+ "v3_exact_3x3_square_pits": 1409,
+ "v3_pits_le_12_cells_share_of_components": 0.569,
+ "v3_cells_in_pits_le_12_cells_share_of_pit_cells": 0.139,
+ "v3_pit_storage_Mm3": 73.1,
+ "v3_200mm_wet_cells_in_small_pits_share": 0.129,
+ "opening_pit_components": 8621,
+ "opening_pit_storage_Mm3": 39.9,
+ "opening_share_land_in_pits_gt15cm": 0.086,
+ "v3_share_land_in_pits_gt15cm": 0.149
+}

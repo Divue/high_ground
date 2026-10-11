@@ -1,0 +1,377 @@
+{
+ "design_200_mean": {
+  "segments": 164594,
+  "served_max_mismatch_gt1cm": 95,
+  "served_t15_mismatch": 54,
+  "hourly_peak_vs_true_peak_median_gap_cm": 0.2,
+  "hourly_peak_lower_by_gt10cm": 19,
+  "band_changes_if_true_peak": 1998,
+  "band_up_if_true_peak": 35,
+  "all_samples_standing_water": 946,
+  "some_samples_standing_water": 2052,
+  "all_masked_true_p90_ge15": 937,
+  "all_masked_true_p90_ge30": 788,
+  "all_masked_named_ge30": [
+   [
+    154,
+    "Madhavaram - Red Hills Road",
+    "primary"
+   ],
+   [
+    117,
+    "Tanu Enterprises",
+    "residential"
+   ],
+   [
+    117,
+    "Tank Bund Road",
+    "residential"
+   ],
+   [
+    111,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    95,
+    "Wallace Garden 3rd Street",
+    "residential"
+   ],
+   [
+    95,
+    "Wallace Garden 2nd Street",
+    "residential"
+   ],
+   [
+    94,
+    "TNHB Colony 1st Main Road",
+    "residential"
+   ],
+   [
+    93,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    92,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    92,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    92,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    92,
+    "25th Street",
+    "residential"
+   ]
+  ]
+ },
+ "design_300_mean": {
+  "segments": 164594,
+  "served_max_mismatch_gt1cm": 144,
+  "served_t15_mismatch": 77,
+  "hourly_peak_vs_true_peak_median_gap_cm": 0.1,
+  "hourly_peak_lower_by_gt10cm": 34,
+  "band_changes_if_true_peak": 2186,
+  "band_up_if_true_peak": 52,
+  "all_samples_standing_water": 946,
+  "some_samples_standing_water": 2052,
+  "all_masked_true_p90_ge15": 944,
+  "all_masked_true_p90_ge30": 927,
+  "all_masked_named_ge30": [
+   [
+    173,
+    "Madhavaram - Red Hills Road",
+    "primary"
+   ],
+   [
+    138,
+    "INTUC nagar joint road",
+    "tertiary"
+   ],
+   [
+    138,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    138,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    123,
+    "Tanu Enterprises",
+    "residential"
+   ],
+   [
+    123,
+    "Tank Bund Road",
+    "residential"
+   ],
+   [
+    121,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    115,
+    "Wallace Garden 3rd Street",
+    "residential"
+   ],
+   [
+    115,
+    "Wallace Garden 2nd Street",
+    "residential"
+   ],
+   [
+    113,
+    "25th Street",
+    "residential"
+   ],
+   [
+    113,
+    "24th Street",
+    "residential"
+   ],
+   [
+    113,
+    "22nd Street",
+    "residential"
+   ]
+  ]
+ },
+ "michaung2023": {
+  "segments": 164594,
+  "served_max_mismatch_gt1cm": 131,
+  "served_t15_mismatch": 75,
+  "hourly_peak_vs_true_peak_median_gap_cm": 0.1,
+  "hourly_peak_lower_by_gt10cm": 28,
+  "band_changes_if_true_peak": 1985,
+  "band_up_if_true_peak": 40,
+  "all_samples_standing_water": 1017,
+  "some_samples_standing_water": 2260,
+  "all_masked_true_p90_ge15": 957,
+  "all_masked_true_p90_ge30": 937,
+  "all_masked_named_ge30": [
+   [
+    171,
+    "Madhavaram - Red Hills Road",
+    "primary"
+   ],
+   [
+    138,
+    "INTUC nagar joint road",
+    "tertiary"
+   ],
+   [
+    138,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    138,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    117,
+    "Tanu Enterprises",
+    "residential"
+   ],
+   [
+    117,
+    "Tank Bund Road",
+    "residential"
+   ],
+   [
+    115,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    112,
+    "Wallace Garden 3rd Street",
+    "residential"
+   ],
+   [
+    112,
+    "Wallace Garden 2nd Street",
+    "residential"
+   ],
+   [
+    111,
+    "25th Street",
+    "residential"
+   ],
+   [
+    111,
+    "24th Street",
+    "residential"
+   ],
+   [
+    111,
+    "22nd Street",
+    "residential"
+   ]
+  ]
+ },
+ "dec2015_reservoir": {
+  "segments": 164594,
+  "served_max_mismatch_gt1cm": 167,
+  "served_t15_mismatch": 87,
+  "hourly_peak_vs_true_peak_median_gap_cm": 0.0,
+  "hourly_peak_lower_by_gt10cm": 47,
+  "band_changes_if_true_peak": 2499,
+  "band_up_if_true_peak": 60,
+  "all_samples_standing_water": 946,
+  "some_samples_standing_water": 2052,
+  "all_masked_true_p90_ge15": 946,
+  "all_masked_true_p90_ge30": 937,
+  "all_masked_named_ge30": [
+   [
+    184,
+    "Madhavaram - Red Hills Road",
+    "primary"
+   ],
+   [
+    157,
+    "INTUC nagar joint road",
+    "tertiary"
+   ],
+   [
+    157,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    157,
+    "6th main road",
+    "tertiary"
+   ],
+   [
+    139,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    139,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    139,
+    "Crematoriam Approach Street",
+    "service"
+   ],
+   [
+    128,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    127,
+    "Tanu Enterprises",
+    "residential"
+   ],
+   [
+    127,
+    "Tank Bund Road",
+    "residential"
+   ],
+   [
+    125,
+    "Krishna Nagar 1st Street",
+    "residential"
+   ],
+   [
+    124,
+    "Montieth Road",
+    "secondary"
+   ]
+  ]
+ },
+ "fengal2024": {
+  "segments": 164594,
+  "served_max_mismatch_gt1cm": 55,
+  "served_t15_mismatch": 4,
+  "hourly_peak_vs_true_peak_median_gap_cm": 0.2,
+  "hourly_peak_lower_by_gt10cm": 4,
+  "band_changes_if_true_peak": 2527,
+  "band_up_if_true_peak": 34,
+  "all_samples_standing_water": 1017,
+  "some_samples_standing_water": 2260,
+  "all_masked_true_p90_ge15": 776,
+  "all_masked_true_p90_ge30": 526,
+  "all_masked_named_ge30": [
+   [
+    139,
+    "Madhavaram - Red Hills Road",
+    "primary"
+   ],
+   [
+    108,
+    "Tanu Enterprises",
+    "residential"
+   ],
+   [
+    108,
+    "Tank Bund Road",
+    "residential"
+   ],
+   [
+    106,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    88,
+    "Karaneeswarar Pagoda Street",
+    "tertiary"
+   ],
+   [
+    79,
+    "Jothi Thottam",
+    "residential"
+   ],
+   [
+    68,
+    "11th Street",
+    "residential"
+   ],
+   [
+    62,
+    "Mount - Poonamallee - Avadi Road",
+    "primary"
+   ],
+   [
+    62,
+    "Montieth Road",
+    "secondary"
+   ],
+   [
+    62,
+    "Montieth Road",
+    "secondary"
+   ],
+   [
+    62,
+    "Montieth Road",
+    "secondary"
+   ],
+   [
+    62,
+    "Montieth Road",
+    "secondary"
+   ]
+  ]
+ }
+}

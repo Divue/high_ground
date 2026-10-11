@@ -1,0 +1,49 @@
+{
+ "velachery": {
+  "gcc_zoned_share": 0.783,
+  "gcc_moderate_plus_share_of_zoned": 0.486,
+  "gcc_high_plus_share_of_zoned": 0.424,
+  "gcc_mean_rank": 3.02,
+  "nrsc_2015_share": 0.595,
+  "model200_wet15": 0.149,
+  "model2015res_wet15": 0.268
+ },
+ "pallikaranai": {
+  "gcc_zoned_share": 0.883,
+  "gcc_moderate_plus_share_of_zoned": 0.263,
+  "gcc_high_plus_share_of_zoned": 0.231,
+  "gcc_mean_rank": 2.49,
+  "nrsc_2015_share": 0.117,
+  "model200_wet15": 0.348,
+  "model2015res_wet15": 0.554
+ },
+ "tnagar": {
+  "gcc_zoned_share": 0.554,
+  "gcc_moderate_plus_share_of_zoned": 0.02,
+  "gcc_high_plus_share_of_zoned": 0.0,
+  "gcc_mean_rank": 1.86,
+  "nrsc_2015_share": 0.333,
+  "model200_wet15": 0.187,
+  "model2015res_wet15": 0.312
+ },
+ "citywide_1km_blocks": {
+  "model200_wet15 vs pit_share_gt15cm": 0.617,
+  "model200_wet15 vs dtm_median": -0.182,
+  "model200_wet15 vs nrsc2015": 0.006,
+  "model200_wet15 vs gcc_mod_plus": 0.208,
+  "model200_wet15 vs building_frac": -0.073,
+  "model200_wet15 vs model2015_wet15": 0.82,
+  "nrsc2015 vs pit_share_gt15cm": 0.071,
+  "gcc_mod_plus vs pit_share_gt15cm": 0.12,
+  "nrsc2015 vs dtm_median": 0.224,
+  "gcc_mod_plus vs dtm_median": -0.052,
+  "nrsc2015 vs building_frac": 0.318,
+  "gcc_mod_plus vs building_frac": 0.304,
+  "model2015_wet15 vs nrsc2015": 0.026,
+  "model2015_wet15 vs pit_share": 0.488,
+  "n_blocks": 413,
+  "wet_cells_in_pit_gt15cm_share": 0.714,
+  "pit_cells_gt15cm_wet_share": 0.729,
+  "nonpit_cells_wet_share": 0.069
+ }
+}

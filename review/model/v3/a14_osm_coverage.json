@@ -1,0 +1,23 @@
+{
+ "velachery": {
+  "osm_building_frac": 0.244,
+  "worldcover_builtup_frac": 0.91,
+  "osm_share_of_wc_built": 0.27,
+  "wc_built_cells_with_osm_lt_0p3": 0.587,
+  "dsm_minus_dtm_on_wcbuilt_osm_lt0p3": 0.33
+ },
+ "tnagar": {
+  "osm_building_frac": 0.303,
+  "worldcover_builtup_frac": 0.872,
+  "osm_share_of_wc_built": 0.35,
+  "wc_built_cells_with_osm_lt_0p3": 0.455,
+  "dsm_minus_dtm_on_wcbuilt_osm_lt0p3": 0.46
+ },
+ "pallikaranai": {
+  "osm_building_frac": 0.087,
+  "worldcover_builtup_frac": 0.521,
+  "osm_share_of_wc_built": 0.17,
+  "wc_built_cells_with_osm_lt_0p3": 0.816,
+  "dsm_minus_dtm_on_wcbuilt_osm_lt0p3": 0.28
+ }
+}

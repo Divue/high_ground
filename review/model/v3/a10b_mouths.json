@@ -1,0 +1,178 @@
+{
+ "design_200_mean": {
+  "Adyar": 0.712,
+  "Cooum": 0.097,
+  "Ennore": 0.008,
+  "Muttukadu/S": 0.016,
+  "top": [
+   [
+    80.2676,
+    13.0128,
+    0.023,
+    true
+   ],
+   [
+    80.2679,
+    13.0128,
+    0.023,
+    true
+   ],
+   [
+    80.2665,
+    13.0128,
+    0.023,
+    true
+   ],
+   [
+    80.2654,
+    13.0128,
+    0.023,
+    true
+   ],
+   [
+    80.2668,
+    13.0128,
+    0.023,
+    true
+   ]
+  ],
+  "west_edge_closed_stretch_max_depth_cols0to2_m": 0.74,
+  "west_edge_deepest_cell_bed_vs_dtm": [
+   14.61,
+   14.61,
+   false
+  ]
+ },
+ "dec2015_reservoir": {
+  "Adyar": 0.859,
+  "Cooum": 0.044,
+  "Ennore": 0.039,
+  "Muttukadu/S": 0.005,
+  "top": [
+   [
+    80.2654,
+    13.0128,
+    0.047,
+    true
+   ],
+   [
+    80.2657,
+    13.0128,
+    0.046,
+    true
+   ],
+   [
+    80.266,
+    13.0128,
+    0.044,
+    true
+   ],
+   [
+    80.2663,
+    13.0128,
+    0.042,
+    true
+   ],
+   [
+    80.2665,
+    13.0128,
+    0.041,
+    true
+   ]
+  ],
+  "west_edge_closed_stretch_max_depth_cols0to2_m": 1.76,
+  "west_edge_deepest_cell_bed_vs_dtm": [
+   14.61,
+   14.61,
+   false
+  ]
+ },
+ "dec2015_rain": {
+  "Adyar": 0.555,
+  "Cooum": 0.14,
+  "Ennore": 0.125,
+  "Muttukadu/S": 0.017,
+  "top": [
+   [
+    80.2654,
+    13.0128,
+    0.022,
+    true
+   ],
+   [
+    80.2657,
+    13.0128,
+    0.022,
+    true
+   ],
+   [
+    80.266,
+    13.0128,
+    0.022,
+    true
+   ],
+   [
+    80.2663,
+    13.0128,
+    0.022,
+    true
+   ],
+   [
+    80.2665,
+    13.0128,
+    0.021,
+    true
+   ]
+  ],
+  "west_edge_closed_stretch_max_depth_cols0to2_m": 0.84,
+  "west_edge_deepest_cell_bed_vs_dtm": [
+   14.61,
+   14.61,
+   false
+  ]
+ },
+ "michaung2023": {
+  "Adyar": 0.267,
+  "Cooum": 0.117,
+  "Ennore": 0.475,
+  "Muttukadu/S": 0.015,
+  "top": [
+   [
+    80.2743,
+    13.0123,
+    0.035,
+    true
+   ],
+   [
+    80.3268,
+    13.2319,
+    0.029,
+    true
+   ],
+   [
+    80.3257,
+    13.2319,
+    0.028,
+    true
+   ],
+   [
+    80.2762,
+    13.015,
+    0.025,
+    true
+   ],
+   [
+    80.3254,
+    13.2319,
+    0.024,
+    true
+   ]
+  ],
+  "west_edge_closed_stretch_max_depth_cols0to2_m": 0.77,
+  "west_edge_deepest_cell_bed_vs_dtm": [
+   14.61,
+   14.61,
+   false
+  ]
+ }
+}

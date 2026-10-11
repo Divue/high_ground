@@ -1,0 +1,149 @@
+{
+ "design_200_mean": {
+  "served_cut_off": 7,
+  "recomputed_cut_off": 7,
+  "cut_off_if_standing_water_counted": 9,
+  "newly_cut_hospitals": [
+   "CSI Kalyani Hospital",
+   "EV Kalyani Hospital"
+  ],
+  "flyovers": 122,
+  "flyovers_dry": 119,
+  "dry_flyovers_with_an_end_on_masked_cell": 6,
+  "dry_flyovers_whose_both_ends_have_ge30cm_unmasked": 0,
+  "examples": []
+ },
+ "design_300_mean": {
+  "served_cut_off": 12,
+  "recomputed_cut_off": 12,
+  "flyovers": 122,
+  "flyovers_dry": 111,
+  "dry_flyovers_with_an_end_on_masked_cell": 6,
+  "dry_flyovers_whose_both_ends_have_ge30cm_unmasked": 2,
+  "examples": [
+   [
+    "Unnamed flyover",
+    [
+     44,
+     49
+    ],
+    [
+     true,
+     true
+    ],
+    [
+     true,
+     false
+    ]
+   ],
+   [
+    "Ambattur Ramp",
+    [
+     49,
+     149
+    ],
+    [
+     false,
+     true
+    ],
+    [
+     false,
+     true
+    ]
+   ]
+  ]
+ },
+ "michaung2023": {
+  "served_cut_off": 12,
+  "recomputed_cut_off": 12,
+  "cut_off_if_standing_water_counted": 15,
+  "newly_cut_hospitals": [
+   "Anna Nagar Government Hospital",
+   "CSI Kalyani Hospital",
+   "EV Kalyani Hospital"
+  ],
+  "flyovers": 122,
+  "flyovers_dry": 116,
+  "dry_flyovers_with_an_end_on_masked_cell": 7,
+  "dry_flyovers_whose_both_ends_have_ge30cm_unmasked": 2,
+  "examples": [
+   [
+    "Unnamed flyover",
+    [
+     37,
+     41
+    ],
+    [
+     true,
+     true
+    ],
+    [
+     true,
+     false
+    ]
+   ],
+   [
+    "Ambattur Ramp",
+    [
+     38,
+     138
+    ],
+    [
+     false,
+     true
+    ],
+    [
+     false,
+     true
+    ]
+   ]
+  ]
+ },
+ "dec2015_reservoir": {
+  "served_cut_off": 12,
+  "recomputed_cut_off": 12,
+  "cut_off_if_standing_water_counted": 16,
+  "newly_cut_hospitals": [
+   "Anna Nagar Government Hospital",
+   "CSI Kalyani Hospital",
+   "EV Kalyani Hospital",
+   "MIOT Hospital"
+  ],
+  "flyovers": 122,
+  "flyovers_dry": 105,
+  "dry_flyovers_with_an_end_on_masked_cell": 6,
+  "dry_flyovers_whose_both_ends_have_ge30cm_unmasked": 2,
+  "examples": [
+   [
+    "Unnamed flyover",
+    [
+     65,
+     70
+    ],
+    [
+     true,
+     true
+    ],
+    [
+     true,
+     false
+    ]
+   ],
+   [
+    "Ambattur Ramp",
+    [
+     69,
+     168
+    ],
+    [
+     false,
+     true
+    ],
+    [
+     false,
+     true
+    ]
+   ]
+  ]
+ }
+}

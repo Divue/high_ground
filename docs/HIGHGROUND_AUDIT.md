@@ -1,8 +1,22 @@
 # HighGround: full project audit
 
-**Updated Sun 11 Oct, ~09:00 IST** (offline + navigation built and reviewed; judge #2; search fix; footage and rough cut). **One file with everything:** what we built, how it works, the tech stack (used and planned), every number we may quote (with its caveat), what is done and what is not, how to run it, the pitch, the 3-minute video, and what to do next. Written Sun 11 Oct 2026, ~00:45 IST, for the team. Numbers are copied from the model output files (`data/out/web/proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `streets/index.json`, `graph/meta.json`) and the run logs. **If you quote a number, quote it as written here, with its caveat.**
+**One file with everything the team needs to pitch, film, submit and keep building.** It covers what we built, how it works, the tech stack we use and the stack still planned, every number we may quote (with its caveat), what is done and what is not, how to run it, the pitch, the video, and the next steps.
 
-Companion files: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` (next features, sourced), `docs/LANDING_PAGE_CONTEXT.md` (landing page), `docs/DEMO.md` (generated demo streets), `docs/blog_draft.md`, `PROGRESS.md` (full engineering log), `CLAUDE.md` (original spec).
+Written **Sun 11 Oct 2026, 09:45 IST**. Numbers are copied from the model output files (`data/out/web/proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `streets/index.json`, `graph/meta.json`, `offline/manifest.json`) and from test logs. **If you quote a number, quote it as written here, with its caveat.**
+
+Companion files:
+
+| File | What it is |
+|---|---|
+| `docs/OFFLINE_AND_NAVIGATION_PLAN.md` | Offline and navigation plan with sourced Chennai facts |
+| `docs/LANDING_PAGE_CONTEXT.md` (+ PDF) | Brief for the landing page |
+| `docs/VIDEO_CUT.md` | Video cut list with voice-over lines |
+| `docs/DEMO.md` | Verified demo streets |
+| `docs/blog_draft.md` | Blog draft |
+| `PROGRESS.md` | Full engineering log |
+| `CLAUDE.md` | Original spec |
+
+Repo: https://github.com/Divue/high_ground
 
 ---
 
@@ -11,87 +25,123 @@ Companion files: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` (next features, sourced),
 | Item | State |
 |---|---|
 | Deadline | **Sun 11 Oct 2026, 20:00 IST** (online submission; confirm on the wemakedevs.org/aws/env form) |
-| Flood model (16 storms) + validation + ANUGA cross-check | **Done**, v3 shipped (v4 tested and rejected by a rule written before the run) |
-| Web app (all screens, replays, time-lapse, routing, hospitals, proof, about, assistant UI) | **Done and working locally** (dev `:5173`, production build `:4173`) |
-| AWS backend (SAM stack, 4 Lambdas, API, DynamoDB, SNS, Scheduler, Bedrock, Location, Amplify) | **Code done, tested against mocked AWS (moto). Not deployed.** |
-| What blocks the deploy | The team's AWS profile `highground` does not exist on this laptop yet; `.env` still has the placeholder email; Bedrock model access not confirmed. See section 16 |
-| Live URL, real alert email, live assistant | After deploy |
-| Demo video | Footage recording (opening done; search, navigate, timelapse, what-if, proof in progress). Rough cut builder `docs/make_rough_cut.py` → `review/p5/footage/rough_cut.mp4` + cut list `docs/VIDEO_CUT.md`, with two slots for the alert email and the assistant (need the deploy) |
-| Blog | Draft in `docs/blog_draft.md` (numbers corrected tonight) |
-| Landing page | Teammate; context in `docs/LANDING_PAGE_CONTEXT.md` + PDF |
-| Offline mode + flood-safe navigation | **Built Sun 11 Oct, 00:55–03:05 IST** (commits 4119956, fdcfb10, a7bbd2f, c8add5b): Save for offline, battery saver map, help card, flood plan, Take me to dry ground with directions, live GPS directions and Preview the drive. Offline gate and route-rule tests pass; reviewer pass running. Plan: `docs/OFFLINE_AND_NAVIGATION_PLAN.md` |
-| Phase gates | P1 passed and tagged `p1`. P2: mass balance, depth maps, Pallikaranai wet and T. Nagar mostly dry pass; **"Velachery wetter than T. Nagar" fails** (disclosed). P3 passed (ranking test). P4/P5 need the deploy. Tags p2/p3 not yet created |
+| Flood model (16 storms) + validation + ANUGA cross-check | **Done.** v3 shipped. v4 was tested and rejected by a rule written before the run |
+| Web app (Tonight, replays, time-lapse, What if, Hospitals, Proof, About, assistant UI) | **Done**, working on the production build (`vite preview` :4173) |
+| **Offline mode** (Save for offline, battery saver map, help numbers, My flood plan) | **Done and reviewed** (Sun 00:55–09:00). Offline gate passes with only the saved pack on the phone |
+| **Flood-safe navigation** (on foot / two-wheeler / car, directions, live GPS, Preview the drive) | **Done and reviewed.** 0 rule violations on 36 test trips |
+| AWS backend (SAM: S3, CloudFront, 4 Lambdas, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Bedrock, Amazon Location, Amplify) | **Code done**, tested against mocked AWS (moto). **Not deployed**; the user setup is missing (section 16) |
+| Live URL, real alert email, live assistant | **After deploy.** These are the two slots in the rough cut |
+| Demo video | **6 shots recorded at 1080p/30 fps** and checked frame by frame. **Rough cut 2:30** at `review/p5/footage/rough_cut.mp4` (720p copy at `docs/video/HighGround_rough_cut_720p.mp4`). Cut list in `docs/VIDEO_CUT.md` |
+| Demo streets | `docs/DEMO.md` lists only streets verified by typing them into the search box |
+| Landing page | Teammate. Context PDF updated with the positioning change and the new features |
+| Blog | `docs/blog_draft.md` (numbers corrected); needs the offline/navigation paragraph |
+| Reviews | Design critic ×3, QA ×5, model reviewer ×2, judge ×2. Every blocker and major fixed (section 9) |
+| Phase gates | **P1** passed (tag `p1`). **P2:** mass balance, depth maps, Pallikaranai wet and T. Nagar mostly dry pass; **"Velachery wetter than T. Nagar" fails** (disclosed). **P3** passed (ranking test). **P4/P5** need the deploy |
+
+Latest scores (judge #2, Sun 08:30, before the search fix and rough cut):
+
+| Criterion | Score |
+|---|---|
+| Idea and impact | 8 |
+| Built on AWS | 4 (7–8 once deployed and filmed) |
+| Design and usability | 7 |
+| Execution | 6 |
+| Demo readiness | 4 |
+
+Its top suggestions were to fix the street search, verify the demo streets and lock the footage; all three are done. What remains is **deploy and film the email and the assistant.**
 
 ---
 
 ## 1. The problem and the pitch
 
-**One line:** HighGround shows Chennai residents where floodwater will go tonight, street by street, and what to do about it.
+**One line:** HighGround shows Chennai residents where floodwater will go tonight, street by street, and what to do about it. It keeps working when the power and the network go down.
 
-**The five questions it answers:**
+**The questions it answers:**
 1. Will my street flood tonight? How deep, and when?
-2. Where can I park my car on dry ground?
-3. Which way can I drive there without crossing water, and by when must I leave?
+2. Where can I park my car on dry ground, and by when must I move it?
+3. Which way can I go, on foot, by two-wheeler or by car, without crossing water?
 4. Which hospitals get cut off?
 5. Email me if this changes.
+6. And if the power and towers go down: who do I call, how do I send my location, and how do I get to dry ground offline?
 
 **Why it matters (sourced, safe to say):**
-- Every monsoon, Chennai parks its cars on flyovers. In Cyclone Fengal (2024) the Velachery, Pallikaranai, Medavakkam and Mint flyovers were full of cars ([Deccan Herald](https://www.deccanherald.com/amp/story/india%2Ftamil-nadu%2Fcyclone-fengal-induced-rains-cause-heavy-inundation-people-park-vehicles-on-flyovers-3298468)).
-- The 2015 floods produced Rs 4,800 crore of insurance claims, mostly motor ([Business Standard](https://www.business-standard.com/amp/article/current-affairs/chennai-floods-insurance-claims-touch-rs-4-800-crore-116012201026_1.html)).
-- In 2015, 18 ICU patients at MIOT died when floodwater reached the generator room ([CS Monitor/AP](https://csmonitor.com/World/2015/1205/Indian-monsoon-cuts-off-power-to-hospital-18-die)).
-- On 4 Dec 2023 (Cyclone Michaung), 712 of Chennai's 1,814 11 kV power feeders were switched off ([TNM](https://www.thenewsminute.com/tamil-nadu/chennais-power-supply-will-be-restored-gradually-says-min-trb-rajaa)); on 5 Dec, 30% of the city's 42,747 mobile towers were down ([The Week/PTI](https://www.theweek.in/wire-updates/national/2023/12/05/mds20-tn-cyclone-chief-secretary.html)). This motivates the offline plan.
+- **Flyover parking.** Every monsoon Chennai parks its cars on flyovers. In Cyclone Fengal (2024) the Velachery, Pallikaranai, Medavakkam and Mint flyovers filled with cars ([Deccan Herald](https://www.deccanherald.com/amp/story/india%2Ftamil-nadu%2Fcyclone-fengal-induced-rains-cause-heavy-inundation-people-park-vehicles-on-flyovers-3298468)).
+- **Insurance.** The 2015 floods produced Rs 4,800 crore of insurance claims, mostly motor ([Business Standard](https://www.business-standard.com/amp/article/current-affairs/chennai-floods-insurance-claims-touch-rs-4-800-crore-116012201026_1.html)).
+- **Hospitals.** In 2015, 18 ICU patients at MIOT died when floodwater reached the generator room ([CS Monitor/AP](https://csmonitor.com/World/2015/1205/Indian-monsoon-cuts-off-power-to-hospital-18-die)).
+- **Power cut on purpose.** On 4 Dec 2023 (Cyclone Michaung), 712 of Chennai's 1,814 11 kV feeders were switched off ([TNM](https://www.thenewsminute.com/tamil-nadu/chennais-power-supply-will-be-restored-gradually-says-min-trb-rajaa)).
+- **Phone networks fall over.** On 5 Dec 2023, 30% of the city's 42,747 mobile towers were down ([The Week/PTI](https://www.theweek.in/wire-updates/national/2023/12/05/mds20-tn-cyclone-chief-secretary.html)). In 2015, networks were mostly down for about 3 days ([TNM](https://www.thenewsminute.com/article/why-chennai-facing-poor-mobile-phone-signal-issues-36550)).
+- **Two-wheelers dominate.** Chennai had 54 lakh two-wheelers and 11.75 lakh four-wheelers in 2019 ([Deccan Chronicle](https://deccanchronicle.com/nation/current-affairs/211119/end-in-sight-for-parking-woes-in-burgeoning-city.html)), so two-wheeler is the default navigation mode.
 
-**Positioning (from the spec, still valid):** Chennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we claim a tested one, built for citizens.
+**Positioning (from the spec; still valid):** Chennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we claim a tested one, built for citizens.
 
-**Positioning update (important, found tonight):** the state's **Chennai Flood Monitor** (RTFF & SDSS, World Bank funded, reported operational since Oct 2025) is public, bilingual and *claims street-level inundation forecasts* for vulnerable areas (Velachery, Saidapet, Mudichur). **TN-Alert** (state app, 5 lakh+ installs) sends official rain and flood alerts in Tamil. So **never say we are the only street-level forecast.** Say what we add:
+**Positioning update (important):** two official tools also reach the public.
+- **Chennai Flood Monitor** (RTFF & SDSS, the state, reported operational since Oct 2025) claims street-level inundation forecasts for vulnerable areas.
+- **TN-Alert** (state app, 5 lakh+ installs) sends official alerts.
 
-> Official systems tell you a flood is coming. HighGround tells you what to do on your street: where to move your car and by when, which way to drive without crossing water, which hospitals you can still reach, and an email when that changes. And we show how well the model did on 2015, honestly.
+So **never say we are the only street-level forecast.** Say what we add:
 
-**Tagline options:** "Where the water goes tonight, street by street." · "Know before the water does." · "Every monsoon, Chennai parks its cars on flyovers. Now you know where, and by when."
+> Official systems tell you a flood is coming. HighGround tells you what to do on your street: where to move your car and by when, which way to go without crossing water, which hospitals you can still reach, and it keeps working when the power and the network go down. And we show, honestly, how well the model did on 2015.
+
+**Taglines:**
+- "Where the water goes tonight, street by street."
+- "Know before the water does."
+- "Every monsoon, Chennai parks its cars on flyovers. Now you know where, and by when."
+- "Saved before the storm. Works without internet."
 
 ---
 
 ## 2. The event and how we score
 
-- **Environmental Hacks**, event 02 of the **Bharat Builds Tour** (WeMakeDevs × AWS), **Heat and Water** track. Hybrid, Oct 8–11, 2026. Teams of 1–4. Must be built during the event, must use AWS **and show it in the video**, 3-minute video. Blog on AWS Builder Center for the blog prize.
-- Repo: https://github.com/Divue/high_ground
+**Event:** Environmental Hacks, event 02 of the Bharat Builds Tour (WeMakeDevs × AWS), Heat and Water track. Hybrid, Oct 8–11, 2026.
+
+**Rules:**
+- teams of 1–4;
+- built during the event;
+- must use AWS **and show it in the video**;
+- a 3-minute video;
+- a blog on AWS Builder Center for the blog prize.
 
 | Criterion | Our evidence |
 |---|---|
-| Idea and impact | A daily, personal decision (move the car, by when, which way) for a city that floods every year; hospitals cut off; offline mode for outages (planned) |
-| Built on AWS | 12 AWS services, each doing real work (section 6); open data read straight from the AWS Open Data registry; one SAM template |
-| Design and usability | Full-screen 3D night city; plain words ("waist-deep", "too deep for scooters from 9 PM"); one orchestrated opening; amber means safety; red only for 112 |
-| Execution | A real 2D flood model (16 storms, mass conserved exactly), a second independent model as cross-check, honest held-out validation, in-browser routing over 206k road edges, ~57 fps |
-| Demo video | Frame-perfect recorder for smooth 1080p footage; script in section 13 |
-
-Earlier simulated-judge scores (Fri, before deploy and before the UX overhaul): idea 8, AWS 5 (≈8 once deployed), design 6, execution 7, demo readiness 5. Its top advice: **deploy and film the real alert email and a grounded assistant answer.** Still the single biggest lever.
+| Idea and impact | One decision per street ("Move your car to X by 2 AM"). Routes around water by mode. Hospitals cut off. Offline help built on sourced outage facts. Two-wheeler first |
+| Built on AWS | 12+ AWS services each doing real work (section 6); open data read straight from the AWS Open Data registry; one SAM template. **Must be shown live in the video** |
+| Design and usability | Full-screen 3D night city. Plain words ("Waist-deep", "too deep for scooters from 9 PM"). Amber only for safety, red only for 112. Phone layout and live-directions view |
+| Execution | A real 2D flood model (16 storms, exact mass balance), an independent second model, honest held-out validation, a routing engine in the browser, offline PWA, 5 QA rounds |
+| Demo video | Frame-perfect footage and a 2:30 rough cut with title cards; two slots for the live AWS proof |
 
 ---
 
 ## 3. The product (what a resident sees)
 
-The whole app is one full-screen 3D night map of Chennai with floodwater on it.
+One full-screen 3D night map of Chennai with floodwater on it.
 
-| Screen | What it does |
+| Screen / feature | What it does |
 |---|---|
-| **Opening** | Camera starts low over the Bay of Bengal at night and flies in to a Velachery street in ~5 s; a title line ("Chennai, 6 PM. Cyclone Michaung, 2023, replayed as if it were tonight."); rain starts; water rises; the answer card appears (~12 s after load) |
-| **Tonight** (hero) | Type a street → the camera pulls up, travels across the city and descends to it ("Going to …" with progress) → a pulse marks the street → the night replays from 6 PM and the water rises hour by hour → the answer card: depth in body words ("Waist-deep") plus cm, when it becomes too deep for scooters, a picture of an adult, a scooter and a car against the water line, **"Move your car to X by 2 AM"**, the nearest dry parking (mostly flyovers) with "1 more dry place nearby", an amber route that draws itself, and **"Email me if this changes"**. A sticky "In danger, call 112" line |
-| **Replay a storm** | Tonight's live forecast is usually dry, so the app replays real storms as if tonight: **Dec 2015** (with the reservoir release), **Cyclone Michaung 2023**, **Cyclone Fengal 2024**. When the forecast is dry, the card says so and offers a replay |
-| **Watch the whole storm** | ~30 s time-lapse of a replay on its real dates, with captions from the model files ("43 mm fell in this one hour", "Chembarambakkam starts releasing water", "most land under water"). Pause, resume, watch again, back to my street, progress bar |
-| **What if** | Rainfall slider over the computed storms (50–400 mm in a day), mean or high tide; the city floods and drains; "% of the city too deep for scooters" and "hospitals cars cannot reach" |
-| **Hospitals** | 46 major hospitals; which are cut off from the main road network at each storm size; the dry route to each reachable one |
-| **Proof** | "Did the model get 2015 right?" Swipe split-screen: model's 2015 flood vs streets residents reported; the honest result on one shared scale; ANUGA cross-check toggle; "For experts" sections |
-| **About the model** | Limits in plain words; data credits; Animations on/off |
-| **Ask HighGround** | Assistant on Bedrock (Strands Agents) that answers only from model tools; every number is checked against tool output and marked "from the model"; tells people in danger to call 112 first. Shows "offline" until deployed |
-| **#admin** (hidden) | "Run and send alerts" for a chosen rainfall, to trigger a real alert email for the demo |
-| **Take me to dry ground** (new) | On the answer card: On foot / Two-wheeler (default) / Car to Dry parking, a Hospital, High ground or a saved place. The route avoids streets the model expects to be 10 cm deep (on foot, two-wheeler) or 20 cm (car) at the hour you would reach them, closes underpasses in rain and keeps to one-way streets; it plans for the hour on the timeline (drag to replan). Shows the dashed usual way it avoids, step-by-step directions, and the honesty line. **Start** follows your GPS with one big instruction and voice; **Preview the drive** plays the route for a demo |
-| **Save for offline** (new) | Keeps the app, the map, this street (and up to 2 more places, 3 km around each) for every storm, the road graph and the forecast on the phone. Offline, the app opens from the phone, says "Offline · forecast from 5:24 PM (6 h ago)", and the map switches to battery saver: flat, streets coloured by depth |
-| **Help numbers** (new) | Tap-to-call 112 (red), 1913, 1070, 1077, 108, 101 and Minnagam 94987 94987 for fallen wires; "Send my location" as SMS / WhatsApp / share / copy |
-| **My flood plan** (new) | The answer as an image and as plain text (depth, time, the decision, dry parking, the route and its streets, the nearest hospital cars can reach, numbers) to save or send to family; works with no app and no network |
+| **Opening** | The camera starts low over the Bay of Bengal and flies to a Velachery street in about 5 s. A title line reads "Chennai, 6 PM. Cyclone Michaung, 2023, replayed as if it were tonight." Rain starts, the water rises, and the answer card appears |
+| **Tonight** (hero) | Type a street and the camera travels across the city to it; a pulse marks the street; the night replays from 6 PM and the water rises hour by hour. The **answer card** shows:<br>• depth in body words ("Waist-deep") with cm and a "from the model" chip<br>• when the street becomes too deep for scooters<br>• a picture of an adult, a scooter and a car against the water line<br>• the decision: **"Move your car to Velachery MRTS Bridge (flyover, 450 m) by Tue 2 AM"** with **Take me there**<br>• **Email me if this changes**; **My flood plan · Save for offline**; a sticky footer: *In danger, call 112 · Help numbers · Battery saver*<br>• search a street name and it answers for that street's deepest stretch near the point, saying how many stretches and their range |
+| **Replay a storm** | Real storms replayed as if tonight: Dec 2015 (with the reservoir release), Cyclone Michaung 2023, Cyclone Fengal 2024 |
+| **Watch the whole storm** | A ~30 s time-lapse on the storm's real dates, with captions from the model files. Pause, resume, watch again, back to my street |
+| **What if** | Rainfall slider over the computed storms (50–400 mm), mean or high tide. Shows "% of the city too deep for scooters" and "hospitals cars cannot reach" |
+| **Hospitals** | 46 major hospitals, which are cut off at each storm size, and a route in from the main roads that avoids flooded streets |
+| **Proof** | "Did the model get 2015 right?" A swipe split-screen of the model vs the streets residents reported, the honest result on one shared scale, the ANUGA cross-check, and "For experts" sections |
+| **About the model** | Limits in plain words, data credits, animations on/off |
+| **Ask HighGround** | Strands Agents on Bedrock; answers only from model tools; every number checked and marked "from the model"; 112 first in danger. Shows "offline" until deployed |
+| **Take me to dry ground** (new) | **By:** on foot / two-wheeler (default) / car. **To:** the card's parking, dry parking, a hospital, high ground or a saved place.<br>• Avoids water **10 cm** (foot, two-wheeler) or **20 cm** (car) at the hour you'd reach each street, looking one hour ahead.<br>• Closes subways in rain; keeps to one-way streets.<br>• Plans for the hour on the timeline (drag to replan); shows the dashed usual way it avoids, step-by-step directions, and the honesty line above **Start**.<br>• If there is no route, it says so, with when a way out opens again and "stay put / 112" |
+| **Live directions** (new) | **Start** follows your GPS (no mobile data needed) with one big instruction, a turn arrow and the distance. It speaks prompts ("Mute voice"), keeps the screen on, and re-plans after 3 off-route fixes. On a phone, only the map and the instruction show.<br>**Preview the drive** plays the route, for demos |
+| **Save for offline** (new) | One tap stores the app, the map, your street (+ up to 2 more places, 3 km around each, every storm), the road network with depths, terrain, and the forecast. Offline, the app opens from the phone and shows "Offline · forecast from 5:24 PM (5 h ago)", and the map switches to battery saver: flat, streets coloured by depth |
+| **Help numbers** (new) | Full-width tap-to-call rows: **112** (red), 1913 GCC, 1070 state EOC, 1077 district EOC, 108, 101, **Minnagam 94987 94987** (fallen wires). **Share my location** by SMS / WhatsApp / share / copy (GPS, falling back to the chosen street) |
+| **My flood plan** (new) | An image and a plain-text plan: street, worst depth and time, the decision, dry parking, a schematic route, the nearest hospital still reachable by car, numbers. Replays carry a band "**Practice plan: a replay of … Not a forecast.**"; every plan is dated |
+| **#admin** (hidden) | "Run and send alerts" for a chosen rainfall, to trigger a real alert email for the video |
 
-**Interaction details:** tap any street for its worst depth and "Make this my street"; play button on the timeline; map controls (zoom, compass/tilt, 3D/flat, slow spin, back to my street); buildings coloured by height; terrain colour-relief and hillshade; flowing water that runs downhill (flow map from the water-surface slope); screen-space rain; a "Play animations" offer for devices that ask for reduced motion (`?motion=on|off`, remembered).
-
-**Design language:** Chennai at 2 AM mid-storm; the water is the brightest thing on screen. Background `#050D12`, land `#0A161C`, text `#D6E0E4`, shallow water `#86E6EC`, deep water `#1E7BC6`, **sodium amber `#F2A541` only for safety** (parking, safe route), **red `#E5484D` only for 112**. Type: Anek Latin (the depth readout widens and gets bolder with depth) and Hind. Sentence case, no jargon, no arrows on buttons, no glassmorphism grids.
+**Design language:**
+- **Concept:** Chennai at 2 AM mid-storm; the water is the brightest thing on screen.
+- **Colours:**
+  - background `#050D12`, land `#0A161C`, text `#D6E0E4`;
+  - shallow water `#86E6EC`, deep water `#1E7BC6`;
+  - **amber `#F2A541` only for safety** (parking, the suggested route, destination);
+  - **red `#E5484D` only for 112**.
+- **Type:** Anek Latin (the readout widens with depth) and Hind, self-hosted.
+- **Copy:** sentence case, plain words, no "safe route" wording.
 
 ---
 
@@ -100,104 +150,176 @@ The whole app is one full-screen 3D night map of Chennai with floodwater on it.
 ### 4.1 Architecture
 
 ```
-OFFLINE (Python on a laptop)                 ONLINE (AWS)                            BROWSER
+OFFLINE (Python on a laptop)                 ONLINE (AWS)                            BROWSER / PHONE (PWA)
 Copernicus 30 m elevation (AWS Open Data) ─┐ EventBridge Scheduler (every 3 h)       MapLibre GL 3D city + terrain
 ESA WorldCover land cover (AWS Open Data) ─┤   → Lambda forecast-check:              three.js water: hourly depth
-OpenStreetMap (buildings, roads, drains,   ├─    Open-Meteo rain for 4 points          textures blended on the GPU,
-  hospitals, flyovers)                     │    → pick the 2 nearest storms           flowing water; Canvas rain
-Rain scenarios + 3 real storms ────────────┘    → current.json on S3                 A* routing over 206k road
-  → terrain conditioning                        → risk changed? Bedrock writes        edges, hour by hour
-  → 2D flood model (16 storms, numba)             2 plain sentences → SNS email       All numbers from model files
-  → ANUGA cross-check (Velachery)           API Gateway → Lambda subscribe
-  → validation vs 2015 reports                (DynamoDB + SNS filter policy)
-  → street / route / hospital / texture     API Gateway → Lambda assistant
-    files → S3 + CloudFront                   (Strands Agents on Bedrock)
-                                            API Gateway → Lambda geocode
+OpenStreetMap (buildings, roads, drains,   ├─    Open-Meteo rain for 4 points          textures blended on the GPU
+  hospitals, flyovers, one-ways, subways)  │    → pick the 2 nearest storms          Navigation worker: time-dependent
+Rain scenarios + 3 real storms ────────────┘    → current.json on S3                   search over 206k road edges,
+  → terrain conditioning                        → risk changed? Bedrock writes          directions, live GPS
+  → 2D flood model (16 storms, numba)             2 plain sentences → SNS email       Service worker: app shell precached,
+  → ANUGA cross-check (Velachery)           API Gateway → Lambda subscribe              saved packs served first,
+  → validation vs 2015 reports                (DynamoDB + SNS filter policy)            forecast network-first
+  → street / route / hospital / texture /   API Gateway → Lambda assistant            Battery saver: flat map, streets
+    navigation flags / offline manifest       (Strands Agents on Bedrock)               coloured by depth
+    → S3 + CloudFront (versioned pack)      API Gateway → Lambda geocode              All numbers from model files
                                               (Amazon Location, Nominatim fallback)
-                                            Amplify Hosting: the site
+                                            Amplify Hosting: the PWA (sw.js no-cache)
 ```
 
-Diagram image: `docs/architecture.png` (also `docs/landing-assets/10_architecture.png`).
+Diagram image: `docs/architecture.png`. It predates offline/navigation; add a "service worker + offline pack" box if regenerating.
 
 ### 4.2 The flood model in plain words
 
-1. **Ground.** The Copernicus GLO-30 elevation model (30 m) includes rooftops and trees. We removed **371,679** OpenStreetMap buildings, tree canopy (ESA WorldCover), bridges/flyovers and other tall objects, filled the gaps from surrounding ground, filtered residual clutter, restored the datum, carved waterways by type (rivers 2 m, canals 1.5 m, streams 0.6 m, drains 0.4 m), capped fake closed pits at 1 m, and put dense buildings back as +3 m walls water flows around. Grid 836 × 1440 = ~1.2 million 30 m cells, EPSG:32644 (UTM 44N).
-2. **Water.** A 2D local-inertial shallow-water solver (Bates et al. 2010, the LISFLOOD-FP formulation) in Python/numba: adaptive timestep (CFL 0.5), Froude cap, donor-cell outflow limiter. **Mass error 0.000% on every run.** Rain is a source term; drains are one uniform capacity (10 mm/h, a stated assumption) on urban cells; infiltration on pervious land; sea held at mean or high tide; land edges are free outfalls except where the Adyar enters. ~15 min per storm on this 2-core laptop.
-3. **Storms (16 runs).** 12 design storms (50, 100, 150, 200, 300, 400 mm in 24 h, front-loaded, each at mean and high tide) and real ones:
-   - **1–2 Dec 2015**, 374 mm, run twice: rain only, and rain + the **Chembarambakkam reservoir release** (inflow at the Adyar's upstream edge, CAG/PWD audit timeline: 10,000 → 12,000 → 20,960 → 29,000 cusecs, 29,000 held 21 h; a documented assumption).
-   - **Cyclone Michaung 2023**, 415 mm (IMD Meenambakkam).
-   - **Cyclone Fengal 2024**, 114 mm (IMD bulletin).
-   - Storm timing from ERA5 (via Open-Meteo), scaled to IMD totals.
-4. **Outputs per storm:** max depth, time to 15 cm, hourly depth frames.
-5. **Per street:** 168,156 street pieces, each with an hour-by-hour depth series, worst depth (p90 of its samples) and the hour it passes 15 cm; a "pre-wet" flag when the model already holds ≥5 cm there before the rain (low ground beside channels).
-6. **Features:** a 162,067-node / 206,223-edge road graph with per-storm peak and hourly edge depths; **168 dry-parking candidates** (122 flyovers, 34 open grounds, 12 multi-storey); **46 major hospitals** (campus ≥4,000 m² or 100+ beds); a 8,427-name local gazetteer.
-7. **Cross-check (Stage B):** ANUGA (Geoscience Australia) on a 103,159-triangle mesh over Velachery and Pallikaranai, same terrain and 200 mm storm, first 14 h.
-8. **Validation** against 2015 citizen reports on held-out wards (section 5).
-9. **Export:** depth PNG frames (sea masked), terrain-RGB tiles, street JSON tiles (288 tiles of 2 km), routing binaries, `proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `places.json`.
+1. **Ground.**
+   - The Copernicus GLO-30 elevation model (30 m) includes rooftops and trees.
+   - We removed **371,679** OpenStreetMap buildings, tree canopy (ESA WorldCover), bridges and flyovers, and other tall objects, then filled and filtered the gaps.
+   - We carved waterways by type (rivers 2 m, canals 1.5 m, streams 0.6 m, drains 0.4 m) and capped fake closed pits at 1 m.
+   - Dense buildings go back as +3 m walls that water flows around.
+   - Grid: 836 × 1440 ≈ 1.2 million cells, EPSG:32644.
+2. **Water.**
+   - A 2D local-inertial shallow-water solver (Bates et al. 2010) in numba: CFL 0.5, a Froude cap, and a donor-cell outflow limiter. **Mass error 0.000% on every run.**
+   - Rain is added to every cell. Drains are one uniform capacity (10 mm/h, a stated assumption). Water soaks into pervious land.
+   - The sea is held at mean or high tide. The edges of the box let water out, except where the Adyar enters.
+   - About 15 min per storm on a 2-core laptop.
+3. **Storms (16 runs).**
+   - 12 design storms: 50–400 mm in 24 h, front-loaded, each at mean and high tide.
+   - 1–2 Dec 2015, 374 mm, run with and without the **Chembarambakkam release** (CAG/PWD audit timeline, peak 29,000 cusecs held 21 h; a documented assumption).
+   - Cyclone Michaung 2023, 415 mm; Cyclone Fengal 2024, 114 mm.
+   - Storm timing from ERA5, scaled to IMD totals.
+4. **Per street:** 168,156 street pieces, each with an hourly depth series, worst depth (p90), the hour it passes 15 cm, and a pre-wet flag.
+5. **Features:**
+   - a 162,067-node / 206,223-edge road graph with peak and hourly edge depths;
+   - 168 dry-parking candidates (122 flyovers);
+   - 46 major hospitals;
+   - an 8,427-name place list.
+6. **Navigation data** (`pipeline/05b_navigation.py`, aligned edge by edge with the graph):
+   - one-way flags on 20,244 edges;
+   - roundabouts: 248 edges;
+   - tunnels/underpasses closed in rain: **280 edges**, including 47 OSM pieces named "Subway"/"Underpass" that were not tagged as tunnels;
+   - slip roads: 1,038;
+   - road numbers on 11,207 edges;
+   - 546 points of interest (276 pharmacies, 199 fuel, 66 police, 5 fire).
+7. **Cross-check:** ANUGA on a 103,159-triangle mesh over Velachery and Pallikaranai.
+8. **Validation** on held-out wards (section 5).
+9. **Export:**
+   - depth PNG frames, terrain tiles, street JSON tiles (288 × 2 km), routing binaries;
+   - `proof.json`, `runs.json`, `hospitals.json`, `parking.json`, `places.json`, `pois.json`;
+   - the **zoom-14 basemap** (7.1 MB instead of 16.9 MB; used online too);
+   - **`offline/manifest.json`**: 361 core files, 31.7 MB raw, 18.6 MB gzipped, versioned.
 
 ### 4.3 The live part (AWS)
 
-- **forecast-check Lambda** (EventBridge Scheduler, every 3 h): Open-Meteo hourly rain for Velachery, T. Nagar, Anna Nagar, Tambaram → 24 h mean → the two nearest modelled storms and blend weights → `current.json` on S3 → compares each subscribed street's risk band with the last run → Bedrock writes two sentences from the model's numbers → SNS publish with message attribute `segment_id`. Pre-wet streets get no change alerts (they would flap).
-- **subscribe Lambda:** email + street → DynamoDB → SNS email subscription with a filter policy on `segment_id` (the person confirms by email).
-- **assistant Lambda:** Strands Agents SDK on Bedrock, six tools: `get_street_risk`, `find_dry_parking`, `safe_route`, `hospital_status`, `current_forecast`, `model_limits`. Every number in the reply is checked against tool outputs.
-- **geocode Lambda:** Amazon Location Places v2 (biased to Chennai), falls back to OSM Nominatim and says which answered. Without the API the app searches its local gazetteer.
+- **forecast-check Lambda** (EventBridge Scheduler, every 3 h):
+  1. reads Open-Meteo hourly rain for Velachery, T. Nagar, Anna Nagar and Tambaram;
+  2. takes the 24 h mean and picks the two nearest modelled storms;
+  3. writes `current.json` to S3;
+  4. compares each subscriber's street risk band with the last run;
+  5. Bedrock writes two sentences from the model's numbers, then SNS publishes with `segment_id`.
+- **subscribe Lambda:** email + street → DynamoDB → an SNS email subscription with a filter policy on `segment_id`.
+- **assistant Lambda:** Strands Agents on Bedrock with six model tools (`get_street_risk`, `find_dry_parking`, `safe_route`, `hospital_status`, `current_forecast`, `model_limits`). Numbers in its replies are checked against tool output.
+- **geocode Lambda:** Amazon Location Places v2 (biased to Chennai), with a Nominatim fallback.
 
-### 4.4 The browser
+### 4.4 In the browser (and offline)
 
-- MapLibre GL JS 6: Protomaps dark basemap from one PMTiles file, `raster-dem` terrain (terrain-RGB tiles), colour-relief + hillshade, extruded buildings coloured by height, sky and fog.
-- three.js custom layer: one water mesh draped on the terrain; hourly depth textures cross-faded in the shader (`mix`); depth colour ramp, 30 cm line, fresnel, glints, sea mask, flow map; drawn without depth test so it never flickers by camera angle. PNG decoding in a Web Worker; render-on-demand map; flow animates ~30 fps only when zoomed in and recently touched.
-- Rain: screen-space Canvas2D streaks in 3 parallax layers, following hourly rainfall.
-- Routing: A* in the browser over the road graph; per-mode limits (cars 30 cm, two-wheelers 15 cm today); "leave by" = latest hour a dry route exists, using hourly edge depths; "no practical dry route" when the detour is >3× or >+4 km.
-- Camera: three-phase travel (pull up, cross the city facing the target, descend), landing pulse, settling orbit; any touch cancels.
+- **Map:**
+  - MapLibre GL JS 6 with a Protomaps basemap (zoom-14 PMTiles), raster-dem terrain, colour-relief, hillshade, 3D buildings.
+  - A three.js water layer blends hourly depth frames on the GPU.
+  - Canvas rain; PNG decoding in a worker; the map redraws only when something changes.
+- **Service worker** (`web/src/sw.ts`; vite-plugin-pwa 1.3.0, Workbox 7.4.1, classic):
+  - precaches the app shell (50 entries, 3.7 MB: JS, MapLibre worker, CSS, fonts, map glyphs, icons);
+  - serves `hg-pack-<version>` first, then `hg-seen` (what you looked at; 900 entries, 30 days);
+  - fetches `current.json` network-first with a 4 s timeout;
+  - answers basemap byte ranges from the saved file.
+- **Save for offline** (`offline/pack.ts`):
+  - up to 3 places; street tiles within 3 km + 600 m;
+  - every storm's street answers;
+  - the graph with all storms' depths, plus hourly depths for tonight's forecast and the three replays;
+  - terrain, water meta, parking, hospitals, places, POIs, the forecast.
+  - It resumes after interruption and is versioned (the old pack is kept until the new one is complete); it asks the browser not to evict it (`persist()`).
+- **Navigation** (`lib/nav.ts` in a Web Worker):
+  - time-dependent search; each edge is judged at the hour you reach it, looking one hour ahead, using the worse storm of a blend;
+  - limits 10/10/20 cm; penalty 1 + 3(D/limit)² from 5/5/10 cm; road-class weights prefer main roads;
+  - subways closed in rain; one-way rules for vehicles.
+  - Destinations: dry parking (dry in every storm of the blend), hospitals, high ground (a main-road junction whose roads stay under 5 cm all storm), saved places.
+  - The card's "move your car by" decision uses the same router (latest hour a car route exists).
+- **Directions** (`lib/directions.ts`):
+  - legs by road name; GraphHopper turn thresholds;
+  - "take the 2nd left" counting real side streets, not driveways, capped at the third;
+  - roundabout exits; stretches under 15 m folded into the next instruction.
+- **Live** (`ui/NavLive.tsx`): `watchPosition`, snapping to the route ahead, off-route replanning (50 m, or 30 m on foot, plus the GPS error, 3 fixes), `speechSynthesis`, screen wake lock, and a preview mode.
 
 ---
 
 ## 5. Numbers we may quote (with caveats)
 
-### 5.1 Validation (the honest headline)
+### 5.1 Validation: the honest headline
 
-**The test:** on GCC wards **never used for tuning** (even-numbered wards; odd wards were the tuning half), pick a street residents reported flooded in Dec 2015 and one they did not. How often does the model put more water on the reported one? (A rank test that cannot be gamed by flooding more.)
+**The test:** on GCC wards **never used for tuning** (the even-numbered wards), pick a street residents reported flooded in Dec 2015 and one they did not. How often does the model put more water on the reported one?
 
 | Map | Score | 95% range (resampling whole wards) |
 |---|---|---|
-| **HighGround model** (2015 rain + release) | **53%** (0.532) | 51% to 55% |
-| Coin toss / random map | 50% (random map scored 49%) | |
+| **HighGround model** (2015 rain + release) | **53%** | 51% to 55% |
+| Coin toss / random map | 50% (random map 49%) | |
 | Low ground alone | 47% | 41% to 51% |
 | Distance to the nearest canal or river | **56%** (better than the model) | 53% to 60% |
 
-- **Verdict, word for word: "slightly better than chance."** Quote it together; never quote 53% alone.
-- 3,200 reported street segments in the held-out wards (27,970 unreported); 7,894 reported segments citywide.
-- **Rain vs river:** rain-driven streets 54%; river-driven streets (within 500 m of the Adyar or Cooum) **51% without the reservoir release, 53% with it**: the release matters by the river.
-- Satellite (NRSC 2015) flood extent: the model covers 33% of it; a random map of the same size 31%; the lowest ground of the same size 21%.
-- GCC's own 2015 flood hotspots (327 points): model 53%, low ground 55%, nearest channel 57%, random 49%.
-- Ward level: weak (Spearman 0.11 over 100 wards, not significant).
-- Drain capacity: 10 mm/h is a **stated assumption**: on the tuning half, every value from 0 to 30 mm/h scored the same within error bars.
-- **Withdrawn metric (a good story):** our first score ("share of reported streets the model floods") said 33% vs 19% for an elevation map. A reviewer showed a random speckle of the same size scores 50% on it: it rewards patchy maps. We withdrew it.
+- **Verdict, word for word: "slightly better than chance."** Never quote 53% alone.
+- **Sample:** 3,200 reported street segments in the held-out wards (27,970 unreported); 7,894 reported citywide.
+- **The release matters by the river:** rain-driven streets score 54%. River-driven streets score **51% without the release, 53% with it**.
+- **NRSC satellite extent:** the model covers 33% of it; a random map of the same size covers 31%; the lowest ground covers 21%.
+- **GCC 2015 hotspots (327):** model 53%, low ground 55%, nearest channel 57%, random 49%.
+- **Ward level:** Spearman 0.11, not significant.
+- **Drains:** 10 mm/h is a stated assumption; every value from 0 to 30 mm/h scored the same.
+- **Withdrawn metric:** our first score (33% vs 19%) rewarded patchy maps; a random speckle scored 50%. We withdrew it.
 
-### 5.2 Cross-check with a second model
+### 5.2 Second-model cross-check
 
-ANUGA vs our solver, Velachery box, 200 mm storm, first 14 h: **they agree on 73% of the cells where either model has ≥15 cm** (critical success index); depth correlation 0.90; 94% of all cells agree (inflated by shared dry cells, so lead with 73%). Same terrain, so this checks the arithmetic, not the terrain.
+ANUGA vs our solver (Velachery, 200 mm, first 14 h): they agree on **73%** of the cells where either model has ≥15 cm (critical success index). Depth correlation is 0.90. Same terrain, so this checks the arithmetic, not the terrain.
 
 ### 5.3 Storm outcomes
 
-| Storm | Rain | City land ≥15 cm ("too deep for scooters") | Hospitals cut off (of 46) |
+| Storm | Rain | City land ≥15 cm | Hospitals cut off (of 46) |
 |---|---|---|---|
-| 50 mm design | 50 mm / 24 h | 0.9% | — |
 | 100 mm design | 100 mm / 24 h | 2.4% | 0 |
 | 150 mm design | 150 mm / 24 h | 9.5% | — |
 | 200 mm design | 200 mm / 24 h | 17% | 9 |
 | 300 mm design | 300 mm / 24 h | 25% | 15 |
 | 400 mm design | 400 mm / 24 h | 30% | 16 |
-| Dec 2015, rain only | 374 mm | 29% | 15 |
 | Dec 2015, rain + release | 374 mm | 29% | 16 |
 | Cyclone Michaung 2023 | 415 mm | 23% | 15 |
 | Cyclone Fengal 2024 | 114 mm | 3.6% | 0 |
 
-(Mean tide for design storms; high tide differs by under 1 point. "—" = not looked up for this file.) Smaller storms are probably overstated: drains are one uniform assumption.
+Mean tide. Smaller storms are probably overstated, because drains are one uniform assumption.
 
-### 5.4 Scale and performance
+### 5.4 Scale, performance and the new features (measured)
 
-~1.2 million 30 m cells · 371,679 buildings removed from the terrain · 16 storm runs · mass error 0.000% · 168,156 street pieces · 206,223 road edges · 168 dry-parking candidates (122 flyovers) · 46 hospitals · 8,427 searchable names · ~57 fps measured on an integrated-GPU laptop with the water flowing · answer card ~12 s after load · routing ~11 ms median per city-wide trip (measured on the real graph).
+**Scale:**
+- ~1.2 million cells; 371,679 buildings removed; 16 runs; mass error 0.000%;
+- 168,156 street pieces; 206,223 road edges; 168 parking candidates; 46 hospitals.
+
+**Speed:**
+- ~57 fps on an integrated-GPU laptop with the water flowing;
+- the answer card appears ~12 s after load with the opening flight.
+
+**Routing:**
+- median **28–33 ms per plan** in the browser; worst case ~3.4 s (a no-route case that also searches later hours, run in the worker, off the main thread);
+- **36 random trips**, 3 storms × 3 modes × 3 destination kinds: **0** edges over the limit at the reached hour, **0** wrong-way one-ways, **0** subways;
+- directions sweep of 48 trips: 0 back-to-back jogs, 0 subways.
+
+**Offline:**
+- app shell precache 3.7 MB;
+- pack core 18.6 MB gzipped plus the saved street tiles;
+- with only the pack on the phone, the offline gate passes **10/10**, 0 page errors: opens, card, battery-saver map, basemap, plan image, help, route with directions, search.
+- Stored size after saving one place was **~83 MB** (measured before terrain and replay depths were added; a little more now; street files are stored uncompressed).
+
+**Demo streets (Michaung replay, verified in the search box):**
+
+| Street | Card shows | Decision |
+|---|---|---|
+| Dhandeeswaram Nagar 8th Cross Road | 118 cm | Velachery Upper Flyover (600 m) by Tue 1 AM |
+| Velachery Main Road | 116 cm | Phoenix Marketcity Parking (450 m) by Tue 1 AM |
+| Arumugam Road | 106 cm | Velachery MRTS Bridge (350 m) by Tue 1 AM |
 
 ---
 
@@ -207,107 +329,167 @@ ANUGA vs our solver, Velachery box, 200 mm storm, first 14 h: **they agree on 73
 
 | Layer | Tools (versions as installed) |
 |---|---|
-| Frontend | **Vite 8.3.4**, **React 19.3**, **TypeScript**, **MapLibre GL JS 6.13.0** (3D terrain, extrusions, colour-relief, hillshade), **three.js 0.186.1** (custom water layer, GLSL), **PMTiles 4.5.0** + **Protomaps basemaps 5.7.2**, Web Workers, Canvas 2D |
-| Model pipeline | **Python 3.11**, **numba** (solver), NumPy, SciPy, rasterio/GDAL, GeoPandas, pyproj, scikit-image, pandas, pyosmium; **ANUGA 4.0.1** (separate env) |
-| AWS | **S3**, **CloudFront** (OAC, CORS), **Amplify Hosting**, **Lambda** (Python 3.12 ×4), **API Gateway** (HTTP API), **DynamoDB**, **SNS** (filter policy per street), **EventBridge Scheduler** (`rate(3 hours)`), **Bedrock** (Claude Sonnet: alerts + assistant), **Strands Agents SDK** (AWS open source), **Amazon Location Service** (Places v2), **AWS SAM**, **AWS Open Data Registry** (Copernicus DEM, ESA WorldCover), AWS Budgets ($10 alarm) |
-| Testing / tooling | **Playwright** (end-to-end hero test, frame-by-frame review, frame-perfect footage with a virtual clock), **moto** (mocked AWS for Lambda tests), **ffmpeg** (OpenH264), Miniforge/conda, nvm/Node 24 |
-| Data / services | OpenStreetMap (Tamil Nadu extract), Open-Meteo forecast + ERA5, IMD rainfall totals, OpenCity datasets (2015 crowd-sourced flood reports, GCC hazard zones, NRSC 2015 inundation, GCC wards, GCC flood hotspots and stagnation points) |
-| AI agents during the build | Claude Code with reviewer subagents: model-reviewer, design-critic, qa-tester, judge; research agents for creative ideas, offline, navigation and Chennai ground truth |
+| Frontend | **Vite 8.3.4**, **React 19.3**, **TypeScript 6**, **MapLibre GL JS 6.13.0**, **three.js 0.186.1** (custom water layer, GLSL), **PMTiles 4.5.0** + **Protomaps basemaps 5.7.2**, Web Workers (image decoding, navigation), Canvas 2D (rain, plan image) |
+| Offline / PWA | **vite-plugin-pwa 1.3.0** (injectManifest), **Workbox 7.4.1** (precaching, routing, expiration, range requests), Cache API, StorageManager (`persist`, `estimate`), web app manifest + icons, **Fontsource** (`@fontsource-variable/anek-latin`, `@fontsource/hind` 5.3.0), self-hosted Protomaps glyphs (Noto Sans) and sprites |
+| Navigation / device APIs | Geolocation `watchPosition`, Screen Wake Lock, Web Speech `speechSynthesis`, Web Share (files and text), `sms:` / `tel:` / WhatsApp links, React portals |
+| Model pipeline | **Python 3.11**, **numba**, NumPy, SciPy, pandas, rasterio/GDAL, GeoPandas, pyproj, scikit-image, **pyosmium**, **pmtiles** (Python, basemap cut); **ANUGA 4.0.1** (separate env) |
+| AWS (coded, not yet deployed) | **S3**, **CloudFront** (OAC, CORS, gzipped routing binaries), **Amplify Hosting** (PWA headers: `sw.js`/`index.html` no-cache, assets immutable; rewrite rule fixed for `.mjs`/`.pbf`/`.webmanifest`), **Lambda** (Python 3.12 ×4), **API Gateway** (HTTP API), **DynamoDB**, **SNS** (filter policy per street), **EventBridge Scheduler** (`rate(3 hours)`), **Bedrock** (Claude Sonnet: alerts + assistant), **Strands Agents SDK**, **Amazon Location Service** (Places v2), **AWS SAM**, **AWS Open Data Registry** (Copernicus DEM, ESA WorldCover), AWS Budgets ($10 alarm) |
+| Testing / tooling | **Playwright 1.64** (hero test; offline gate; route rules; directions sweep; navigation UI, live, phone and demo-street checks; frame-perfect footage with a virtual clock), **moto** (mocked AWS), **ffmpeg** (OpenH264; rough cut), oxlint, Miniforge/conda, nvm/Node 24 |
+| Data / services | OpenStreetMap (Tamil Nadu extract), Open-Meteo forecast + ERA5, IMD totals, OpenCity datasets (2015 crowd reports, GCC hazard zones, NRSC 2015 extent, GCC wards, hotspots, stagnation points) |
+| AI during the build | Claude Code with reviewer subagents (model-reviewer, design-critic, qa-tester, judge) and research agents (creative ideas, offline web tech, flood navigation, Chennai ground truth) |
 
-### 6.2 Added for offline and navigation (built Sun 11 Oct)
+### 6.2 Planned (will be used), in priority order
 
-| Purpose | Tool |
-|---|---|
-| Service worker / PWA | `vite-plugin-pwa` 1.3.0 (injectManifest) + Workbox 7.4.1 |
-| Offline basemap | basemap cut at zoom 14 with the `pmtiles` Python package (7.1 MB, used online too); the service worker answers its byte ranges from the saved copy (`workbox-range-requests`) |
-| Offline storage | Cache API (`hg-pack-<version>`, `hg-seen` with `workbox-expiration`) + `navigator.storage.persist()`/`estimate()` |
-| Offline search | the existing local place list (8,427 names) works offline; typo-tolerant search not added |
-| Self-hosted fonts | `@fontsource-variable/anek-latin`, `@fontsource/hind` 5.3.0; Protomaps glyphs (Noto Sans) and sprites in `web/public/basemap-assets/` |
-| Navigation | time-dependent search in a Web Worker (`lib/nav.ts`), own directions generator (`lib/directions.ts`, GraphHopper turn thresholds), OSM one-way/roundabout/tunnel flags (`pipeline/05b_navigation.py`), Geolocation `watchPosition`, Screen Wake Lock, Web Speech `speechSynthesis`, Web Share (files), canvas image of the plan |
-| AWS additions | offline pack files on S3/CloudFront with a version manifest; routing binaries gzipped at rest; Amplify custom headers (service worker never cached, assets immutable) and a fixed rewrite rule. Later: SACHET CAP official warnings via Lambda, Web Push (VAPID in SSM), AWS End User Messaging SMS (needs TRAI DLT) |
+| What | Tool / service | Why |
+|---|---|---|
+| Official warnings in the app and in every offline pack | **Lambda** ingests NDMA **SACHET CAP** RSS (IMD Chennai alerts; the feed has no CORS, so a server is required) into `current.json` | Point to official channels, keep them offline |
+| Push "your street's risk changed" to phones | **Web Push** from the forecast Lambda (pywebpush 2.5.0, VAPID key in **SSM Parameter Store**, subscriptions in DynamoDB); Periodic Background Sync on Android | Updates reach offline packs before the towers go |
+| Relief centres as destinations | GCC relief-centre list (OpenCity PDF, Oct 2024) geocoded with **Amazon Location**, spot-checked, labelled "call 1913 to check it is open" | The most-asked destination in floods |
+| Typo-tolerant offline search | uFuzzy 1.0.19 (3.9 KB) with name normalisation (Velacheri/Velachery…) | Search works offline for misspellings |
+| Smaller stored packs | `CompressionStream` in the pack downloader | ~83 MB → ~15–20 MB stored |
+| Tamil (and Hindi) | i18n of all copy; Noto Sans Tamil glyphs | About 18.5% of Tamil Nadu speaks English |
+| SMS alerts | **AWS End User Messaging SMS** after TRAI DLT registration (needs a registered entity) | Feature phones, data outages |
+| Voice line | **Amazon Connect** IVR (Indian numbers take weeks) | No smartphone needed |
+| Screen-off navigation | Native wrapper (Capacitor) | Web pages pause GPS when the screen is off |
+| Better hazard | Depth × velocity per edge from the solver (it already computes flux); citywide "move your car by" layer precomputed in **Lambda** to S3 | Safer walking limits; the map as a decision layer |
+| Better terrain | Revisit the v4 changes (grey opening, bank-level channels) with a new pre-registered test; finer DEM if one becomes open | Fix the Velachery/T. Nagar failure |
+| Crowd reports (after moderation design) | Reports that can only make routes more cautious, photo required, 3 h expiry | Ground truth during storms |
 
 ---
 
 ## 7. Honesty: limits, claims to make, claims to avoid
 
-**Limits (must appear in the app, video or page):**
-- 30 m satellite terrain with buildings and trees removed by approximation: kerbs, gates, culverts and small dips are invisible.
-- Drains are one uniform capacity (10 mm/h), an assumption, not a drain network. Smaller storms are probably overstated.
-- The model does not reproduce GCC's finding that Velachery floods far more than T. Nagar; its flooding follows small hollows in the 30 m terrain. Some places that flooded (e.g. Pallikaranai and Kotturpuram streets) read dry; don't use them as demo addresses.
-- The 2015 reservoir release is modelled from the CAG audit timeline; other tanks are not included.
-- No storm surge; rain is uniform across the city in each scenario. Some low ground beside channels holds water before the storm starts (flagged on the card).
-- Underpasses are invisible to 30 m terrain.
-- English only (about 18.5% of Tamil Nadu residents speak English; official tools are Tamil-first).
+**Limits** (must appear in the app, video or page):
+- 30 m satellite terrain: kerbs, culverts, small dips and **underpasses are invisible** (subways are closed in rain by name instead).
+- Drains are one uniform 10 mm/h assumption; smaller storms are probably overstated.
+- The model does not reproduce GCC's finding that Velachery floods far more than T. Nagar. Some flooded places read dry; don't demo Pallikaranai or Kotturpuram.
+- The 2015 release is modelled from the CAG timeline. There is no storm surge, and rain is uniform across the city.
+- Routes avoid streets **the model expects** to flood. They cannot see fallen trees, live wires, open drains or closures.
+- Offline answers are as of the last saved forecast; nothing is live offline.
+- English only.
 - **Not an official warning. Follow GCC, IMD and TNSDMA advisories. In danger, call 112.**
 
-**Claims to make:** street-by-street answers in plain words; tested honestly on held-out wards, and we show the modest result; an independent second model agrees on 73% of the flooded area; built for residents; AWS-native; open data and open-source tools; email alerts (SMS coming: Indian SMS needs TRAI DLT registration).
+**Claims to make:**
+- street-by-street answers and decisions in plain words;
+- tested honestly on held-out wards, and we show the modest result;
+- an independent second model agrees on 73% of the flooded area;
+- routes that avoid modelled water, by mode, offline;
+- AWS-native; open data, open-source tools;
+- email alerts (SMS coming; needs DLT).
 
-**Claims to avoid:** "accurate", "predicts exactly", "official", "better than CFLOWS", "the only street-level forecast", "real-time flood model" (the model is precomputed; the forecast check is live), "AI predicts floods" (the AI only explains the model's numbers), "calibrated", "safe route" (say "avoids streets our model expects to flood"), flyover parking is "allowed", SMS alerts as working, any validation number without its caveat. For offline (if built): no "works on every phone", no "live updates during an outage".
+**Claims to avoid:**
+- "accurate", "predicts exactly", "official", "better than CFLOWS", "the only street-level forecast";
+- "real-time flood model" (the model is precomputed; the forecast check is live);
+- "AI predicts floods" (the AI only explains the model);
+- "calibrated";
+- **"safe route" or "dry route"** (say "a route that avoids streets our model expects to flood");
+- "flyover parking is allowed";
+- "works on every phone offline" (iPhone must add it to the home screen);
+- "live updates during an outage";
+- SMS or Cell Broadcast as working;
+- any validation number without its caveat.
 
 ---
 
 ## 8. What fought back (for the blog and the video)
 
-1. **Satellite elevation is full of fake lakes.** Closed hollows in the 30 m data could hold 124 million m³, about 70% of a whole 200 mm storm. Fixes: cap artificial hollows at 1 m, carve drains by type (a street drain is not the Adyar), free-outfall edges so valleys drain.
-2. **Channels leaked before the rain.** Filling rivers to their spill level flooded ~2% of the city at 6 PM in every storm. Caught while picking demo streets; fixed (start at the measured water surface); everything rerun.
-3. **Our first validation metric was wrong, and a reviewer caught it.** It rewarded patchy maps (random speckle scored higher than the model). We withdrew it, switched to the ranking test, and stopped calling the drains "calibrated".
-4. **A 2-core laptop.** First solver: 35 min per storm. Vectorised float32 kernels and a Halley-iteration cube root: ~11 min. A review then found sloshing at the original timestep (peaks inflated up to 1.6 m); a halving test fixed CFL at 0.5 (~15 min per storm).
-5. **The model's edges leaked.** A third of the 2015 release ran out of the west edge; at high tide the sea ran through Ennore. Both fixed.
-6. **The sea drawn as floodwater** in high-tide frames. Masked explicitly in export and shader.
-7. **A better terrain (v4) that we did not ship.** We wrote the adoption rule before the run; v4 missed one condition (flooded land in GCC moderate-plus zones 23.7% vs 24.4%), so v3 stayed. Pre-registration over wishful thinking.
-8. **Frontend lag** turned out to be rain forcing full-map redraws and PNG decoding on the main thread; fixed with a separate rain canvas, render-on-demand, and a decode worker.
-9. **"Nothing animates"** on a teammate's laptop: the desktop had animations turned off, so the browser asked for reduced motion and the app skipped everything. Now it offers "Play animations" and remembers the choice.
+1. **Satellite elevation is full of fake lakes.** Closed hollows could hold 124 million m³, about 70% of a 200 mm storm. We capped them, carved drains by type and opened the edges.
+2. **Channels leaked before the rain.** About 2% of the city was flooded at 6 PM in every storm. Fixed, and everything rerun.
+3. **Our first validation metric was wrong.** It rewarded patchy maps (random noise beat the model). A reviewer caught it; we switched to a ranking test and stopped calling the drains "calibrated".
+4. **A 2-core laptop.** 35 → ~11 min per storm. A review then found sloshing, so CFL is 0.5 (~15 min).
+5. **The model's edges leaked** (a third of the 2015 release; the sea through Ennore). Fixed.
+6. **The sea was drawn as floodwater** in high-tide frames. Masked.
+7. **A better-looking terrain (v4) we did not ship.** The rule was written before the run; v4 missed one condition, so v3 stayed.
+8. **Lag** came from rain forcing full-map redraws and PNG decoding on the main thread. Fixed with a separate canvas, render-on-demand and a decode worker.
+9. **"Nothing animates"** on a laptop with desktop animations off. The app now offers "Play animations".
+10. **Offline found two deploy-breaking bugs before any deploy:**
+    - Amplify's rewrite rule would have served MapLibre's `.mjs` worker as the web page, so the map would never have started.
+    - With only the saved pack, the map never finished loading because terrain tiles were missing.
+11. **OpenStreetMap splits a street into pieces.** The top demo street read 118 cm on one piece and 0 cm on the next. Search now answers for the street's deepest stretch and says so.
+12. **47 of 69 subway pieces weren't tagged as tunnels.** Routes went through Madley and Aranganathan subways until they were closed by name.
+13. **The card and the route disagreed** ("by 2 AM" vs "under water at 2 AM") because they used different rules. The card's decision now comes from the navigation router.
 
 ---
 
 ## 9. Reviews and QA (process)
 
-After every piece of work a reviewer agent ran, and every blocker and major was fixed:
-- **model-reviewer** (hydrology): withdrew the gameable metric; fixed the release leak, sloshing (CFL 0.5), the sea short circuit, the pre-storm mask hiding deep riverside streets, and "leave by" using display textures instead of model-grid depths; insisted on honest wording (CSI, ward bootstrap) and disclosure of the Velachery/T. Nagar failure.
-- **design-critic**: first 5 seconds, water "draining then rising", contour clutter, number vs hour mismatch, email above the fold, deep-water colour, time-lapse captions, What-if range, basemap noise, mobile layout.
-- **qa-tester**: terrain never loaded (URL encoding), crash on an empty scenario, rejected hospitals layer, a leave-by race on storm switch, coastal roads reading a constant 50 cm at high tide, wording.
-- **judge**: scores and the top suggestion (deploy and film the real email and assistant; time-aware routing was built in response).
-- Tests: Playwright hero flow 9/9 OK; storm switch, time-lapse, leave-by, reduced motion, production preview, camera angles; Lambda flow subscribe → forecast-check → SNS → filtered delivery passes against moto.
+After each piece of work a reviewer ran, and every blocker and major was fixed. Full logs are in PROGRESS.md.
+
+**model-reviewer (×2):**
+- withdrew the gameable metric; fixed the release leak, sloshing, the sea short circuit and the pre-storm mask;
+- made "leave by" use model-grid depths;
+- insisted on honest wording and on disclosing the Velachery/T. Nagar failure.
+
+**design-critic (×3).** Latest round on offline and navigation, 2 blockers and 5 majors:
+- a practice-plan band and date on shared plans;
+- wire and drain warnings in the live banner;
+- a shorter card with "Take me there";
+- card and route agreeing;
+- no "safe/dry route" wording;
+- a glanceable banner;
+- the Go panel replacing the card body.
+
+**qa-tester (×5).** Latest round on offline and navigation, 1 blocker and 9 majors, all fixed:
+- the pack now includes terrain and replay depths, so it opens with nothing else cached;
+- honest messages for streets that weren't saved;
+- failed fetches are retried;
+- subways closed by name;
+- cleaner directions;
+- a banner when there is no route;
+- battery-saver notes;
+- the card's depth used in navigation.
+
+**judge (×2).** Top suggestions acted on: time-aware routing (#1); search fix, verified demo streets, footage and rough cut (#2).
+
+**Test scripts** (`web/tests/`):
+
+| Script | What it checks |
+|---|---|
+| `hero.mjs` | The hero flow (9/9) |
+| `offline.mjs` | The offline gate, pack-only, 10/10 |
+| `route_rules.mjs` | Routing rules |
+| `directions_sweep.mjs` | Directions quality across many trips |
+| `nav_ui.mjs`, `nav_live.mjs` | Navigation UI and live directions |
+| `mobile_new.mjs` | Phone layout |
+| `demo_streets.mjs` | Demo streets via the real search box |
+| `reduced_motion.mjs` | Devices that ask for less motion |
+| `record_frames.mjs` | The footage recorder |
+
+The Lambda flow is tested against moto in `infra/tests/test_lambdas_moto.py`.
 
 ---
 
 ## 10. Repository map
 
 ```
-CLAUDE.md                 original spec (read first)
-PROGRESS.md               engineering log, decisions, FOR THE USER steps
-README.md                 public overview + run instructions
+CLAUDE.md                     original spec · PROGRESS.md engineering log · README.md public overview
 pipeline/
-  00_fetch.py             DEM tiles, OSM, WorldCover, validation KMLs, ERA5 timing
-  01_condition.py         bare-earth terrain, buildings, waterway burn, land cover
-  02_fast_model.py        local-inertial 2D solver (numba)
-  03_anuga_velachery.py   ANUGA cross-check
-  04_streets.py           per-street depth series, worst depth, time to 15 cm, pre-wet flag
-  05_features.py          road graph + edge depths (peak, hourly), parking, hospitals, gazetteer
-  06_validate.py          held-out ranking test, baselines, NRSC/GCC checks -> proof.json
-  07_export_tiles.py      depth PNG frames, terrain-RGB, runs.json, upload layout
-  gates.py                scripted phase gates (p1, p2, p3)
-  config.yaml             bbox, CRS, storms, release hydrograph, thresholds
-  run_all.sh, post_runs.sh, v4_chain.sh, v4_decision.py, common.py, scoring.py
+  00_fetch.py … 07_export_tiles.py   data → terrain → model → streets → graph/parking/hospitals → validation → tiles
+  05b_navigation.py           one-way/roundabout/tunnel(+named subway)/slip flags, road numbers, POIs (aligned with the graph)
+  08_offline_assets.py        zoom-14 basemap cut + offline/manifest.json (versioned pack list)
+  gates.py, config.yaml, run_all.sh, post_runs.sh, v4_*.py/sh, common.py, scoring.py
 infra/
-  template.yaml           SAM: S3, CloudFront, DynamoDB, SNS, HTTP API, 4 Lambdas, Scheduler, Amplify
-  deploy.sh               one-command deploy (budget alarm, Bedrock model pick, sam deploy, upload, Amplify)
-  functions/{subscribe,forecast_check,assistant,geocode}/app.py
-  layers/common/python/hg.py   shared: nearest street, blend, risk bands, parking, hospitals, A*, limits
-  layers/strands/         Strands Agents SDK layer (py3.12 manylinux)
-  tests/test_lambdas_moto.py
+  template.yaml               SAM: S3, CloudFront, DynamoDB, SNS, HTTP API, 4 Lambdas, Scheduler, Amplify (+ PWA headers)
+  deploy.sh                   one command: budget, Bedrock model pick, sam deploy, upload (gzipped graph), Amplify
+  functions/{subscribe,forecast_check,assistant,geocode}/app.py · layers/common/python/hg.py · tests/
 web/
-  src/App.tsx             screens, opening, motion offer
-  src/map/                MapView (camera, controls, peek, pulse, orbit, drawLine), style (night palette)
-  src/water/              WaterLayer (three.js), shaders, RainOverlay
-  src/screens/            Tonight, WhatIf, Proof, Hospitals, About
-  src/ui/                 Search, Timeline, Timelapse, DepthGlyph, Legend, Readout, Subscribe, Assistant
-  src/lib/                data (fetch + decode worker), routing (A*, leave-by), streets, scenario, words, geo
-  tests/                  Playwright: hero, record_frames (footage), storm_switch, timelapse, angles, ...
-data/out/web/             everything the site serves (symlinked as web/public/data)
-docs/                     this audit, offline/navigation plan, landing context (+PDF), demo guide, blog draft,
-                          architecture.png, landing-assets/, ideas/creative_research.md
-review/                   screenshots and reports per phase (p1, p2, p5, p5-dev, qa, design, model-review, judge)
+  src/App.tsx, main.tsx       screens, opening, online status, battery saver, service worker registration
+  src/sw.ts                   service worker (precache, packs, forecast, basemap ranges)
+  src/offline/                pack.ts (save/update/remove), status.ts (online probe, forecast age), register.ts
+  src/map/                    MapView (camera, layers, battery saver, route framing), style (night palette, self-hosted glyphs)
+  src/water/                  three.js water layer, shaders, rain
+  src/screens/                Tonight, WhatIf, Proof, Hospitals, About
+  src/ui/                     GoPanel, NavLive, StepIcon, HelpCard, PlanCard, OfflineSave, Search, Timeline, Timelapse,
+                              DepthGlyph, Legend, Readout, Subscribe, Assistant
+  src/lib/                    nav.ts (router), nav.worker.ts, navClient.ts, directions.ts, routing.ts, streets.ts,
+                              data.ts, scenario.ts, words.ts, geo.ts
+  public/basemap-assets/      Noto Sans glyphs + sprites · public/icons/ app icons
+  tests/                      Playwright scripts (section 9)
+docs/                         this audit (+PDF), offline/navigation plan (+PDF), landing context (+PDF), VIDEO_CUT.md,
+                              DEMO.md, blog draft, architecture.png, landing-assets/, video/ (720p rough cut),
+                              make_*.py (PDFs, demo guide, rough cut, architecture)
+review/                       screenshots and reports per phase and review; p5/footage/*.mp4 (full shots, not in git)
+data/                         raw data and model outputs (not in git; served from data/out/web)
 ```
 
 ---
@@ -315,137 +497,139 @@ review/                   screenshots and reports per phase (p1, p2, p5, p5-dev,
 ## 11. How to run
 
 ```bash
-# web, local (data already built)
+# web (data already built)
 cd web && npm install
-npx vite --port 5173                         # dev
-npx vite build && npx vite preview --port 4173   # production build (use this for recording)
-# demo links
-http://127.0.0.1:4173/?replay=michaung2023            # Michaung replay
-http://127.0.0.1:4173/?replay=michaung2023&motion=on  # if the device reduces motion
+npx vite --port 5173                              # dev (no service worker)
+npx vite build && npx vite preview --port 4173    # production build: service worker, offline, recording
+http://127.0.0.1:4173/?replay=michaung2023        # Michaung replay (add &motion=on if the device reduces motion)
 
 # tests
-node tests/hero.mjs http://127.0.0.1:4173/                  # hero flow, screenshots to review/p5
-source pipeline/env.sh && python infra/tests/test_lambdas_moto.py   # Lambda flow vs moto
+HG_QUERY='?replay=michaung2023' node tests/hero.mjs http://127.0.0.1:4173/
+node tests/offline.mjs http://127.0.0.1:4173/          # offline gate (pack only)
+node tests/route_rules.mjs http://127.0.0.1:5173/      # routing rules (dev server)
+node tests/directions_sweep.mjs http://127.0.0.1:5173/
+source ../pipeline/env.sh && python ../infra/tests/test_lambdas_moto.py
 
-# model (long; run under systemd-inhibit so the laptop does not sleep)
-source pipeline/env.sh
-python pipeline/00_fetch.py && python pipeline/01_condition.py
-systemd-inhibit --what=sleep pipeline/run_all.sh      # 16 runs, hours
-python pipeline/06_validate.py && python pipeline/04_streets.py && python pipeline/05_features.py && python pipeline/07_export_tiles.py
-python pipeline/gates.py p1|p2|p3
+# offline / navigation assets after a model re-export
+python pipeline/05b_navigation.py && python pipeline/08_offline_assets.py
 
-# AWS (after the FOR THE USER steps)
+# footage and rough cut
+WARM=1 node tests/record_frames.mjs <opening|search|navigate|timelapse|whatif|proof> http://127.0.0.1:4173/ ../review/p5/footage
+python docs/make_rough_cut.py                          # → review/p5/footage/rough_cut.mp4 + docs/VIDEO_CUT.md
+
+# AWS (after section 16)
 infra/deploy.sh
 ```
 
-Gotcha: after swapping `data/out/web`, restart Vite (its public-file list goes stale and `/data/*` returns index.html).
+Gotchas:
+- After swapping `data/out/web`, restart Vite.
+- Run long jobs under `systemd-inhibit --what=sleep`.
+- Never `pkill -f` a pattern that appears in your own command line.
 
 ---
 
-## 12. Pitch (for a deck, the landing page or a 60-second talk)
+## 12. Pitch (deck, landing page or a 60-second talk)
 
 1. **Hook:** "Every monsoon, Chennai parks its cars on flyovers, because nobody tells residents where the water will go."
-2. **Problem:** official systems warn that a flood is coming; residents still have to guess what that means for their street, their car, their route and their hospital.
-3. **Solution:** type your street; watch tonight's storm rise on a 3D model of the city; get a plain answer: how deep, when it gets too deep for scooters, where to move the car and by when, the way there without crossing water, which hospitals you can still reach, and an email if it changes.
-4. **How:** a real 2D flood model of all of Greater Chennai on open data from AWS, 16 storms precomputed, a live forecast check on AWS every 3 hours, an assistant that can only quote the model.
-5. **Proof, honestly:** tested on wards we never tuned on against 2015 reports: slightly better than chance at street level (53% vs 50%), and we show that on screen; a second independent model agrees on 73% of the flooded area.
-6. **Built on AWS:** S3, CloudFront, Amplify, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Bedrock, Strands Agents, Amazon Location, SAM, AWS Open Data.
-7. **Next:** offline mode for power and network outages (towers down for days in 2015 and 2023), flood-safe navigation on foot / two-wheeler / car, Tamil, SMS once DLT-registered, better terrain.
+2. **Problem:** official systems warn that a flood is coming. Residents still guess what it means for their street, their car, their way out and their hospital. And when the power and towers go, as they did in 2015 and 2023, they're on their own.
+3. **Solution:** type your street and watch tonight's storm rise on a 3D model of the city. You get a plain answer and a decision: how deep, when it's too deep for scooters, "move your car to X by 2 AM". **Take me there** gives a route around the water, on foot, by two-wheeler or by car, with directions. Plus the hospitals you can still reach, and an email if it changes.
+4. **When the network dies:** save your area before the storm. HighGround opens from the phone, still plans a way out, gives the help numbers, and makes a flood plan image for the family group.
+5. **How:** a real 2D flood model of all of Greater Chennai, built on open data from AWS, with 16 storms precomputed. AWS checks the live forecast every 3 hours, and an assistant can only quote the model.
+6. **Proof, honestly:** tested on wards we never tuned on against 2015 reports, it is slightly better than chance at street level (53% vs 50%), and we show that on screen. A second, independent model agrees on 73% of the flooded area.
+7. **Built on AWS:** S3, CloudFront, Amplify, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Bedrock, Strands Agents, Amazon Location, SAM, AWS Open Data.
+8. **Next:** official IMD warnings in the app via SACHET, push alerts, relief centres, Tamil, SMS once DLT-registered, better terrain.
 
 ---
 
 ## 13. The 3-minute video
 
-**Script (spec timings, updated):**
+**Rough cut:** `review/p5/footage/rough_cut.mp4` (1080p) and `docs/video/HighGround_rough_cut_720p.mp4`, 2:30, no audio. The cut list with voice-over lines is in `docs/VIDEO_CUT.md`.
 
-| Time | Shot | Voice-over / caption |
+| Starts | Shot | Voice-over |
 |---|---|---|
-| 0:00–0:15 | Still of cars on the Velachery flyover (footage-style) | "Every monsoon, Chennai parks its cars on flyovers, because nobody tells residents where the water will go." |
-| 0:15–1:15 | Opening flight from the Bay of Bengal → Michaung replay → search a Velachery street (pick from `docs/DEMO.md`) → water rises → answer card → "Move your car to X by …" → amber route draws → **Email me if this changes** → **the real SNS email arriving** (trigger from `#admin` → Run and send alerts, 300 mm) | Plain description of each step; name Amazon Location (search), S3/CloudFront (model data), SNS + Bedrock (the email) |
-| 1:15–1:50 | What if: drag to 400 mm, the city floods; Hospitals at 300 mm (15 of 46 cut off) | "At 300 mm, 15 of 46 major hospitals can't be reached by car." |
-| 1:50–2:30 | Proof split-screen; "53% vs a coin toss's 50%"; one sentence on held-out wards; ANUGA 73% | Say the verdict word for word: "slightly better than chance"; "we show you that" |
-| 2:30–3:00 | Architecture diagram (name every AWS service); two limits from About; close on What if dragged back to 50 mm (water recedes) | "Not an official warning. In danger, call 112." |
+| 0:00 | Title cards: flyovers (replace the first with a photo of cars on the Velachery flyover, credited) | "Every monsoon, Chennai parks its cars on flyovers… because nobody tells residents where the water will go." |
+| 0:11 | `opening.mp4`: Bay of Bengal → Velachery, the night plays, the card | Michaung replayed as if tonight; model runs from S3/CloudFront |
+| 0:29 | `search.mp4`: Arumugam Road → 106 cm, "Move your car to Velachery MRTS Bridge (350 m) by Tue 1 AM" | Amazon Location search; the decision |
+| 0:43 | `navigate.mp4`: Take me to dry ground → Preview the drive with directions | "A route that avoids streets the model expects to flood. It works offline." |
+| 1:01 | **SLOT: the real alert email** (#admin → Run and send alerts, 300 mm) | EventBridge → Lambda → Bedrock → SNS |
+| 1:11 | Title card: 712/1,814 feeders, 30% of 42,747 towers; offline stills (battery-saver map, offline route, flood plan) | "When the power goes, the towers go. Saved before the storm, HighGround keeps working." |
+| 1:27 | `whatif.mp4` + Hospitals still | "What if 400 mm fell tonight? At 300 mm, 15 of 46 major hospitals can't be reached by car." |
+| 1:39 | `timelapse.mp4`: Dec 2015 with the release | The 2015 floods hour by hour |
+| 1:53 | `proof.mp4`: the swipe | "53% against a coin toss's 50%: slightly better than chance, and we show it." |
+| 2:03 | **SLOT: Ask HighGround** answering with grounded numbers | Strands Agents on Bedrock |
+| 2:13 | `docs/architecture.png` | Name every AWS service |
+| 2:23 | Close card | "Not an official warning. In danger, call 112." |
 
-**New beat (built; fit it into 1:15–1:50 or trim What if):** "When the power goes, the towers go." Network off (airplane mode on a real Android phone, or DevTools offline on the laptop): HighGround still opens, "Offline", the battery-saver map with streets coloured by depth, **Take me to dry ground · Two-wheeler** draws the amber route around the water with directions, **Preview the drive** plays it, **My flood plan** shared as an image. Caption: "Saved before the storm. Works without internet." Facts to show (sourced in the plan): 712 of 1,814 power feeders off on 4 Dec 2023; 30% of 42,747 towers down on 5 Dec 2023.
-
-**Footage commands (smooth 1080p/30 fps, virtual clock, waits for tiles):**
-
-```bash
-cd web && npx vite build && npx vite preview --port 4173 &
-WARM=1 node tests/record_frames.mjs opening   http://127.0.0.1:4173/ ../review/p5/footage
-WARM=1 node tests/record_frames.mjs search    http://127.0.0.1:4173/ ../review/p5/footage
-WARM=1 node tests/record_frames.mjs timelapse http://127.0.0.1:4173/ ../review/p5/footage
-WARM=1 node tests/record_frames.mjs whatif    http://127.0.0.1:4173/ ../review/p5/footage
-WARM=1 node tests/record_frames.mjs proof     http://127.0.0.1:4173/ ../review/p5/footage
-```
-About 30 s of wall time per second of footage; run under `systemd-inhibit --what=sleep`. Output: `review/p5/footage/<shot>.mp4` plus PNG masters. Still images ready now: `docs/landing-assets/01…10`.
-
-**Demo streets:** `docs/DEMO.md` lists Velachery streets that flood in the Michaung replay (e.g. Dhandeeswaram Nagar 8th Cross Road, 118 cm). Check each in the search box before filming (search may resolve a different segment). Avoid Pallikaranai/Kotturpuram (model reads dry).
+The remaining ~30 s is for voice-over pacing or a real-phone offline beat (airplane mode on an Android phone, after deploy). Re-record any shot with `record_frames.mjs` and rebuild with `docs/make_rough_cut.py`.
 
 ---
 
-## 14. Offline mode and flood-safe navigation (built Sun 11 Oct; plan with sources: `docs/OFFLINE_AND_NAVIGATION_PLAN.md`)
-
-What shipped, measured: offline gate (save → network off → reload → card, battery-saver map, plan image, help, offline search, offline route) passes with 0 page errors; route rules hold on 36 random trips over 3 storms × 3 modes × 3 destination kinds (0 edges over the limit at the reached hour, 0 one-way violations, 0 underpasses), median 33 ms per plan; live directions follow emulated GPS and re-plan after 3 off-route fixes. Stored size after saving one place is about 83 MB (street files are stored uncompressed). Not built: rainfall ladder for an old forecast, typo-tolerant search, Web Push, relief centres (needs geocoding of the GCC PDF), SACHET warnings.
-
-- **Help card** (zero data): tap-to-call 112 (red), 1913, 1070, 1077, 108, 101, Minnagam 94987 94987; "Send my location" pre-filled SMS/WhatsApp.
-- **My flood plan** card: image + text, shared via the phone's share sheet (works phone to phone without internet).
-- **Save for offline:** ~18 MB (app, fonts, zoom-14 basemap 7.1 MB, 3 km of street answers for all 16 storms 2.0 MB, road graph 5.8 MB, edge depths); forecast updates are a 4 KB file; honest "forecast from 6 PM (5 h ago)"; rainfall ladder when stale.
-- **Take me to dry ground:** foot / two-wheeler (default) / car; blocks at 10 / 10 / 20 cm; one-hour look-ahead; underpasses blocked in rain; one-way respected; prefers main roads; turn list; later live GPS turn-by-turn.
-- **Build slices:** Slice 1 offline (~6 h), Slice 2 navigation with turn list (~7 h), Slice 3 live GPS (~5 h). Deploy and the video come first.
-
----
-
-## 15. Open issues and to-do (owner)
+## 14. Open issues and to-do (owner)
 
 | # | Item | Owner |
 |---|---|---|
-| 1 | Create AWS profile `highground` (us-east-1), real `ALERT_TEST_EMAIL` in `.env`, Bedrock Claude Sonnet access | **User** |
-| 2 | `infra/deploy.sh` → live URL; subscribe once, click the SNS confirmation link; `#admin` → Run and send alerts for the real email shot | Claude + user |
-| 3 | Record the 1080p footage (section 13): in progress, then the rough cut | Claude |
-| 4 | Edit the video; voice-over; submit | Teammate 1 |
-| 5 | Blog on AWS Builder Center (from `docs/blog_draft.md`); link in submission | Teammate 1 |
-| 6 | Landing page (context PDF already shared) — apply the positioning update in section 1 | Teammate |
-| 7 | ~~Verify demo streets in the search box~~ done: `docs/DEMO.md` lists only verified streets (search now answers a named street with its deepest stretch) | Claude |
-| 8 | Judge pass at the end; tag `p2` (with the documented place failure) and `p3` | Claude |
-| 9 | README and blog: add the latest UX work (motion offer, rain, flow, camera) | Claude |
-| 10 | Minor: assistant shows a raw error if Bedrock fails; mobile hides the timeline | Claude |
-| 11 | Offline + navigation built; fix reviewer findings; film the new beat | Claude |
-| 12 | Student verification on AWS Builder Center (eligibility) | User |
+| 1 | Create the AWS profile `highground` (us-east-1), put a real `ALERT_TEST_EMAIL` in `.env`, enable Bedrock Claude Sonnet | **User, now** |
+| 2 | `infra/deploy.sh` → live URL; subscribe once and click the SNS confirmation link; film the email and the assistant into the two slots | Claude (deploy) + user (inbox, filming) |
+| 3 | Post-deploy check of the live site: hero, offline on a real Android phone, assistant, email | Claude + user |
+| 4 | Edit the video (voice-over, the two slots, optional flyover photo); submit by 20:00 | Teammate 1 |
+| 5 | Blog: add the offline/navigation paragraph and the "what fought back" items 10–13; publish on AWS Builder Center; link it | Teammate 1 |
+| 6 | Landing page with the positioning update (context PDF sent) | Teammate |
+| 7 | Live URL and video link into README, LANDING_PAGE_CONTEXT, this audit | Claude, after deploy |
+| 8 | Architecture diagram: add the service worker + offline pack box | Claude, optional |
+| 9 | Known minors: a U-turn on a flyover deck when the parking target is the deck; the speckled city view at low zoom (the model's pockets); answer at ~8 s with motion off; English only | Later |
+| 10 | Student verification on AWS Builder Center | User |
+
+---
+
+## 15. Timeline (what was built when)
+
+| When | What |
+|---|---|
+| Fri 9 Oct | Data, terrain, solver, 16 storms, calibration withdrawn → assumption, ANUGA cross-check, validation, SAM stack, first web app, first reviews |
+| Sat 10 Oct | v3 rebuild, v4 test (rejected by rule), UX overhaul (camera travel, plain words, palette, transitions), time-lapse, rain and water fixes, motion offer, landing context |
+| Sun 11 Oct, 00:00–03:05 | Offline (Slice 1), navigation (Slice 2), live directions (Slice 3) |
+| Sun 11 Oct, 07:40–08:45 | Design and QA review fixes |
+| Sun 11 Oct, 08:30–09:40 | Judge #2, search fix, verified demo streets, footage, rough cut |
 
 ---
 
 ## 16. FOR THE USER (only you can do these)
 
-1. `aws configure --profile highground` → access keys for the team's AWS account, region `us-east-1`. (Checked tonight: the profile does not exist yet.)
+1. `aws configure --profile highground`, with access keys for the team's AWS account and region `us-east-1`. (As of 09:45 the profile does not exist.)
 2. Put your real inbox in `.env`: `ALERT_TEST_EMAIL=you@yourdomain` (still the placeholder).
-3. AWS console (us-east-1) → Amazon Bedrock → Model access → enable an Anthropic Claude Sonnet model.
-4. Then run `infra/deploy.sh` (or ask Claude). It creates the $10 budget alarm, deploys the stack, uploads ~200 MB of model outputs, builds and deploys the site, runs the first forecast check, prints the live URL; the admin token for `#admin` is in `data/admin_token`.
-5. Subscribe once from the live site with that email and **click the AWS Notifications confirmation link**.
+3. In the AWS console (us-east-1): Amazon Bedrock → Model access → enable an Anthropic Claude Sonnet model.
+4. Tell Claude. It runs `infra/deploy.sh`, which:
+   - creates the $10 budget alarm;
+   - deploys the stack;
+   - uploads the model outputs, including the offline pack files and the gzipped graph;
+   - builds and deploys the PWA to Amplify;
+   - runs the first forecast check;
+   - prints the live URL. The admin token is in `data/admin_token`.
+5. Subscribe once on the live site with that email and **click the AWS Notifications confirmation link**. Then `#admin` → "Run and send alerts" (300 mm) and film the email.
 6. Verify student status on AWS Builder Center.
 
 ---
 
 ## 17. Attribution lines (required wherever data or the map appears)
 
-- Elevation: Copernicus DEM GLO-30, © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018, provided under COPERNICUS by the European Union and ESA; all rights reserved. Read from the AWS Open Data registry.
-- Land cover: ESA WorldCover 2021 (CC BY 4.0), © ESA WorldCover project / contains modified Copernicus Sentinel data (2021), from the AWS Open Data registry.
-- Map data: © OpenStreetMap contributors (ODbL); basemap by Protomaps.
-- Rainfall forecasts and storm timing: Open-Meteo (CC BY 4.0), including ERA5 reanalysis (Copernicus Climate Change Service).
-- 2015 flood reports: OpenCity, osm-in/flood-map contributors. Flood hazard zones, wards, hotspots: Greater Chennai Corporation via OpenCity. 2015 inundation extent: NRSC via OpenCity.
-- Cross-check model: ANUGA, Geoscience Australia.
+| Source | Credit line |
+|---|---|
+| Elevation | Copernicus DEM GLO-30, © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018, provided under COPERNICUS by the European Union and ESA; all rights reserved. Read from the AWS Open Data registry |
+| Land cover | ESA WorldCover 2021 (CC BY 4.0), © ESA WorldCover project / contains modified Copernicus Sentinel data (2021), from the AWS Open Data registry |
+| Map data | © OpenStreetMap contributors (ODbL); basemap by Protomaps; Noto Sans fonts (OFL) |
+| Rain | Open-Meteo (CC BY 4.0), including ERA5 (Copernicus Climate Change Service) |
+| Validation data | 2015 flood reports: OpenCity, osm-in/flood-map contributors. Hazard zones, wards, hotspots: Greater Chennai Corporation via OpenCity. 2015 inundation extent: NRSC via OpenCity |
+| Cross-check model | ANUGA, Geoscience Australia |
+| News facts used on title cards | The News Minute, The Week/PTI, Deccan Herald (links in section 1) |
 
 ---
 
 ## 18. Glossary (for writing copy)
 
-- **CFLOWS:** Chennai's flood forecasting decision tool for officials (NCCR).
-- **Chennai Flood Monitor (RTFF & SDSS):** the state's public flood forecasting portal (since Oct 2025).
-- **TN-Alert:** Tamil Nadu's official alert app.
-- **Too deep for scooters:** 15 cm; **cars stall:** about 30 cm (the app's display thresholds).
-- **Replay:** a real past storm run through the model and shown as if it started at 6 PM tonight.
-- **Leave by / move your car by:** the latest hour a route to dry parking still avoids water deeper than the vehicle's limit.
-- **Held-out wards:** the even-numbered GCC wards, never used for tuning; all reported results come from them.
-- **Critical success index (CSI):** of the area either model floods, the share both flood.
-- **Cusecs:** cubic feet per second, the unit Chennai news uses for reservoir releases.
-- **Pre-wet street:** low ground where the model already holds ≥5 cm before the rain.
+- **CFLOWS:** Chennai's flood decision tool for officials (NCCR). **Chennai Flood Monitor:** the state's public forecasting portal. **TN-Alert:** the state's alert app.
+- **Too deep for scooters:** 15 cm. **Cars stall:** about 30 cm (the display bands). **Route limits:** 10 cm on foot or two-wheeler, 20 cm by car (stricter on purpose).
+- **Replay:** a real past storm shown as if it started at 6 PM tonight. **Practice plan:** a flood plan made from a replay.
+- **Move your car by:** the latest hour a car route to the dry place still avoids water over the car limit.
+- **Save for offline / pack:** files kept on the phone for chosen places. **Battery saver:** flat map, streets coloured by depth.
+- **Held-out wards:** even-numbered GCC wards, never used for tuning. **CSI:** of the area either model floods, the share both flood.
+- **Cusecs:** cubic feet per second. **Pre-wet street:** low ground the model holds ≥5 cm on before the rain.
