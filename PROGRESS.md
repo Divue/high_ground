@@ -452,3 +452,14 @@ Team action (only they can): AWS profile + Bedrock access + real inbox, then `in
   2. Bedrock through the teammate's account (cross-account role), with the assistant's `temperature` and token-limit settings fixed in the same pass.
   3. Docs still describe our own CloudFront distribution: `docs/architecture.png`, `docs/HIGHGROUND_AUDIT.md`, `docs/LANDING_PAGE_CONTEXT.md`, `docs/VIDEO_CUT.md`, `docs/DEMO.md`, `docs/blog_draft.md`, and the spec in `CLAUDE.md`. The video must not name CloudFront as ours unless Support verifies the account and it is added back.
   4. `data/site.zip` also sits in the data bucket under `deploy/` (private).
+
+### Deployment destroyed on the user's instruction (Sun 11 Oct, ~15:05 IST)
+
+- The user compared live with local, said "I want it exactly as the local", and then "destroy the deployment". What they saw differ was not established: the side-by-side capture (`compare.mjs`, plain address, with and without the reduce-motion device setting) was interrupted before it ran.
+- Removed: the `highground` stack (Amplify app and branch, HTTP API, 4 Lambdas, DynamoDB table, SNS topic, schedule, data bucket with 4,920 objects), both retained Lambda layers (2 versions each) and the 4 Lambda log groups. The address https://main.di6wqd7cpdu8q.amplifyapp.com no longer resolves; a new deploy gets a new address.
+- Still in the account: the SAM artifact bucket (9 objects, 41 MB; keeps the next deploy from re-uploading the layers), the budget alarm `highground-30usd`, and one SNS email subscription in PendingConfirmation (AWS removes unconfirmed ones itself; it cannot be deleted by API).
+- On disk (not in git): `data/site.zip` (the 175 MB bundle that was live), `data/admin_token`.
+- A redeploy is `infra/deploy.sh`: about 300 MB to S3 for the Lambdas and the 167 MB site bundle, roughly 20–30 minutes on this link if nothing drops.
+- Two leads for "exactly as the local", unchecked:
+  1. The viewer's animation choice (`hg-motion`) is stored per address, so on the live address Firefox with GNOME animations off starts with no flight, rain or transitions until "Play animations" is pressed.
+  2. The online check fetches `/data/current.json` with a 5 s limit; on live that request goes through Amplify and a Lambda, and a slow answer makes the app switch to its offline look (flat map, no water, no alerts or assistant).

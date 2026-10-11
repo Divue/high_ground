@@ -8,8 +8,6 @@ Chennai already has CFLOWS, a government flood warning system built for official
 
 Built for **Environmental Hacks** (Bharat Builds Tour, WeMakeDevs × AWS), Heat and Water track.
 
-**Live on AWS:** https://main.di6wqd7cpdu8q.amplifyapp.com
-
 ![Architecture](docs/architecture.png)
 
 ## What is in the box
