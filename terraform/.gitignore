@@ -1,0 +1,6 @@
+# local Terraform state (holds the admin token), provider binaries and build output
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+build/

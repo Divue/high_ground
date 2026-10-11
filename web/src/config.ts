@@ -1,4 +1,4 @@
-// Runtime configuration. In production the data is served with the site (Amplify Hosting) and the API is API Gateway.
+// Runtime configuration. In production these point at CloudFront and API Gateway.
 export const DATA_BASE: string = (import.meta.env.VITE_DATA_BASE as string | undefined) ?? '/data'
 export const API_BASE: string = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 

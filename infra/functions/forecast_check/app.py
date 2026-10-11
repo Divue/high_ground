@@ -91,20 +91,9 @@ def write_alert(street, old, new, info, parking):
 
 
 def handler(event, context):
-    http = event.get("requestContext", {}).get("http", {}) if isinstance(event, dict) else {}
-    if http.get("method") == "GET":
-        # GET /data/current.json: the site reads tonight's forecast through the API (Amplify Hosting passes
-        # the request on), because the file changes with every run and is not part of the published site
-        try:
-            return {"statusCode": 200, "headers": {"content-type": "application/json", "cache-control": "no-store"},
-                    "body": hg._get("current.json").decode()}
-        except Exception as e:
-            print("current.json not readable", e)
-            return {"statusCode": 404, "headers": {"content-type": "application/json"},
-                    "body": json.dumps({"error": "No forecast has been written yet."})}
     body = {}
-    if http or (isinstance(event, dict) and event.get("body")):   # any other web call is the admin "Run now"
-        body = json.loads(event.get("body") or "{}")
+    if isinstance(event, dict) and event.get("body"):
+        body = json.loads(event["body"])
         if body.get("token") != os.environ.get("ADMIN_TOKEN"):
             return {"statusCode": 403, "body": json.dumps({"error": "bad token"})}
     start, pts = forecast()
