@@ -177,14 +177,17 @@ const shots = {
     await waitReady()
     await skip(10)
     await film(2)
-    const h = page.locator('.split-handle, [role=separator]').first()
-    const b = await h.boundingBox().catch(() => null)
+    // swipe the split: model's 2015 flood on the left, the streets residents reported on the right
+    const h = page.locator('.proof-handle').first()
+    const b = await h.boundingBox({ timeout: 5000 }).catch(() => null)
     if (b) {
-      await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.down()
-      for (let i = 0; i <= 2 * FPS; i++) { await page.mouse.move(b.x + b.width / 2 - 500 * (i / (2 * FPS)), b.y + b.height / 2); await film(1 / FPS) }
+      const x0 = b.x + b.width / 2, y0 = Math.min(b.y + b.height / 2, H * 0.6)
+      await page.mouse.move(x0, y0); await page.mouse.down()
+      for (let i = 0; i <= 2 * FPS; i++) { await page.mouse.move(x0 - 420 * Math.sin((Math.PI / 2) * (i / (2 * FPS))), y0); await film(1 / FPS) }
+      for (let i = 0; i <= 3 * FPS; i++) { await page.mouse.move(x0 - 420 + 760 * (0.5 - Math.cos(Math.PI * (i / (3 * FPS))) / 2), y0); await film(1 / FPS) }
       await page.mouse.up()
-    }
-    await film(4)
+    } else console.error('proof: split handle not found')
+    await film(3)
   },
 }
 

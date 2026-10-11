@@ -62,7 +62,7 @@ CUT = [
     ("clip", "whatif.mp4", 8, "What if 400 mm fell tonight?"),
     ("still", "docs/landing-assets/04_hospitals.png", 4, "At 300 mm, 15 of 46 major hospitals can't be reached by car."),
     ("clip", "timelapse.mp4", 14, "The Dec 2015 floods, hour by hour, with the Chembarambakkam release."),
-    ("clip", "proof.mp4", 8, "Did it get 2015 right? On wards we never tuned on: 53% against a coin toss's 50%. Slightly better than chance, and we show it."),
+    ("clip", "proof.mp4", 10, "Did it get 2015 right? On wards we never tuned on: 53% against a coin toss's 50%. Slightly better than chance, and we show it."),
     ("slate", "slot_assistant", 10, "SLOT: Ask HighGround (Strands Agents on Bedrock) answering with grounded numbers."),
     ("still", "docs/architecture.png", 10, "Built on AWS: S3, CloudFront, Amplify, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Bedrock, Strands Agents, Amazon Location, SAM, AWS Open Data."),
     ("slate", "close", 7, "Not an official warning. Follow GCC and IMD advisories. In danger, call 112."),
