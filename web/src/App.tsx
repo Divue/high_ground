@@ -12,6 +12,7 @@ import Tonight from './screens/Tonight'
 import WhatIf from './screens/WhatIf'
 import Assistant from './ui/Assistant'
 import { Legend } from './ui/Legend'
+import { findPlace } from './lib/place'
 import type { Place } from './ui/Search'
 import { useOnline } from './offline/status'
 
@@ -81,8 +82,12 @@ export default function App() {
       if (screenFromHash() === 'tonight') {
         window.setTimeout(() => setTitleOn(false), prefersReducedMotion() ? 0 : 1800)
         // resolves about 2 s before the camera lands, so the water starts rising during the descent
+        // an address typed on the landing page (/app?q=...) is looked up while the camera flies
+        const asked = new URLSearchParams(location.search).get('q')
+        const found = asked ? findPlace(asked).catch(() => null) : Promise.resolve(null)
         await v.openingSequence()
-        setPlace((p) => p ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
+        const hit = await found
+        setPlace((p) => p ?? hit ?? { label: 'Velachery', lon: VELACHERY[0], lat: VELACHERY[1] })
       }
       setIntro(false)
     })

@@ -13,6 +13,7 @@
     "@fontsource-variable/anek-latin": "^5.3.0",
     "@fontsource/hind": "^5.3.0",
     "@protomaps/basemaps": "^5.7.2",
+    "gsap": "^3.12.5",
     "maplibre-gl": "^6.13.0",
     "pmtiles": "^4.5.0",
     "react": "^19.2.8",

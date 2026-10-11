@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'HighGround: Chennai flood answers',
         short_name: 'HighGround',
         description: 'Where floodwater will go tonight in Chennai, street by street, and what to do about it. Works offline once saved.',
-        start_url: '/',
+        start_url: '/app',
         scope: '/',
         display: 'standalone',
         background_color: '#050D12',
@@ -33,7 +33,7 @@ export default defineConfig({
         // .mjs: MapLibre's worker (Workbox's default list misses it, and the map would not start offline)
         globPatterns: ['**/*.{js,mjs,css,html,svg,png,woff2,pbf,json,webmanifest}'],
         // Latin only: Devanagari and Vietnamese font files are never used by an English page
-        globIgnores: ['data/**', '**/node_modules/**', '**/*devanagari*', '**/*vietnamese*'],
+        globIgnores: ['data/**', 'landing/**', '**/node_modules/**', '**/*devanagari*', '**/*vietnamese*'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         rollupFormat: 'iife',            // a classic worker: module service workers are not in every browser yet
       },
