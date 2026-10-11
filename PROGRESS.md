@@ -375,6 +375,6 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 
 ### Live directions, Slice 3 (Sun 02:35–02:55 IST)
 - `ui/NavLive.tsx` (portal banner at the top of the map): one instruction in large type with the distance to it, distance and minutes left, GPS accuracy, the honesty line, Voice on/off, End. Follows `watchPosition` (high accuracy, fixes worse than 50 m ignored), snaps to the route ahead, camera follows with the route's heading (flat in battery saver). Off the route by more than 50 m (30 m on foot) plus the GPS error for three fixes: plans again from there. Spoken prompts (`speechSynthesis`, started from the Start tap) at ~300 m and ~50 m in a vehicle, ~50 m and at the turn on foot; arrival announced. Screen wake lock while it runs (re-acquired when the page is visible again).
-- "Preview the drive": a dot travels the route at 4× the mode's speed, for the demo video and for seeing the way before leaving.
+- "Preview the drive": a dot travels the route at 6× the mode speed, for the demo video and for seeing the way before leaving.
 - Test `web/tests/nav_live.mjs`: preview advances the instruction; emulated GPS at 0/15/30/45% of the route updates instruction and distance; three off-route fixes 300 m away re-plan from there; 0 page errors. Screens `review/p5-dev/nav/10–13`.
 - Web limit (disclosed in the plan): location and voice stop when the screen is off or the tab is hidden.

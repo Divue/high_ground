@@ -123,12 +123,12 @@ export default function NavLive({ mv, coords, steps, dest, mode, simulate, onRer
     return () => navigator.geolocation.clearWatch(id)
   }, [simulate, coords]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // preview: a dot travels the route at the mode's speed, four times faster
+  // preview: a dot travels the route at six times the mode's speed
   useEffect(() => {
     if (!simulate) return
     let a = 0, last = performance.now(), raf = 0, lastShow = 0
     const tick = (t: number) => {
-      a = Math.min(total, a + ((t - last) / 1000) * (m.kmh / 3.6) * 4)
+      a = Math.min(total, a + ((t - last) / 1000) * (m.kmh / 3.6) * 6)
       last = t
       if (t - lastShow > 450 || a >= total) {
         lastShow = t

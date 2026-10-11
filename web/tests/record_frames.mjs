@@ -3,7 +3,7 @@
 // no matter how slow this laptop renders. Frames are encoded with ffmpeg.
 //
 //   node tests/record_frames.mjs <shot> [base_url] [out_dir]
-//   shots: opening | search | timelapse | whatif | proof
+//   shots: opening | search | timelapse | whatif | proof | navigate
 //
 // Run each shot once beforehand (or pass WARM=1) so tiles and data come from the HTTP cache.
 import { chromium } from '@playwright/test'
@@ -136,6 +136,22 @@ const shots = {
     }
     await page.mouse.up()
     await film(3)
+  },
+  // Take me to dry ground by two-wheeler, then the preview drive along the route
+  async navigate() {
+    const url = `${base}?replay=michaung2023`
+    if (process.env.WARM) await warm(url)
+    await startClock()
+    await page.goto(url)
+    await waitReady()
+    await skip(20)
+    await film(1.5)
+    await page.getByRole('button', { name: 'Take me to dry ground' }).click()
+    // the route is planned in a worker in real time; keep filming while it arrives and draws
+    for (let i = 0; i < 40 && !(await page.$('.go-result:not(.stale)')); i++) { await page.waitForTimeout(100) }
+    await film(5)
+    await page.getByRole('button', { name: 'Preview the drive' }).click()
+    await film(16)
   },
   // a user's whole journey, for reviewing transitions frame by frame
   async journey() {
