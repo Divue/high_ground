@@ -378,3 +378,27 @@ A research agent read the spec, progress, screenshots and code, and surveyed flo
 - "Preview the drive": a dot travels the route at 6× the mode speed, for the demo video and for seeing the way before leaving.
 - Test `web/tests/nav_live.mjs`: preview advances the instruction; emulated GPS at 0/15/30/45% of the route updates instruction and distance; three off-route fixes 300 m away re-plan from there; 0 page errors. Screens `review/p5-dev/nav/10–13`.
 - Web limit (disclosed in the plan): location and voice stop when the screen is off or the tab is hidden.
+
+### Reviews of offline + navigation (Sun 07:40–08:45 IST) → acted on
+**Design critic** (2 blockers, 5 majors, 6 minors; `review/design/offline_nav/`):
+- B1 a forwarded replay plan could pass for a forecast → full-width band "Practice plan: a replay of … Not a forecast." and a "made <date>" stamp on every plan (image and text).
+- B2 the fallen-wire/open-drain warning vanished on phones while navigating → in the live banner itself.
+- M3 card too long → band chip row dropped (the "from the model" chip moved to the depth line); "Take me there" inside the "Move your car to X (flyover, 450 m) by 2 AM" box; parking list only when there is no decision; "My flood plan · Save for offline" as quiet links; footer strip fixed. "Email me" is above the fold at 1440×900.
+- M4 card and route disagreed → the card's "move your car by" is now planned by the navigation router (car, 20 cm, one hour ahead, one-way, underpasses closed) in the worker; "Take me there" opens Go by car to that exact place at the leave-by hour; if a parking search lands elsewhere it says why ("the way to X is under water…").
+- M5 banned words: "safe route" / "dry route" removed from the legend, card, Hospitals and offline copy ("suggested route", "route that avoids flooded streets").
+- M6 live banner: 52 px turn arrow, 40/28 px type (34/24 on phones); on phones only the map and the banner while navigating.
+- M7 Go panel replaces the card body ("Back to <street> · 28 cm"); honesty line above Start; step list no longer scrolls inside the card.
+- Minors: depth lines thinner than the route + dark casing under the route; battery-saver legend shows the three line bands; offline chip sentence case with the day; amber kept off buttons; plan image fonts preloaded for every weight, decision box aligned, labels moved off the line, copy fixed; Help rows are full-width call buttons with "Call"; "Share my location"; "Mute voice".
+**QA tester** (1 blocker, 9 majors, 7 minors; `review/qa/offline_nav/`):
+- B1 pack-only offline stuck on loading (terrain tiles missing) → the pack now includes all 324 terrain tiles; the offline gate now deletes the browsing cache before going offline and passes.
+- M1 replay hourly depths missing from the pack → hourly road depths for tonight's forecast and the three replay storms are saved (pack ~18.6 MB gzipped core).
+- M2 offline search said "not modelled" → "This street was not saved for offline use (saved: …)"; tiles within radius + 600 m; nearest-street lookup skips unsaved tiles.
+- M3 one failed fetch broke routing until reload → failed `getBin`, graph, depth and destination promises are no longer cached.
+- M4 offline without a pack: storm switch / search gave no message → honest messages for unsaved answers and the unsaved street list.
+- M5 routes used subways → OSM ways named Subway/Underpass are closed in rain too (tunnel/underpass edges 233 → 280).
+- M6 re-plan with no route made the banner vanish → a "No route avoids deep water from here" banner with 112; stay-put wording fixed.
+- M7 battery saver hid water on What if/Hospitals/Proof without saying so → note "Battery saver is on, so the map shows no water here" with "Show the water"; depth streets only on Tonight.
+- M8 driveways counted in "take the fifth right" → service lanes excluded, counts capped at third, <15 m jogs folded into the next instruction, headings over 25 m. Sweep of 48 trips: 0 jogs, 0 subways, 1 "fourth exit" (a roundabout).
+- M9 three depths for one street → Go uses the card's own hour-by-hour depth for your street and warns when it is over the mode's limit at that hour.
+- Minors: closing Go restores the card's route; location-off message replaces the instruction; tap targets enlarged; route framing on phones; plan image grows to fit (never clipped); empty Indic glyph ranges served (no console noise).
+- Gates after fixes: offline (pack only) 10/10 OK, 0 page errors; route rules 0 violations (30 routes, 6 no-route); directions sweep clean; hero 9/9; live directions + replan OK; phone check OK.

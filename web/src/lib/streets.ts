@@ -23,15 +23,20 @@ export interface StreetAnswer {
   preWet: boolean        // low ground the model already holds water on before the storm starts
 }
 
+/** Set when the last lookup could not read some street tiles (offline and not saved). */
+export let lastMissingTiles = 0
+
 export async function nearestSegment(lon: number, lat: number): Promise<Segment | null> {
   const idx = await loadStreetIndex()
+  lastMissingTiles = 0
   const pad = 0.004
   const tiles = Object.entries(idx.tile_bounds_lonlat)
     .filter(([, [w, s, e, n]]) => lon >= w - pad && lon <= e + pad && lat >= s - pad && lat <= n + pad)
     .map(([t]) => t)
   let best: Segment | null = null
   for (const t of tiles) {
-    const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`)
+    const g = await getJSON<StreetGeom>(`streets/geom/${t}.json`).catch(() => null)
+    if (!g) { lastMissingTiles++; continue }
     g.segs.forEach(([id, name, hw, br, flat], i) => {
       // Prefer named, non-service streets for an address answer
       const penalty = (hw === 'service' ? 25 : 0) + (name ? 0 : 40)

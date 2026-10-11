@@ -89,13 +89,17 @@ export class MapView {
     m.addLayer({ id: 'depth-streets', type: 'line', source: 'depth-streets', layout: { 'line-cap': 'round', 'line-join': 'round', visibility: 'none' },
       paint: {
         'line-color': ['interpolate', ['linear'], ['get', 'cm'], 5, TOKENS.shallow, 30, '#3FA8D8', 90, TOKENS.deep],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 11, ['case', ['>=', ['get', 'cm'], 15], 1.6, 0.8], 16, ['case', ['>=', ['get', 'cm'], 15], 7, 3.5]],
+        // thinner than the suggested route, so the route never seems to run through water
+        'line-width': ['interpolate', ['linear'], ['zoom'], 11, ['case', ['>=', ['get', 'cm'], 15], 1.2, 0.7], 16, ['case', ['>=', ['get', 'cm'], 15], 3.2, 2]],
         'line-opacity': ['interpolate', ['linear'], ['get', 'cm'], 5, 0.55, 30, 0.95],
       } })
     m.addLayer({ id: 'proof-crowd', type: 'line', source: 'proof-crowd', layout: { visibility: 'none', 'line-cap': 'round' },
       paint: { 'line-color': TOKENS.rainGrey, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 15, 3], 'line-opacity': 0.85 } })
     m.addLayer({ id: 'route-normal', type: 'line', source: 'route-normal', layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': '#7C8C93', 'line-width': 4, 'line-opacity': 0.55, 'line-dasharray': [1.5, 1.5] } })
+    // a dark edge under the suggested route keeps it readable over water and depth-coloured streets
+    m.addLayer({ id: 'route-safe-casing', type: 'line', source: 'route-safe', layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#050D12', 'line-width': 9, 'line-opacity': 0.85 } })
     m.addLayer({ id: 'route-safe', type: 'line', source: 'route-safe', layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': TOKENS.amber, 'line-width': 5, 'line-opacity': 0.95 } })
     m.addLayer({ id: 'street', type: 'line', source: 'street', layout: { 'line-cap': 'round' },
@@ -215,8 +219,13 @@ export class MapView {
   /** Frame a route in the open part of the map. */
   fitRoute(b: [number, number, number, number]) {
     const p = viewPadding()
+    const phone = window.innerWidth <= 900
+    // on a phone the card covers the lower half: frame the route in the top part, never more padding than fits
+    const pad = phone
+      ? { left: 24, right: 56, top: 70, bottom: Math.min(p.bottom + 20, Math.round(window.innerHeight * 0.5)) }
+      : { left: p.left + 60, right: p.right + 80, top: p.top + 90, bottom: p.bottom + 40 }
     this.map.fitBounds([[b[0], b[1]], [b[2], b[3]]], {
-      padding: { left: p.left + 60, right: p.right + 80, top: p.top + 90, bottom: p.bottom + 40 },
+      padding: pad,
       maxZoom: 16, pitch: this.lite ? 0 : Math.min(this.map.getPitch(), 50), bearing: this.map.getBearing(),
       duration: prefersReducedMotion() ? 0 : 1100, essential: true,
     })

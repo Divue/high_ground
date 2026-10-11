@@ -40,13 +40,18 @@ export function loadGraph(): Promise<Graph> {
         geom: new Float32Array(g), adjStart: deg, adjNode, adjEdge,
       }
     })()
+    graphP.catch(() => { graphP = null })
   }
   return graphP
 }
 
 const depthCache = new Map<string, Promise<Uint16Array>>()
 export function edgeDepths(run: string): Promise<Uint16Array> {
-  if (!depthCache.has(run)) depthCache.set(run, getBin(`graph/depth_${run}.bin`).then((b) => new Uint16Array(b)))
+  if (!depthCache.has(run)) {
+    const p = getBin(`graph/depth_${run}.bin`).then((b) => new Uint16Array(b))
+    depthCache.set(run, p)
+    p.catch(() => depthCache.delete(run))
+  }
   return depthCache.get(run)!
 }
 

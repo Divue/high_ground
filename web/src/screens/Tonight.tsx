@@ -5,15 +5,18 @@ import { REPLAYS, bandFor, prefersReducedMotion } from '../config'
 import { loadGray, loadParking, type Current, type Parking, type Runs } from '../lib/data'
 import { distM, fmtDistance } from '../lib/geo'
 import { frameName } from '../lib/frames'
-import { leaveByPlan, type Route } from '../lib/routing'
+import type { Route } from '../lib/routing'
+import { leaveByAsync } from '../lib/navClient'
 import { clockLabel, mixDescription, type Scenario } from '../lib/scenario'
-import { depthStreets, nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
+import { depthStreets, lastMissingTiles, nearbyShare, nearestSegment, segmentValues, type Segment, type StreetAnswer } from '../lib/streets'
 import { forecastAge } from '../offline/status'
 import HelpCard from '../ui/HelpCard'
 import OfflineSave from '../ui/OfflineSave'
 import PlanCard, { type PlanInput } from '../ui/PlanCard'
 import GoPanel from '../ui/GoPanel'
 import { packRecord } from '../offline/pack'
+import type { DestKind, Mode } from '../lib/nav'
+
 import type { MapView } from '../map/MapView'
 import Readout from '../ui/Readout'
 import DepthGlyph from '../ui/DepthGlyph'
@@ -59,7 +62,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [rising, setRising] = useState(false)    // the night is playing to the peak
   const [morePark, setMorePark] = useState(false)
   const [sheet, setSheet] = useState<'help' | 'plan' | null>(null)
-  const [going, setGoing] = useState(false)
+  const [going, setGoing] = useState<null | { mode?: Mode; kind?: DestKind | 'target' }>(null)
 
   useEffect(() => { loadParking().then(setParking).catch(() => {}) }, [])
   useEffect(() => () => { mv.setGeoJSON('route-safe', null); mv.setGeoJSON('route-normal', null) }, [mv])
@@ -84,21 +87,29 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       if (dead) return
       if (!s || s.distanceM > 600) {
         setSeg(null); setAns(null)
-        setError('No street within 600 m of that point in the area HighGround models. Try a nearby street name.')
+        const saved = packRecord()?.places.map((p) => p.label).join(', ')
+        setError(!online && (lastMissingTiles > 0 || !s)
+          ? `This street was not saved for offline use${saved ? ` (saved: ${saved})` : ''}. Connect to the internet to load it.`
+          : 'No street within 600 m of that point in the area HighGround models. Try a nearby street name.')
         return
       }
       setSeg(s)
       mv.setGeoJSON('street', { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: s.coords } })
       mv.setGeoJSON('here', { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [place.lon, place.lat] } })
       if (!scenario.mix.length) { setAns(null); return }
-      const a = await segmentValues(s, scenario.mix)
+      const a = await segmentValues(s, scenario.mix).catch(() => null)
       if (dead) return
+      if (!a) {
+        setError(!online ? `${scenario.label.replace(/^Replay: /, '')}: this street's answers were not saved for offline use. Connect to load them, or switch back to a storm you saved.`
+          : 'Could not load this street’s answers. Check the connection and try again.')
+        return
+      }
       setAns(a)
       setAnsKey(`${place.lon},${place.lat}|${scenario.mix.map((m) => `${m.run}:${m.w}`).join()}`)
       nearbyShare(place.lon, place.lat, scenario.mix).then((n) => { if (!dead) setNearby(n) }).catch(() => setNearby(null))
     })()
     return () => { dead = true }
-  }, [place, scenario, mv])
+  }, [place, scenario, mv, online])
 
   // Fly to the street once per place (the opening flight may already have framed it)
   useEffect(() => {
@@ -175,7 +186,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
   const [lapse, setLapse] = useState<'off' | 'playing' | 'paused' | 'done'>('off')
   const lapseRun = scenario.kind === 'replay' && scenario.mix.length === 1 ? scenario.mix[0].run : null
   useEffect(() => { setLapse('off'); setMorePark(false) }, [place, scenario])
-  useEffect(() => { if (lapse !== 'off') setGoing(false) }, [lapse])
+  useEffect(() => { if (lapse !== 'off') setGoing(null) }, [lapse])
   const lapseFrom = useRef(1)
   const watchStorm = async (from = 1) => {
     if (!lapseRun) return
@@ -281,10 +292,13 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       // than the hour your own street passes 15 cm (in the first hour: before the rain starts).
       const streetFloods = !!ans?.hoursTo15
       const until = ans?.hoursTo15 ? Math.max(1, ans.hoursTo15 - 1) : (ans?.peakHour ?? Math.min(scenario.hours, 12))
-      const plan = await leaveByPlan([place.lon, place.lat], [o.lon, o.lat], scenario.mix, until, 30)
+      // planned by the navigation router (car, 20 cm, one hour ahead, one-way streets, underpasses closed)
+      // so the card's decision and 'Take me there' always agree
+      const lb = await leaveByAsync({ from: [place.lon, place.lat], to: [o.lon, o.lat], mix: scenario.mix, until, mode: 'car' })
       if (token !== routeToken.current) return
       const firstHour = ans?.hoursTo15 === 1
-      setRoute({ normal: plan.normal, safe: plan.route, to: o.name, leaveBy: firstHour ? 0 : plan.leaveByHour, until, streetFloods })
+      const plan = { normal: lb.usual, route: lb.route }
+      setRoute({ normal: lb.usual as unknown as Route, safe: lb.route as unknown as Route, to: o.name, leaveBy: firstHour ? 0 : lb.leaveByHour, until, streetFloods })
       // the map stays at the peak the card describes; the leave-by hour is marked on the timeline
       mv.setGeoJSON('route-normal', plan.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: plan.normal.coords } } : null)
       // the safe route draws itself from your street to the dry place
@@ -302,6 +316,19 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
     showRoute(park[0])
   }, [ans, fresh, park, seg, scenario, showRoute])
 
+  const openGo = (o: { mode?: Mode; kind?: DestKind | 'target'; at?: number } = {}) => {
+    playToken.current++; setRising(false)
+    if (o.at) scrub(o.at)
+    setGoing({ mode: o.mode, kind: o.kind })
+  }
+  const parkFor = (name: string | undefined) => park.find((x) => x.name === name)
+  // leaving Take me to dry ground puts the card's own route back on the map
+  useEffect(() => {
+    if (going || !route) return
+    mv.setGeoJSON('route-normal', route.normal ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.normal.coords } } : null)
+    mv.setGeoJSON('route-safe', route.safe ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.safe.coords } } : null)
+  }, [going]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const atHour = ans?.seriesCm[hour - 1] ?? 0
   const band = ans ? bandFor(ans.maxCm) : null
   // while the night plays, the number is the model's depth at the hour shown; then it settles on the peak
@@ -315,8 +342,8 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
       ? ans.preWet ? `Water already stands here before the rain. Park at ${route.to} instead.`
         : `Floods in the first hour. Move your car to ${route.to} before the rain starts, by ${clockLabel(scenario.start, 0)}.`
       : route.safe && route.leaveBy ? `Move your car to ${route.to} by ${clockLabel(scenario.start, route.leaveBy)}.`
-        : ans.hoursTo15 === 1 ? `Water reaches scooter level here in the first hour, and no dry route to ${route.to} stays open.`
-          : `No dry way out to ${route.to} before your street floods.`
+        : ans.hoursTo15 === 1 ? `Water reaches scooter level here in the first hour, and no way to ${route.to} avoids the water.`
+          : `No way out to ${route.to} avoids the water before your street floods.`
   const planInput: PlanInput | null = place && seg && ans && fresh ? {
     street: seg.name, place: { lon: place.lon, lat: place.lat }, ans, scenario,
     forecastAt: scenario.kind === 'forecast' && age ? `${age.time}, ${new Date(current!.updated_at).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}` : null,
@@ -345,9 +372,9 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
         </div>
         {(!online || (age?.stale && scenario.kind !== 'replay')) && (
           <div className="offline-chip" role="status">
-            {!online ? <><span className="off-dot" />Offline</> : null}
-            {age && scenario.kind !== 'replay' ? <>{!online ? ' · ' : ''}forecast from {age.time} ({age.ago}){age.stale ? ', may be out of date' : ''}</> : null}
-            {!online && scenario.kind === 'replay' ? ' · saved model answers' : ''}
+            {!online ? <><span className="off-dot" />Offline · </> : null}
+            {age && scenario.kind !== 'replay' ? <>{!online ? 'forecast' : 'Forecast'} from {age.time} ({age.ago}).{age.stale ? ' May be out of date.' : ''}</> : null}
+            {!online && scenario.kind === 'replay' ? (packRecord() ? `answers saved ${new Date(packRecord()!.savedAt).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\b(am|pm)\b/g, (m) => m.toUpperCase())}` : 'showing what this phone kept from before') : ''}
           </div>
         )}
         {lapseRun && lapse !== 'off' && (
@@ -373,7 +400,18 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             <div className="bar"><i /></div>
           </div>
         )}
-        {lapse === 'off' && arrivedHere && fresh && seg && ans && band && scenario.mix.length > 0 && (
+        {lapse === 'off' && arrivedHere && fresh && seg && ans && band && scenario.mix.length > 0 && going && (
+          <div className="reveal" key={`go-${nightKey}`}>
+            <button className="linkbtn back" onClick={() => setGoing(null)}>Back to {seg.name} · {ans.maxCm} cm</button>
+            <GoPanel mv={mv} from={{ lon: place!.lon, lat: place!.lat, label: seg.name }} scenario={scenario} hour={hour}
+              saved={packRecord()?.places ?? []} initialMode={going.mode} initialKind={going.kind}
+              preferred={route?.safe ? route.to : park[0]?.name}
+              target={route?.safe && parkFor(route.to) ? { name: route.to, lon: parkFor(route.to)!.lon, lat: parkFor(route.to)!.lat, detail: parkFor(route.to)!.kind } : undefined}
+              streetSeries={ans.seriesCm}
+              onClose={() => setGoing(null)} />
+          </div>
+        )}
+        {lapse === 'off' && arrivedHere && fresh && seg && ans && band && scenario.mix.length > 0 && !going && (
           <div className="reveal" key={nightKey}>
             <div className="street">{seg.name}{seg.bridge ? ' (on a bridge)' : ''}</div>
             <Readout cm={ans.maxCm} shown={shownCm} />
@@ -381,6 +419,7 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
               {depthFeel(shownCm)}{' '}
               <span className="when-word">{rising ? `at ${clockLabel(scenario.start, hour)}`
                 : ans.maxCm >= 5 && ans.peakHour ? `at worst, ${clockLabel(scenario.start, ans.peakHour)}` : 'all night'}</span>
+              <span className="chip">from the model</span>
             </div>
             <div className="when">
               {ans.hoursTo15 ? <>Too deep for scooters from {clockLabel(scenario.start, ans.hoursTo15)}</> :
@@ -388,10 +427,6 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             </div>
             {ans.preWet && ans.maxCm >= 5 && <p className="muted small" style={{ margin: '4px 0 0' }}>Low ground next to a canal: water already stands here before the rain.</p>}
             {ans.maxCm >= 5 && <DepthGlyph cm={shownCm} />}
-            <div>
-              <span className={`band ${band.code}`}>{band.label}</span>
-              <span className="chip">from the model</span>
-            </div>
             {ans.hoursTo15 && (
               <div className="decision" role="status">
                 {routing && !route ? 'Working out when to move your car…'
@@ -399,10 +434,16 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
                     ? ans.preWet
                       ? <>Water already stands here before the rain. Park at <b className="safe">{route.to}</b> instead.</>
                       : <>Floods in the first hour. Move your car to <b className="safe">{route.to}</b> before the rain starts, by <b>{clockLabel(scenario.start, 0)}</b>.</>
-                  : route?.safe && route.leaveBy ? <>Move your car to <b className="safe">{route.to}</b> by <b>{clockLabel(scenario.start, route.leaveBy)}</b>.</>
+                  : route?.safe && route.leaveBy ? <>Move your car to <b className="safe">{route.to}</b>{parkFor(route.to) ? ` (${parkFor(route.to)!.kind}, ${fmtDistance(parkFor(route.to)!.d)})` : ''} by <b>{clockLabel(scenario.start, route.leaveBy)}</b>.</>
                     : route ? (ans.hoursTo15 === 1
-                      ? <>Water reaches scooter level here in the first hour, and no dry route to {route.to} stays open.</>
-                      : <>No dry way out to {route.to} before your street floods.</>) : null}
+                      ? <>Water reaches scooter level here in the first hour, and no way to {route.to} avoids the water.</>
+                      : <>No way out to {route.to} avoids the water before your street floods.</>) : null}
+                {route?.safe && (
+                  <div className="row" style={{ marginTop: 8 }}>
+                    <button className="btn primary small-btn" onClick={() => openGo({ mode: 'car', kind: 'target', at: route.leaveBy || undefined })}>Take me there</button>
+                    <button className="linkbtn" onClick={() => openGo({})}>Other places and ways</button>
+                  </div>
+                )}
               </div>
             )}
             {!rising && hour !== ans.peakHour && (
@@ -417,9 +458,9 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
             )}
 
             <div className="divider" />
-            <h3>Dry places to park nearby</h3>
+            {!(ans.hoursTo15 && route?.safe) && <h3>Dry places to park nearby</h3>}
             {park.length === 0 && <p className="muted small">No mapped flyover or parking ground near you stays dry in this scenario.</p>}
-            {park.slice(0, morePark ? 2 : 1).map((o) => (
+            {(ans.hoursTo15 && route?.safe ? (morePark ? park.filter((o) => o.name !== route.to).slice(0, 1) : []) : park.slice(0, morePark ? 2 : 1)).map((o) => (
               <div className="park" key={`${o.name}-${o.lon}`}>
                 <span className="pin" />
                 <div style={{ flex: 1 }}>
@@ -431,25 +472,23 @@ export default function Tonight({ mv, runs, current, scenario, replayRun, setRep
               </div>
             ))}
             {park.length > 1 && !morePark && (
-              <button className="linkbtn" style={{ marginLeft: 22 }} onClick={() => setMorePark(true)}>1 more dry place nearby</button>
+              <button className="linkbtn" style={{ marginLeft: ans.hoursTo15 && route?.safe ? 0 : 22, paddingLeft: ans.hoursTo15 && route?.safe ? 0 : 6 }} onClick={() => setMorePark(true)}>1 more dry place nearby</button>
             )}
             {route && !route.streetFloods && (
               <p className="small muted" style={{ margin: '2px 0 6px' }}>
-                {route.safe ? <>Your street stays passable. Dry route to {route.to}: {fmtDistance(route.safe.lengthM)}.</> : <>No practical dry route to {route.to} at the storm’s worst.</>}
+                {route.safe ? <>Your street stays passable. Route to {route.to} that avoids flooded streets: {fmtDistance(route.safe.lengthM)}.</> : <>No practical way to {route.to} avoids the water at the storm’s worst.</>}
               </p>
             )}
             {park.some((o) => o.kind === 'flyover') && <p className="muted small">Check local traffic advisories before parking on a flyover.</p>}
+            {!(ans.hoursTo15 && route?.safe) && (
+              <button className="btn primary" style={{ marginTop: 4 }} onClick={() => openGo({})}>Take me to dry ground</button>
+            )}
             <div className="divider" />
-            {going
-              ? <GoPanel mv={mv} from={{ lon: place!.lon, lat: place!.lat, label: seg.name }} scenario={scenario} hour={hour}
-                  saved={packRecord()?.places ?? []} onClose={() => setGoing(false)} />
-              : <button className="btn amber" onClick={() => { playToken.current++; setRising(false); setGoing(true) }}>Take me to dry ground</button>}
-            <div className="divider" />
-            <div className="row">
-              <button className="btn" onClick={() => setSheet('plan')}>My flood plan</button>
-              {online && <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />}
+            {online && <Subscribe lat={place!.lat} lon={place!.lon} street={seg.name} />}
+            <div className="quiet-links">
+              <button className="linkbtn" onClick={() => setSheet('plan')}>My flood plan</button>
+              <OfflineSave place={{ label: seg.name, lon: place!.lon, lat: place!.lat }} online={online} />
             </div>
-            <OfflineSave place={{ label: seg.name, lon: place!.lon, lat: place!.lat }} online={online} />
           </div>
         )}
         {!place && !dryTonight && <p className="muted" style={{ marginTop: 12 }}>Type your street to see how deep the water gets there tonight, when, and where to move your car.</p>}

@@ -6,7 +6,7 @@
 // any storm), hourly road depths for tonight's forecast, parking, hospitals, the place list and the
 // latest forecast. Packs are versioned; a new version is downloaded beside the old one, which is
 // removed only once the new one is complete.
-import { DATA_BASE } from '../config'
+import { DATA_BASE, REPLAYS } from '../config'
 import { getJSON, loadCurrent, loadStreetIndex } from '../lib/data'
 import { distM } from '../lib/geo'
 
@@ -44,7 +44,7 @@ async function streetTiles(places: SavedPlace[], radiusKm: number) {
   const idx = await loadStreetIndex()
   const near = (p: SavedPlace, [w, s, e, n]: [number, number, number, number]) => {
     const x = Math.min(Math.max(p.lon, w), e), y = Math.min(Math.max(p.lat, s), n)
-    return distM(p.lon, p.lat, x, y) <= radiusKm * 1000
+    return distM(p.lon, p.lat, x, y) <= radiusKm * 1000 + 600
   }
   const tiles = Object.entries(idx.tile_bounds_lonlat).filter(([, b]) => places.some((p) => near(p, b))).map(([t]) => t)
   return { tiles, runs: idx.runs }
@@ -55,16 +55,18 @@ export async function planPack(places: SavedPlace[], radiusKm = 3) {
   const m = await getJSON<Manifest>('offline/manifest.json?hgpack=1', true)
   const cur = await loadCurrent()
   const forecastRuns = cur?.scenario ? [...new Set([cur.scenario.lower, cur.scenario.upper])] : []
+  // hour-by-hour road depths for tonight's forecast and for the storms the replay buttons offer
+  const hourlyRuns = [...new Set([...forecastRuns, ...REPLAYS.map((r) => r.run)])]
   const { tiles, runs } = await streetTiles(places, radiusKm)
   const files = [...m.core.map((f) => f.path), 'current.json', 'offline/manifest.json']
   for (const t of tiles) {
     files.push(`streets/geom/${t}.json`)
     for (const r of runs) files.push(`streets/${r}/${t}.json`)
   }
-  for (const r of forecastRuns) for (const f of m.hourly[r] ?? []) files.push(f.path)
+  for (const r of hourlyRuns) for (const f of m.hourly[r] ?? []) files.push(f.path)
   // street tiles average ~8 KB gzipped each (measured on the Michaung and 2015 runs); the rest is listed
   const est = m.core.reduce((a, f) => a + f.gz, 0) + tiles.length * (runs.length + 1) * 8_000
-    + forecastRuns.reduce((a, r) => a + (m.hourly[r] ?? []).reduce((b, f) => b + f.gz, 0), 0)
+    + hourlyRuns.reduce((a, r) => a + (m.hourly[r] ?? []).reduce((b, f) => b + f.gz, 0), 0)
   return { version: m.version, files, estBytes: est, forecastRuns, tiles: tiles.length }
 }
 

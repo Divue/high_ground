@@ -52,17 +52,17 @@ export default function Hospitals({ mv, runs }: { mv: MapView; runs: Runs }) {
     const h = data.hospitals[i]
     mv.map.flyTo({ center: [h.lon, h.lat], zoom: 14.2, pitch: 58, duration: 2000, curve: 1.4, essential: true })
     mv.pulse([h.lon, h.lat])
-    setMsg('Finding a dry route from the main road network…')
+    setMsg('Finding a way in from the main roads that avoids flooded streets…')
     const g = await loadGraph()
     const depth = await mixedDepth([{ run, w: 1 }])
     const reach = data.runs[run]?.reach[i]
     const r = reach ? toArterial(g, h.node, depth, 30) : null
     if (r) {
       mv.setGeoJSON('route-safe', { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: r.coords } })
-      setMsg(`Dry route from the main road: ${fmtDistance(r.lengthM)}.`)
+      setMsg(`Route from the main road that avoids flooded streets: ${fmtDistance(r.lengthM)}.`)
     } else {
       mv.setGeoJSON('route-safe', null)
-      setMsg('No dry route: every way in from the main road crosses water deeper than 30 cm.')
+      setMsg('No route from the main road avoids the water: every way in crosses water deeper than 30 cm.')
     }
   }
 

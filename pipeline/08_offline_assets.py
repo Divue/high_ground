@@ -54,6 +54,8 @@ def manifest():
     core += [f"graph/{f}.bin" for f in ("nodes", "edges", "len", "cls", "geom_off", "geom", "bridge")]
     core += [f"graph/{f}.bin" for f in ("flags",) if (WEB / "graph" / f"{f}.bin").exists()]
     core += [f"graph/depth_{r}.bin" for r in runs]
+    # terrain tiles: the map's style needs them to finish loading (and they give the 3D view offline)
+    core += sorted(str(f.relative_to(WEB)) for f in (WEB / "terrain").rglob("*.png"))
     files = [entry(c) for c in core]
     hourly = {r: [entry(f"graph/hourly_{r}_ids.bin"), entry(f"graph/hourly_{r}.bin")]
               for r in runs if r in gmeta.get("hourly", {})}

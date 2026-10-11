@@ -146,7 +146,7 @@ const shots = {
     await waitReady()
     await skip(20)
     await film(1.5)
-    await page.getByRole('button', { name: 'Take me to dry ground' }).click()
+    await page.getByRole('button', { name: /Take me (there|to dry ground)/ }).first().click()
     // the route is planned in a worker in real time; keep filming while it arrives and draws
     for (let i = 0; i < 40 && !(await page.$('.go-result:not(.stale)')); i++) { await page.waitForTimeout(100) }
     await film(5)

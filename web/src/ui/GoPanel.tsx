@@ -3,47 +3,40 @@
 // It works offline (the road graph and depths are in the saved pack) and follows the timeline:
 // drag the hour and the route is planned for leaving then.
 import { useEffect, useRef, useState } from 'react'
-import type { Step } from '../lib/directions'
+import { createPortal } from 'react-dom'
 import { fmtDistance } from '../lib/geo'
 import { MODES, type DestKind, type Mode } from '../lib/nav'
 import { navigateAsync, type NavAnswer } from '../lib/navClient'
 import { clockLabel, type Scenario } from '../lib/scenario'
 import type { MapView } from '../map/MapView'
 import NavLive from './NavLive'
+import StepIcon from './StepIcon'
+import { depthFeel } from '../lib/words'
 
 const KINDS: [DestKind, string][] = [['parking', 'Dry parking'], ['hospital', 'Hospital'], ['high', 'High ground']]
-const ICON_ROT: Partial<Record<Step['icon'], number>> = {
-  straight: 0, 'slight-left': -45, 'slight-right': 45, left: -90, right: 90, 'sharp-left': -135, 'sharp-right': 135, uturn: 180,
-}
-
-function StepIcon({ icon }: { icon: Step['icon'] }) {
-  if (icon === 'start') return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4" fill="currentColor" /></svg>
-  if (icon === 'arrive') return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5" fill="var(--amber)" /></svg>
-  if (icon === 'roundabout') return <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="9" r="4" fill="none" stroke="currentColor" strokeWidth="1.6" /><path d="M8 5V1M6 3l2-2 2 2" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg>
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" style={{ transform: `rotate(${ICON_ROT[icon] ?? 0}deg)` }}>
-      <path d="M8 14V3M4 7l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 interface Props {
   mv: MapView
   from: { lon: number; lat: number; label: string }
   scenario: Scenario
   hour: number
   saved: { label: string; lon: number; lat: number }[]
+  initialMode?: Mode
+  initialKind?: DestKind | 'target'
+  preferred?: string            // the parking the answer card names
+  target?: { name: string; lon: number; lat: number; detail?: string }   // "Take me there": that place
+  streetSeries?: number[]       // the card's depth for this street, hour by hour (the same numbers everywhere)
   onClose: () => void
 }
 
-export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Props) {
+export default function GoPanel({ mv, from, scenario, hour, saved, initialMode, initialKind, preferred, target, streetSeries }: Props) {
   const [mode, setModeState] = useState<Mode>(() => {
+    if (initialMode) return initialMode
     try { const m = localStorage.getItem('hg-mode'); if (m && m in MODES) return m as Mode } catch { /* private mode */ }
     return 'two_wheeler'       // Chennai has about 4.6 two-wheelers per car
   })
   const setMode = (m: Mode) => { setModeState(m); try { localStorage.setItem('hg-mode', m) } catch { /* private mode */ } }
   const others = saved.filter((p) => Math.abs(p.lon - from.lon) > 1e-4 || Math.abs(p.lat - from.lat) > 1e-4)
-  const [kind, setKind] = useState<DestKind | `place:${number}`>('parking')
+  const [kind, setKind] = useState<DestKind | 'target' | `place:${number}`>(initialKind === 'target' && !target ? 'parking' : initialKind ?? 'parking')
   const [ans, setAns] = useState<NavAnswer | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
@@ -59,7 +52,8 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
   useEffect(() => {
     const t = ++token.current
     setBusy(true); setErr('')
-    const place = kind.startsWith('place:') ? others[Number(kind.slice(6))] : undefined
+    const place = kind === 'target' && target ? { label: target.name, lon: target.lon, lat: target.lat }
+      : kind.startsWith('place:') ? others[Number(kind.slice(6))] : undefined
     const id = window.setTimeout(() => {
       navigateAsync({ from: [start.lon, start.lat], mode, kind: place ? 'place' : (kind as DestKind), mix: scenario.mix, hour,
         place: place ? { name: place.label, lon: place.lon, lat: place.lat } : undefined })
@@ -88,34 +82,43 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
 
   const r = ans?.res
   const when = clockLabel(scenario.start, hour)
+  // water on your own street at the hour you leave: the card's number while you are at your street
+  const hereCm = !fromNow && streetSeries ? streetSeries[Math.min(Math.max(1, hour), streetSeries.length) - 1] ?? null : r?.startCm ?? null
   const mins = r?.route ? Math.max(1, Math.round(r.route.timeS / 60)) : 0
   return (
     <div className="go" aria-live="polite" ref={box}>
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h3 style={{ margin: 0 }}>Get to dry ground</h3>
-        <button className="linkbtn" onClick={onClose}>Close</button>
-      </div>
-      <div className="seg tight" role="group" aria-label="How you are travelling">
+      <h3 style={{ margin: 0 }}>Get to dry ground</h3>
+      <div className="seg tight labelled" role="group" aria-label="How you are travelling">
+        <span className="seg-label">By</span>
         {(Object.keys(MODES) as Mode[]).map((k) => <button key={k} aria-pressed={mode === k} onClick={() => setMode(k)}>{MODES[k].label}</button>)}
       </div>
-      <div className="seg tight" role="group" aria-label="Where to">
+      <div className="seg tight labelled" role="group" aria-label="Where to">
+        <span className="seg-label">To</span>
+        {target && <button aria-pressed={kind === 'target'} onClick={() => setKind('target')}>{target.name}</button>}
         {KINDS.map(([k, l]) => <button key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>{l}</button>)}
         {others.map((p, i) => <button key={`p${i}`} aria-pressed={kind === `place:${i}`} onClick={() => setKind(`place:${i}`)}>{p.label}</button>)}
       </div>
       <p className="muted small" style={{ margin: '6px 0 0' }}>Leaving at {when} (drag the timeline to change). Avoids water {m.block} cm deep or more {m.verb}.</p>
       {busy && !r && <p className="small">Finding a way that avoids the water…</p>}
       {err && <p className="small" role="alert">Could not plan a route: {err}</p>}
+      {r && hereCm != null && hereCm >= m.block && (
+        <p className="small warn">Your street has about {hereCm} cm at {when} in the model, more than this {m.label.toLowerCase()} limit. Leave earlier (drag the timeline back), or stay put if you are safe.</p>
+      )}
       {r && (r.ok && r.route && r.dest ? (
         <div className={busy ? 'go-result stale' : 'go-result'}>
-          <div className="go-dest"><b className="safe">{r.dest.name}</b>{r.dest.detail ? <span className="muted small"> ({r.dest.detail})</span> : null}</div>
+          {kind === 'parking' && preferred && r.dest.name !== preferred && (
+            <div className="small">Leaving at {when}, the way to {preferred} is under water {m.verb}. Nearest dry parking you can still reach:</div>
+          )}
+          <div className="go-dest"><b className="safe">{r.dest.name}</b>{(r.dest.detail ?? (kind === 'target' ? target?.detail : undefined)) ? <span className="muted small"> ({r.dest.detail ?? target?.detail})</span> : null}</div>
           <div className="small">{fmtDistance(r.route.lengthM)} · about {mins} min {m.verb}</div>
           {r.avoided > 0 && <div className="small">Avoids {r.avoided} {r.avoided === 1 ? 'street' : 'streets'} the shortest way would cross in water (dashed).</div>}
-          {r.route.maxCm >= m.soft && <div className="small">Shallow water possible on the way: up to {r.route.maxCm} cm in the model.</div>}
+          {r.route.maxCm >= m.soft && <div className="small">Up to {r.route.maxCm} cm ({depthFeel(r.route.maxCm).toLowerCase()}) on the way, in the model.</div>}
           {r.dest.kind === 'hospital' && <div className="muted small">Call ahead: hospitals can be cut off or short of power in a flood.</div>}
-          {r.dest.detail === 'flyover' && <div className="muted small">Check local traffic advisories before parking on a flyover.</div>}
+          {(r.dest.detail ?? (kind === 'target' ? target?.detail : undefined)) === 'flyover' && <div className="muted small">Check local traffic advisories before parking on a flyover.</div>}
+          <p className="muted small honest">A route that avoids streets our model expects to flood, not an official route. If you see water above your ankle, turn back. Keep clear of fallen wires and open drains.</p>
           {!live && (
             <div className="row" style={{ marginTop: 8 }}>
-              <button className="btn amber" onClick={() => setLive('gps')}>Start</button>
+              <button className="btn primary" onClick={() => setLive('gps')}>Start</button>
               <button className="btn" onClick={() => setLive('sim')}>Preview the drive</button>
             </div>
           )}
@@ -128,21 +131,25 @@ export default function GoPanel({ mv, from, scenario, hour, saved, onClose }: Pr
       ) : (
         <div className="go-result">
           <p className="small" style={{ marginTop: 6 }}>
-            {r.onHighGround && kind === 'high' ? <>Your street stays under ankle depth all storm in the model. Staying put may be the safest choice. </> : null}
-            No route avoids deep water from here at {when}{r.startCm >= m.block ? ` (your street already has about ${r.startCm} cm)` : ''}.
+            {r.onHighGround && kind === 'high' ? <>Where you are stays under 5 cm all storm in the model. Staying put may be the safest choice. </> : null}
+            No route avoids deep water from here at {when}.
             {r.opensAt ? <> A way out opens again around {clockLabel(scenario.start, r.opensAt)} as the water drains.</> : null}
           </p>
           <p className="small">If you are safe, stay where you are. If water enters your home, call <a className="emergency" href="tel:112">112</a>.</p>
         </div>
       ))}
+      {live && r && !busy && !r.route && createPortal(
+        // re-planning from where you are found no way out: say so, never just vanish
+        <div className="nav-live" role="alert">
+          <div className="nav-text">No route avoids deep water from here at {when}.</div>
+          <div className="nav-honest small">If you are safe, stay where you are. If water is rising around you, call <a className="emergency" href="tel:112">112</a>.</div>
+          <div className="row" style={{ marginTop: 8 }}><button className="btn small-btn" onClick={() => { setLive(null); setFromNow(null) }}>End</button></div>
+        </div>, document.body)}
       {live && r?.route && r.dest && (
         <NavLive key={`${live}|${r.route.edges.length}|${r.route.edges[0]}`} mv={mv} coords={r.route.coords} steps={ans!.steps} dest={r.dest.name}
           mode={mode} simulate={live === 'sim'} onReroute={(p) => setFromNow(p)}
           onEnd={() => { setLive(null); setFromNow(null) }} />
       )}
-      <p className="muted small" style={{ marginBottom: 0 }}>
-        A route that avoids streets our model expects to flood, not an official route. Model estimate, not a sighting: if you see water above your ankle, turn back. Watch for fallen wires and open drains.
-      </p>
     </div>
   )
 }

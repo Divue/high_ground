@@ -10,12 +10,14 @@ Outputs (data/out/web/graph/):
 and data/out/web/pois.json: pharmacies, fuel stations, police and fire stations inside the model area.
 """
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+SUBWAY = re.compile(r"\b(subway|underpass)\b", re.I)
 sys.path.insert(0, str(HERE))       # common.py, as when 05_features runs from pipeline/
 spec = importlib.util.spec_from_file_location("features", HERE / "05_features.py")
 F = importlib.util.module_from_spec(spec)
@@ -42,7 +44,10 @@ def main():
             flags[i] |= 2
         if t["junction"] in ("roundabout", "circular"):
             flags[i] |= 4
-        if t["tunnel"] not in ("", "no") or t["covered"] == "yes" or t["layer"].startswith("-"):
+        # many Chennai subways are not tagged as tunnels in OSM (47 of 69 pieces named Subway or
+        # Underpass): their name is the better signal; they flood first and are closed in rain
+        if t["tunnel"] not in ("", "no") or t["covered"] == "yes" or t["layer"].startswith("-") \
+                or SUBWAY.search(names[i] or "") or SUBWAY.search(t["ref"] or ""):
             flags[i] |= 8
         if t["link"]:
             flags[i] |= 16

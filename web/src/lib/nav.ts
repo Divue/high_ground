@@ -221,6 +221,7 @@ async function parkingDests(nav: NavData, mix: MixPart[]): Promise<Dest[]> {
         .filter((x) => x.ok)
         .map(({ c }) => ({ kind: 'parking' as const, name: c.name, lon: c.lon, lat: c.lat, node: nearestNode(nav.g, c.lon, c.lat, 4), detail: c.kind }))
     })())
+    destCache.get(key)!.catch(() => destCache.delete(key))
   }
   return destCache.get(key)!
 }
@@ -322,4 +323,35 @@ export async function navigate(req: NavRequest): Promise<NavResult> {
   let onHighGround = true
   for (let j = g.adjStart[start]; j < g.adjStart[start + 1]; j++) if (depths.worstPeak[g.adjEdge[j]] >= 5) onHighGround = false
   return { ok: !!route, dest, route, usual, avoided, startCm, opensAt, onHighGround }
+}
+
+// ---------------------------------------------------------------- the card's decision
+/** "Move your car to X by 2 AM": the latest hour (up to `until`) at which this router still finds a
+ *  way to the place, with the same rules as Take me to dry ground, so the card and the directions agree. */
+export async function leaveBy(req: { from: [number, number]; to: [number, number]; mix: MixPart[]; until: number; mode: Mode }) {
+  const nav = await loadNav()
+  const { g } = nav
+  const depths = await Depths.load(req.mix, g.edges.length / 2)
+  const storm = req.mix.length > 0
+  const start = nearestNode(g, req.from[0], req.from[1], 4)
+  const target = nearestNode(g, req.to[0], req.to[1], 4)
+  const usual = search(nav, start, { mode: req.mode, depths: null, storm: false, hour: 1, target })
+  const tooLong = (r: NavRoute) => !!usual && r.lengthM > Math.max(3 * usual.lengthM, usual.lengthM + 4000)
+  const at = (h: number) => {
+    const r = search(nav, start, { mode: req.mode, depths, storm, hour: h, target })
+    return r && !tooLong(r) ? r : null
+  }
+  // water only rises before the street floods, so the open hours form a prefix: binary search it
+  let best: NavRoute | null = null, bestH: number | null = null
+  let lo = 1, hi = Math.max(1, req.until)
+  const last = at(hi)
+  if (last) { best = last; bestH = hi } else {
+    hi -= 1
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1
+      const r = at(mid)
+      if (r) { best = r; bestH = mid; lo = mid + 1 } else hi = mid - 1
+    }
+  }
+  return { leaveByHour: bestH, route: best, usual }
 }

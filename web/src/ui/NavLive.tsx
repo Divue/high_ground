@@ -11,6 +11,7 @@ import type { Step } from '../lib/directions'
 import { distM, fmtDistance } from '../lib/geo'
 import { MODES, type Mode } from '../lib/nav'
 import type { MapView } from '../map/MapView'
+import StepIcon from './StepIcon'
 
 interface Props {
   mv: MapView
@@ -157,6 +158,7 @@ export default function NavLive({ mv, coords, steps, dest, mode, simulate, onRer
       document.documentElement.classList.remove('nav-live-on') }
   }, [mv])
 
+  const noFix = !simulate && acc == null && /off|no location|not allowed/i.test(status)
   const k = stepAt.findIndex((s, i) => i > 0 && s > along + 5)
   const next = arrived ? steps[steps.length - 1] : k > 0 ? steps[k] : steps[steps.length - 1]
   const toNext = arrived ? 0 : k > 0 ? stepAt[k] - along : total - along
@@ -165,17 +167,23 @@ export default function NavLive({ mv, coords, steps, dest, mode, simulate, onRer
   // a portal: the card's blur and animation would otherwise trap this fixed banner inside the card
   return createPortal(
     <div className="nav-live" role="region" aria-label="Directions">
-      <div className="nav-next">
-        <div className="nav-dist">{arrived ? 'Arrived' : fmtDistance(Math.max(0, toNext))}</div>
-        <div className="nav-text">{arrived ? `You have arrived at ${dest}` : next.text}</div>
-      </div>
+      {noFix ? (
+        // without a location there is no "next turn": say what is wrong instead of guessing
+        <div className="nav-next"><div className="nav-text">{status}</div></div>
+      ) : (
+        <div className="nav-next">
+          <div className="nav-icon"><StepIcon icon={arrived ? 'arrive' : next.icon} size={52} /></div>
+          <div className="nav-dist">{arrived ? 'Arrived' : fmtDistance(Math.max(0, toNext))}</div>
+          <div className="nav-text">{arrived ? `You have arrived at ${dest}` : next.text}</div>
+        </div>
+      )}
       <div className="nav-meta small">
         {arrived ? null : <>{fmtDistance(left)} · about {mins} min left · </>}
         {simulate ? 'preview, not your location' : status || (acc ? `GPS ± ${acc} m` : '')}
       </div>
-      <div className="nav-honest small">Model estimate, not a sighting. If you see water above your ankle, turn back.</div>
+      <div className="nav-honest small">Model estimate, not a sighting. If water is above your ankle, turn back. Keep clear of fallen wires and open drains.</div>
       <div className="row" style={{ marginTop: 8 }}>
-        {'speechSynthesis' in window && <button className="btn small-btn" aria-pressed={voice} onClick={() => { setVoice(!voice); window.speechSynthesis.cancel() }}>{voice ? 'Voice on' : 'Voice off'}</button>}
+        {'speechSynthesis' in window && <button className="btn small-btn" onClick={() => { setVoice(!voice); window.speechSynthesis.cancel() }}>{voice ? 'Mute voice' : 'Unmute voice'}</button>}
         <button className="btn small-btn" onClick={onEnd}>End</button>
       </div>
     </div>,

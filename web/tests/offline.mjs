@@ -44,7 +44,8 @@ const usage = await page.evaluate(async () => {
 })
 console.log('storage', JSON.stringify(usage))
 
-await step('offline reload opens the app', async () => {
+await step('offline reload opens the app (saved pack only: the browsing cache is cleared first)', async () => {
+  await page.evaluate(() => caches.delete('hg-seen'))
   await ctx.setOffline(true)
   await page.reload()
   await page.waitForSelector('.readout', { timeout: 60000 })
@@ -80,14 +81,14 @@ await step('offline: help numbers', async () => {
   await page.getByRole('button', { name: 'Close' }).click()
 })
 await step('offline: take me to dry ground (route + directions)', async () => {
-  await page.getByRole('button', { name: 'Take me to dry ground' }).click()
+  await page.getByRole('button', { name: /Take me (there|to dry ground)/ }).first().click()
   await page.waitForSelector('.go-result', { timeout: 60000 })
   await page.waitForTimeout(1500)
   const txt = await page.$eval('.go-result', (el) => el.innerText)
   if (!/min (on foot|by two-wheeler|by car)|No route avoids deep water/.test(txt)) throw new Error('no route answer: ' + txt.slice(0, 200))
   console.log('     ' + txt.split('\n').slice(0, 3).join(' | '))
   await page.screenshot({ path: `${out}/06_go_offline.png` })
-  await page.getByRole('button', { name: 'Close' }).first().click()
+  await page.getByRole('button', { name: /^Back to .* cm$/ }).click()
 })
 await step('offline: search a saved-area street', async () => {
   const box = page.getByRole('combobox').or(page.locator('input[type=search], .search input')).first()

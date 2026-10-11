@@ -45,6 +45,11 @@ async function nearestHospital(p: { lon: number; lat: number }, scenario: Scenar
   return best ? { name: best.name, d: best.d } : null
 }
 
+const madeAt = () => new Date().toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
+  .replace(/\b(am|pm)\b/g, (m) => m.toUpperCase())
+/** A replay must never pass for tonight's forecast once it is forwarded. */
+const practice = (s: Scenario) => s.kind === 'replay' ? `Practice plan: a replay of ${s.label.replace(/^Replay: /, '')}. Not a forecast.` : null
+
 function lines(inp: PlanInput, names: string[], hosp: { name: string; d: number } | null) {
   const { ans, scenario } = inp
   const worst = ans.maxCm >= 5 && ans.peakHour
@@ -54,16 +59,18 @@ function lines(inp: PlanInput, names: string[], hosp: { name: string; d: number 
   const scen = scenario.kind === 'replay' ? `${scenario.label.replace(/^Replay: /, '')}, replayed as if it were tonight`
     : inp.forecastAt ? `Forecast from ${inp.forecastAt}` : scenario.label
   const park = inp.park ? `Dry parking: ${inp.park.name} (${inp.park.kind}), ${fmtDistance(inp.park.d)}` : null
-  const via = names.length ? `Route there avoids streets the model expects to flood: via ${names.join(', ')}` : inp.route ? `Route there: ${fmtDistance(inp.route.lengthM)}` : null
-  const hos = hosp ? `Nearest hospital cars can still reach: ${hosp.name}, ${fmtDistance(hosp.d)}` : null
+  void names
+  const via = inp.route ? `Route there avoids streets the model expects to flood: ${fmtDistance(inp.route.lengthM)}` : null
+  const hos = hosp ? `Nearest hospital still reachable by car: ${hosp.name.replace(/^Dr\.(?=\S)/, 'Dr. ')}, ${fmtDistance(hosp.d)}` : null
   return { worst, scooters, scen, park, via, hos }
 }
 
 export function planText(inp: PlanInput, names: string[], hosp: { name: string; d: number } | null): string {
   const l = lines(inp, names, hosp)
   return plain([
+    practice(inp.scenario),
     `HighGround flood plan: ${inp.street}`,
-    l.scen,
+    `${l.scen}. Made ${madeAt()}.`,
     l.worst + '.',
     l.scooters ? l.scooters + '.' : null,
     inp.decision ? inp.decision : null,
@@ -76,27 +83,39 @@ export function planText(inp: PlanInput, names: string[], hosp: { name: string; 
 }
 
 async function drawPlan(cv: HTMLCanvasElement, inp: PlanInput, names: string[], hosp: { name: string; d: number } | null) {
-  const W = 1080, H = 1500
-  cv.width = W; cv.height = H
-  const g = cv.getContext('2d')!
-  await Promise.all(['600 64px "Anek Latin Variable"', '400 34px Hind', '600 34px Hind'].map((f) => document.fonts.load(f).catch(() => null)))
+  // drawn on a tall scratch canvas, then cut to the height the text needed (nothing is ever clipped)
+  const W = 1080, H = 2400
+  const tmp = document.createElement('canvas')
+  tmp.width = W; tmp.height = H
+  const g = tmp.getContext('2d')!
+  // every weight the image uses must be loaded first, or the canvas silently falls back to Arial
+  await Promise.all(['600 64px "Anek Latin Variable"', '700 150px "Anek Latin Variable"', '400 34px Hind', '500 34px Hind', '600 34px Hind']
+    .map((f) => document.fonts.load(f, 'Aa0').catch(() => null)))
   const head = (w: number, px: number) => `${w} ${px}px "Anek Latin Variable", "Anek Latin", sans-serif`
   const body = (w: number, px: number) => `${w} ${px}px Hind, sans-serif`
   g.fillStyle = '#050D12'; g.fillRect(0, 0, W, H)
   const X = 72
   let y = 96
-  const wrap = (text: string, font: string, color: string, lh: number, maxW = W - 2 * X) => {
+  const wrap = (text: string, font: string, color: string, lh: number, maxW = W - 2 * X, x = X) => {
     g.font = font; g.fillStyle = color
     const words = text.split(' ')
     let line = ''
     for (const w of words) {
       const t = line ? `${line} ${w}` : w
-      if (g.measureText(t).width > maxW && line) { g.fillText(line, X, y); y += lh; line = w } else line = t
+      if (g.measureText(t).width > maxW && line) { g.fillText(line, x, y); y += lh; line = w } else line = t
     }
-    if (line) { g.fillText(line, X, y); y += lh }
+    if (line) { g.fillText(line, x, y); y += lh }
   }
   const l = lines(inp, names, hosp)
-  wrap('HighGround · my flood plan', body(500, 30), '#8FA2AA', 44)
+  const pr = practice(inp.scenario)
+  if (pr) {
+    // full-width band, readable even as a small WhatsApp preview
+    g.fillStyle = '#3E5560'; g.fillRect(0, 0, W, 150)
+    y = 66
+    wrap(pr, head(600, 40), '#C9D4D8', 48)
+    y = 210
+  }
+  wrap(`HighGround · my flood plan · made ${madeAt()}`, body(500, 28), '#8FA2AA', 42)
   y += 18
   wrap(inp.street, head(640, 66), '#D6E0E4', 72)
   wrap(l.scen, body(400, 30), '#8FA2AA', 42)
@@ -111,12 +130,12 @@ async function drawPlan(cv: HTMLCanvasElement, inp: PlanInput, names: string[], 
   if (l.scooters) wrap(l.scooters, body(400, 34), '#D6E0E4', 48)
   y += 20
   if (inp.decision) {
-    // the decision in a box; amber only for the dry place (the design rule)
+    // the decision in a box aligned with the text column; the sentence in white, amber only for the place
     y += 24
     const top = y - 50
-    wrap(inp.decision, body(600, 38), TOKENS.amber, 52, W - 2 * X - 40)
-    g.strokeStyle = 'rgba(214,224,228,0.35)'; g.lineWidth = 2
-    g.strokeRect(X - 20, top, W - 2 * X + 40, y - top - 22)
+    wrap(inp.decision, body(600, 38), '#FFFFFF', 52, W - 2 * X - 48, X + 24)
+    g.strokeStyle = TOKENS.amber; g.lineWidth = 3
+    g.strokeRect(X, top, W - 2 * X, y - top - 22)
     y += 34
   }
   if (l.park) wrap(l.park, body(400, 32), '#D6E0E4', 44)
@@ -136,24 +155,37 @@ async function drawPlan(cv: HTMLCanvasElement, inp: PlanInput, names: string[], 
     const [ax, ay] = P(inp.route.coords[0]), [bx, by] = P(inp.route.coords[inp.route.coords.length - 1])
     g.fillStyle = '#D6E0E4'; g.beginPath(); g.arc(ax, ay, 12, 0, 7); g.fill()
     g.fillStyle = TOKENS.amber; g.beginPath(); g.arc(bx, by, 14, 0, 7); g.fill()
-    g.font = body(500, 26); g.fillStyle = '#8FA2AA'
-    // label beside the start dot, on whichever side has room
-    const right = ax < box.x + box.w - 170
-    g.textAlign = right ? 'left' : 'right'
-    g.fillText('your street', ax + (right ? 20 : -20), Math.min(ay + 34, box.y + box.h - 12))
-    g.textAlign = 'left'
+    g.font = body(500, 26)
+    // labels away from the line: on the side opposite to where the route leaves (or arrives)
+    const label = (x: number, y0: number, nx: number, ny: number, text: string, color: string) => {
+      const L = Math.hypot(nx, ny) || 1
+      const lx = x - (nx / L) * 34, ly = y0 - (ny / L) * 34
+      g.fillStyle = color
+      g.textAlign = lx < x - 4 ? 'right' : lx > x + 4 ? 'left' : 'center'
+      g.fillText(text, Math.min(Math.max(lx, box.x + 12), box.x + box.w - 12), Math.min(Math.max(ly + 9, box.y + 28), box.y + box.h - 10))
+      g.textAlign = 'left'
+    }
+    const [a2x, a2y] = P(inp.route.coords[Math.min(3, inp.route.coords.length - 1)])
+    const [b2x, b2y] = P(inp.route.coords[Math.max(0, inp.route.coords.length - 4)])
+    label(ax, ay, a2x - ax, a2y - ay, 'your street', '#8FA2AA')
+    label(bx, by, b2x - bx, b2y - by, inp.park?.name ?? 'dry ground', TOKENS.amber)
     y = box.y + box.h + 50
     if (l.via) wrap(l.via, body(400, 28), '#8FA2AA', 38)
   }
   if (l.hos) { y += 6; wrap(l.hos, body(400, 32), '#D6E0E4', 44) }
   // emergency numbers; red only for 112
-  y = Math.max(y + 20, H - 230)
+  y += 50
   g.font = body(600, 40); g.fillStyle = '#E5484D'; g.fillText('112', X, y)
   const w112 = g.measureText('112').width
   g.font = body(400, 30); g.fillStyle = '#D6E0E4'
   g.fillText('emergency  ·  1913 GCC  ·  94987 94987 fallen power lines', X + w112 + 18, y)
   y += 64
   wrap('Model estimate, not an official warning. Never walk, ride or drive into floodwater. Follow GCC and IMD advisories.', body(400, 26), '#8FA2AA', 36)
+  const used = Math.min(H, Math.max(1350, Math.ceil(y + 40)))
+  cv.width = W; cv.height = used
+  const c = cv.getContext('2d')!
+  c.fillStyle = '#050D12'; c.fillRect(0, 0, W, used)
+  c.drawImage(tmp, 0, 0)
 }
 
 export default function PlanCard({ inp, onClose }: { inp: PlanInput; onClose: () => void }) {

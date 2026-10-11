@@ -60,14 +60,18 @@ export default function HelpCard({ onClose, street, fallback }: { onClose: () =>
         <ul className="numbers">
           {HELP_NUMBERS.map((h) => (
             <li key={h.n}>
-              <a href={`tel:${h.tel}`} className={h.red ? 'emergency' : ''}>{h.n}</a>
-              <span>{h.what}</span>
+              {/* the whole row is the call button */}
+              <a href={`tel:${h.tel}`} className="call" aria-label={`Call ${h.n}: ${h.what}`}>
+                <b className={h.red ? 'emergency' : ''}>{h.n}</b>
+                <span>{h.what}</span>
+                <em>Call</em>
+              </a>
             </li>
           ))}
         </ul>
         <div className="divider" />
         <h3 style={{ marginTop: 0 }}>Send my location</h3>
-        {state === 'idle' && <button className="btn" onClick={locate}>Find my location</button>}
+        {state === 'idle' && <button className="btn" onClick={locate}>Share my location</button>}
         {state === 'finding' && <p className="small">Finding you… GPS works without mobile data, but the first fix can take a minute outdoors.</p>}
         {state === 'err' && <p className="small">Could not find your location. Allow location for this site, or describe the nearest landmark when you call.</p>}
         {state === 'ok' && fix && (

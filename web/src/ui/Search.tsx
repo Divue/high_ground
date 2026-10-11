@@ -20,14 +20,21 @@ export default function Search({ onPick, initial = '' }: { onPick: (p: Place) =>
     if (q.trim().length < 3) { setItems([]); return }
     timer.current = window.setTimeout(async () => {
       const my = ++seq.current
-      const places = await loadPlaces().catch(() => [])
+      let listMissing = false
+      const places = await loadPlaces().catch(() => { listMissing = true; return [] as [string, number, number, string][] })
       const ql = q.toLowerCase()
       const rank = ([n, , , kind]: [string, number, number, string]) =>
         (n.toLowerCase().startsWith(ql) ? 0 : 2) + (kind === 'street' ? 1 : 0)
       const local = places.filter(([n]) => n.toLowerCase().includes(ql))
         .sort((a, b) => rank(a) - rank(b) || a[0].length - b[0].length).slice(0, 6)
         .map(([n, lon, lat]) => ({ label: `${n}, Chennai`, lon, lat }))
-      if (my === seq.current) { setItems(local); setSource(local.length ? 'Places and streets from OpenStreetMap' : (API_BASE ? '' : 'No matching place or street. Try a street name or a neighbourhood.')) }
+      if (my === seq.current) {
+        setItems(local)
+        setSource(local.length ? 'Places and streets from OpenStreetMap'
+          : listMissing && !navigator.onLine ? 'Offline: the list of streets was not saved on this phone. Use Save for offline next time you are connected.'
+          : (API_BASE ? '' : 'No matching place or street. Try a street name or a neighbourhood.'))
+      }
+      if (!navigator.onLine) return
       if (!API_BASE) return
       setBusy(true)
       try {

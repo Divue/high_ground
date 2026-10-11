@@ -12,7 +12,7 @@ const errors = []
 p.on('pageerror', (e) => errors.push(String(e)))
 await p.goto(base + '?replay=michaung2023&motion=off')
 await p.waitForSelector('.readout', { timeout: 90000 })
-await p.getByRole('button', { name: 'Take me to dry ground' }).click()
+await p.getByRole('button', { name: /Take me (there|to dry ground)/ }).first().click()
 await p.waitForSelector('.go-result:not(.stale)', { timeout: 60000 })
 await p.waitForTimeout(1200)
 const live = async () => p.$eval('.nav-live', (el) => el.innerText.replace(/\n+/g, ' | ')).catch(() => '(none)')

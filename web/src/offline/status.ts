@@ -36,7 +36,10 @@ export function forecastAge(updatedAt: string | undefined, now = Date.now()) {
   const t = new Date(updatedAt).getTime()
   if (!isFinite(t)) return null
   const h = (now - t) / 3600_000
-  const time = new Date(t).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s+/g, ' ').toUpperCase()
+  const d = new Date(t)
+  const clock = d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/\s+/g, '\u00a0').toUpperCase()
+  // the day too, once it is not today ("Sat 5:24 PM")
+  const time = new Date(now).toDateString() === d.toDateString() ? clock : `${d.toLocaleDateString('en-IN', { weekday: 'short' })} ${clock}`
   const ago = h < 1 ? `${Math.max(1, Math.round(h * 60))} min ago` : h < 48 ? `${Math.round(h)} h ago` : `${Math.round(h / 24)} days ago`
   return { time, ago, hours: h, stale: h > 6, old: h > 24 }
 }

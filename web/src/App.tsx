@@ -101,10 +101,13 @@ export default function App() {
     return fromCurrent(current, runs)
   }, [runs, current, replayRun])
 
+  // battery saver draws the water on Tonight's streets only; other screens say the water layer is off
+  useEffect(() => { mv?.setVisible('depth-streets', screen === 'tonight' && (lite || mv.waterMissing)) }, [mv, screen, lite])
+
   useEffect(() => {
     if (!mv) return
     const onTonight = screen === 'tonight'
-    for (const id of ['street', 'here', 'parking', 'parking-label', 'route-safe', 'route-normal']) mv.setVisible(id, onTonight || id === 'route-safe')
+    for (const id of ['street', 'here', 'parking', 'parking-label', 'route-safe', 'route-safe-casing', 'route-normal']) mv.setVisible(id, onTonight || id.startsWith('route-safe'))
     if (onTonight && place) mv.map.easeTo({ center: [place.lon, place.lat], zoom: 15, pitch: 62, duration: 1200 })
   }, [screen, mv]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -132,13 +135,19 @@ export default function App() {
         <>
           {screen === 'tonight' && <Tonight mv={mv} runs={runs} current={current} scenario={scenario} replayRun={replayRun}
             setReplayRun={setReplayRun} place={place} setPlace={setPlace} online={online} lite={lite} setLite={setLite} />}
+          {lite && (screen === 'whatif' || screen === 'hospitals' || screen === 'proof') && (
+            <div className="lite-note" role="status">
+              <span>Battery saver is on, so the map shows no water here.</span>
+              {!mv.waterMissing && <button className="btn small-btn" onClick={() => setLite(false)}>Show the water</button>}
+            </div>
+          )}
           {screen === 'whatif' && <WhatIf mv={mv} runs={runs} />}
           {screen === 'proof' && <Proof mv={mv} />}
           {screen === 'hospitals' && <Hospitals mv={mv} runs={runs} />}
           {screen === 'about' && <About />}
           {screen === 'admin' && <Admin onDone={() => loadCurrent().then(setCurrent)} />}
           {screen !== 'proof' && screen !== 'about' && online && <Assistant place={place} scenario={scenario} />}
-          {(screen === 'tonight' || screen === 'whatif' || screen === 'hospitals') && <Legend />}
+          {(screen === 'tonight' || screen === 'whatif' || screen === 'hospitals') && <Legend lite={lite} />}
         </>
       )}
     </>

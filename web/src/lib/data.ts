@@ -20,10 +20,12 @@ export function getJSON<T>(path: string, fresh = false): Promise<T> {
 export async function getBin(path: string): Promise<ArrayBuffer> {
   const key = `bin:${path}`
   if (!cache.has(key)) {
-    cache.set(key, fetch(`${DATA_BASE}/${path}`).then((r) => {
+    const p = fetch(`${DATA_BASE}/${path}`).then((r) => {
       if (!r.ok) throw new Error(`${r.status} ${path}`)
       return r.arrayBuffer()
-    }))
+    })
+    cache.set(key, p)
+    p.catch(() => cache.delete(key))      // a failed fetch (offline) is retried next time, not remembered
   }
   return cache.get(key) as Promise<ArrayBuffer>
 }

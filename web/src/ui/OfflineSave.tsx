@@ -47,22 +47,21 @@ export default function OfflineSave({ place, online }: { place: SavedPlace; onli
     const pct = prog.total ? Math.round((100 * prog.done) / prog.total) : 0
     return (
       <div className="offline-save" aria-live="polite">
-        <div className="small">Saving for offline… {fmtMB(prog.bytes)}</div>
+        <div className="small">Saving for offline… {fmtMB(prog.bytes)} <button className="linkbtn" onClick={() => ctl?.abort()}>Stop</button></div>
         <div className="lapse-progress"><i style={{ width: `${pct}%` }} /></div>
-        <button className="linkbtn" style={{ paddingLeft: 0 }} onClick={() => ctl?.abort()}>Stop</button>
       </div>
     )
   }
 
   if (rec) {
-    const when = new Date(rec.savedAt).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
+    const when = new Date(rec.savedAt).toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase().replace(/^(\w)(\w+)/, (_m, a, b) => a + b.toLowerCase())
     return (
       <div className="offline-save">
         <div className="small"><span className="saved-dot" />Saved for offline: {rec.places.map((p) => p.label).join(', ')} <span className="muted">· {when}</span></div>
         {!rec.persisted && <p className="muted small" style={{ margin: '2px 0 0' }}>The browser may clear it if the phone runs low on space.</p>}
         {isIOS() && !standalone() && <p className="muted small" style={{ margin: '2px 0 0' }}>On iPhone, add HighGround to your home screen to keep it saved.</p>}
         {online && (
-          <div className="row" style={{ marginTop: 4 }}>
+          <div className="row" style={{ marginTop: 2 }}>
             {!here && rec.places.length < MAX_PLACES && <button className="linkbtn" style={{ paddingLeft: 0 }} onClick={() => run(nextPlaces)}>Add this street</button>}
             {outdated && <button className="linkbtn" onClick={() => run(rec.places)}>Update to the latest model</button>}
             <button className="linkbtn" onClick={async () => { await removePack(); setRec(null) }}>Remove</button>
@@ -75,10 +74,10 @@ export default function OfflineSave({ place, online }: { place: SavedPlace; onli
 
   return (
     <div className="offline-save">
-      <button className="btn" disabled={!online} onClick={() => run([place])}>Save for offline</button>
-      <p className="muted small" style={{ margin: '4px 0 0' }}>
+      <button className="linkbtn" style={{ paddingLeft: 0 }} disabled={!online} onClick={() => run([place])}>Save for offline</button>
+      <p className="muted small" style={{ margin: '2px 0 0' }}>
         {online
-          ? <>Keeps this street’s answers, the map and dry routes on your phone for when power and the network go down{est ? <>. About {fmtMB(est)}; use Wi-Fi if you can</> : null}.{space && space.quota < 200e6 ? ' Space on this phone is low.' : ''}</>
+          ? <>Keeps this street, the map and routes that avoid flooded streets on your phone, for when the network goes down{est ? <>. About {fmtMB(est)}</> : null}.{space && space.quota < 200e6 ? ' Space on this phone is low.' : ''}</>
           : <>Connect once to save this street for offline use.</>}
       </p>
       {err && <p className="small" role="alert">{err}</p>}

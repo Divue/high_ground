@@ -22,11 +22,11 @@ const norm = (d: number) => ((d + 540) % 360) - 180
 const ORD = ['first', 'second', 'third', 'fourth', 'fifth']
 const CARD = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west']
 
-/** Heading over the first (or last) ~15 m of a polyline. */
-function headingAt(coords: [number, number][], fromEnd: boolean): number {
+/** Heading over the first (or last) ~25 m of a polyline (shorter windows read kinks as turns). */
+function headingAt(coords: [number, number][], fromEnd: boolean, over = 25): number {
   const pts = fromEnd ? [...coords].reverse() : coords
   let acc = 0, j = 1
-  for (; j < pts.length; j++) { acc += distM(pts[j - 1][0], pts[j - 1][1], pts[j][0], pts[j][1]); if (acc >= 15) break }
+  for (; j < pts.length; j++) { acc += distM(pts[j - 1][0], pts[j - 1][1], pts[j][0], pts[j][1]); if (acc >= over) break }
   const a = pts[0], b = pts[Math.min(j, pts.length - 1)]
   return fromEnd ? bearing(b, a) : bearing(a, b)
 }
@@ -61,6 +61,16 @@ export function directions(nav: NavData, r: NavRoute, destName: string): Step[] 
       legs.push({ edges: [e], nodes: [from, r.nodes[i + 1]], coords: c, len: g.len[e], name, ref, cls: g.cls[e], round, bridge: !!bridge[e] })
     }
   })
+  // a stretch shorter than 15 m (a jog across a junction) is no instruction of its own: fold it into
+  // the next stretch, so "turn right, then turn left 10 m later" becomes one manoeuvre
+  for (let i = 1; i < legs.length - 1; i++) {
+    const l = legs[i]
+    if (l.len < 15 && !l.round && !legs[i + 1].round) {
+      const n = legs[i + 1]
+      n.edges.unshift(...l.edges); n.nodes = [...l.nodes.slice(0, -1), ...n.nodes]; n.coords = [...l.coords.slice(0, -1), ...n.coords]; n.len += l.len
+      legs.splice(i, 1); i--
+    }
+  }
   const label = (l: Leg) => l.name || l.ref
 
   // side streets on one side of a leg, before its end (for "take the 2nd left")
@@ -71,7 +81,8 @@ export function directions(nav: NavData, r: NavRoute, destName: string): Step[] 
       const inH = headingAt(edgeCoords(nav, l.edges[i - 1], l.nodes[i - 1]), true)
       for (let j = g.adjStart[u]; j < g.adjStart[u + 1]; j++) {
         const e = g.adjEdge[j]
-        if (e === l.edges[i - 1] || e === l.edges[i]) continue
+        // only real side streets count: not driveways and service lanes
+        if (e === l.edges[i - 1] || e === l.edges[i] || g.cls[e] >= 5) continue
         const d = norm(headingAt(edgeCoords(nav, e, u), false) - inH)
         if (side * d > 30 && side * d < 150) { n++; break }
       }
@@ -110,7 +121,8 @@ export function directions(nav: NavData, r: NavRoute, destName: string): Step[] 
     } else if (ad < 40) { text = `Bear ${lr}${onto}`; icon = side < 0 ? 'slight-left' : 'slight-right' }
     else if (ad < 103) {
       if (onto) text = `Turn ${lr}${onto}`
-      else { const n = sideCount(prev, side) + 1; text = n > 1 && n <= 5 ? `Take the ${ORD[n - 1]} ${lr}` : `Turn ${lr}` }
+      // counting past the third side street is more confusing than helpful
+      else { const n = sideCount(prev, side) + 1; text = n > 1 && n <= 3 ? `Take the ${ORD[n - 1]} ${lr}` : `Turn ${lr}` }
       icon = side < 0 ? 'left' : 'right'
     } else if (ad < 160) { text = `Turn sharp ${lr}${onto}`; icon = side < 0 ? 'sharp-left' : 'sharp-right' }
     else { text = 'Make a U-turn'; icon = 'uturn' }
