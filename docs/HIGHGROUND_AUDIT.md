@@ -333,7 +333,7 @@ Mean tide. Smaller storms are probably overstated, because drains are one unifor
 | Offline / PWA | **vite-plugin-pwa 1.3.0** (injectManifest), **Workbox 7.4.1** (precaching, routing, expiration, range requests), Cache API, StorageManager (`persist`, `estimate`), web app manifest + icons, **Fontsource** (`@fontsource-variable/anek-latin`, `@fontsource/hind` 5.3.0), self-hosted Protomaps glyphs (Noto Sans) and sprites |
 | Navigation / device APIs | Geolocation `watchPosition`, Screen Wake Lock, Web Speech `speechSynthesis`, Web Share (files and text), `sms:` / `tel:` / WhatsApp links, React portals |
 | Model pipeline | **Python 3.11**, **numba**, NumPy, SciPy, pandas, rasterio/GDAL, GeoPandas, pyproj, scikit-image, **pyosmium**, **pmtiles** (Python, basemap cut); **ANUGA 4.0.1** (separate env) |
-| AWS (coded, not yet deployed) | **S3**, **CloudFront** (OAC, CORS, gzipped routing binaries), **Amplify Hosting** (PWA headers: `sw.js`/`index.html` no-cache, assets immutable; rewrite rule fixed for `.mjs`/`.pbf`/`.webmanifest`), **Lambda** (Python 3.12 ×4), **API Gateway** (HTTP API), **DynamoDB**, **SNS** (filter policy per street), **EventBridge Scheduler** (`rate(3 hours)`), **Bedrock** (Claude Sonnet: alerts + assistant), **Strands Agents SDK**, **Amazon Location Service** (Places v2), **AWS SAM**, **AWS Open Data Registry** (Copernicus DEM, ESA WorldCover), AWS Budgets ($10 alarm) |
+| AWS (coded, not yet deployed) | **S3**, **CloudFront** (OAC, CORS, gzipped routing binaries), **Amplify Hosting** (PWA headers: `sw.js`/`index.html` no-cache, assets immutable; rewrite rule fixed for `.mjs`/`.pbf`/`.webmanifest`), **Lambda** (Python 3.12 ×4), **API Gateway** (HTTP API), **DynamoDB**, **SNS** (filter policy per street), **EventBridge Scheduler** (`rate(3 hours)`), **Bedrock** (Claude Sonnet: alerts + assistant), **Strands Agents SDK**, **Amazon Location Service** (Places v2), **AWS SAM**, **AWS Open Data Registry** (Copernicus DEM, ESA WorldCover), AWS Budgets ($30 alarm) |
 | Testing / tooling | **Playwright 1.64** (hero test; offline gate; route rules; directions sweep; navigation UI, live, phone and demo-street checks; frame-perfect footage with a virtual clock), **moto** (mocked AWS), **ffmpeg** (OpenH264; rough cut), oxlint, Miniforge/conda, nvm/Node 24 |
 | Data / services | OpenStreetMap (Tamil Nadu extract), Open-Meteo forecast + ERA5, IMD totals, OpenCity datasets (2015 crowd reports, GCC hazard zones, NRSC 2015 extent, GCC wards, hotspots, stagnation points) |
 | AI during the build | Claude Code with reviewer subagents (model-reviewer, design-critic, qa-tester, judge) and research agents (creative ideas, offline web tech, flood navigation, Chennai ground truth) |
@@ -568,7 +568,7 @@ The remaining ~30 s is for voice-over pacing or a real-phone offline beat (airpl
 
 | # | Item | Owner |
 |---|---|---|
-| 1 | Create the AWS profile `highground` (us-east-1), put a real `ALERT_TEST_EMAIL` in `.env`, enable Bedrock Claude Sonnet | **User, now** |
+| 1 | Use the existing AWS CLI `default` profile (account `451513981733`, IAM user `captions-dev`) in `us-east-1`, put a real `ALERT_TEST_EMAIL` in `.env`, enable Bedrock Claude Sonnet | **User, now** |
 | 2 | `infra/deploy.sh` → live URL; subscribe once and click the SNS confirmation link; film the email and the assistant into the two slots | Claude (deploy) + user (inbox, filming) |
 | 3 | Post-deploy check of the live site: hero, offline on a real Android phone, assistant, email | Claude + user |
 | 4 | Edit the video (voice-over, the two slots, optional flyover photo); submit by 20:00 | Teammate 1 |
@@ -595,11 +595,11 @@ The remaining ~30 s is for voice-over pacing or a real-phone offline beat (airpl
 
 ## 16. FOR THE USER (only you can do these)
 
-1. `aws configure --profile highground`, with access keys for the team's AWS account and region `us-east-1`. (As of 09:45 the profile does not exist.)
-2. Put your real inbox in `.env`: `ALERT_TEST_EMAIL=you@yourdomain` (still the placeholder).
+1. The repo uses the existing `default` AWS CLI profile, verified as account `451513981733` / IAM user `captions-dev`, with deployment region `us-east-1`. No separate `highground` profile or IAM user is required.
+2. The repo `.env` now uses `ALERT_TEST_EMAIL=divue2003@gmail.com` for SNS confirmation and demo alerts.
 3. In the AWS console (us-east-1): Amazon Bedrock → Model access → enable an Anthropic Claude Sonnet model.
 4. Tell Claude. It runs `infra/deploy.sh`, which:
-   - creates the $10 budget alarm;
+   - creates the $30 budget alarm;
    - deploys the stack;
    - uploads the model outputs, including the offline pack files and the gzipped graph;
    - builds and deploys the PWA to Amplify;

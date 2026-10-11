@@ -23,7 +23,7 @@ Positioning (use this language in the app and video): Chennai already has CFLOWS
 
 - Linux laptop. Install everything **in user space, without sudo** (sudo needs a password Claude cannot type): Miniforge in `~/miniforge3` (conda-forge env `highground` with gdal, rasterio, numba, anuga, geopandas, osmnx), Node LTS via nvm, AWS CLI v2 and SAM CLI to `~/.local`, Playwright browsers. If something truly needs sudo, find a user-space alternative or log it under "FOR THE USER".
 - Read settings from `.env` in the repo root: `AWS_PROFILE`, `AWS_REGION`, `ALERT_TEST_EMAIL`.
-- Check AWS access with the `highground` profile; create the $10 budget alarm via `aws budgets` if it does not exist.
+- Check AWS access with the profile selected in `.env`; create the $30 budget alarm via `aws budgets` if it does not exist.
 - Check Bedrock model access via the CLI; if Claude Sonnet is not enabled, use the newest enabled Claude model and log it.
 - Read the event rules page (wemakedevs.org, Environmental Hacks) if browsing is available and log the deadline in `PROGRESS.md`.
 
@@ -313,7 +313,7 @@ On load: camera starts high over the Bay of Bengal at night, descends toward Vel
 - **Self-verify every gate** with scripted checks, and save every visual (hillshades, depth maps, validation plots, app screenshots via Playwright) to `review/<phase>/` with a one-line caption in `PROGRESS.md`.
 - **Commit and tag** each passed phase (`git tag p1`, `p2`, …). Never rewrite history.
 - **When stuck:** try up to 3 genuinely different approaches, then take the fallback written in this file, log why, and move on. Never sit blocked.
-- **Safety:** only use the `highground` AWS profile; only create or delete resources inside the SAM stack and the project S3 buckets; never touch other AWS resources; never print secrets into logs or commits.
+- **Safety:** use only the AWS profile selected in `.env` (currently `default`, verified as account `451513981733` / IAM user `captions-dev`); only create or delete resources inside the SAM stack and the project S3 buckets; never touch other AWS resources; never print secrets into logs or commits.
 - **Never stop between phases.** After each phase, add a 3-line summary at the top of `PROGRESS.md` and continue. Stop only if a gate fails three different fixes and its fallback.
 
 ### Phases

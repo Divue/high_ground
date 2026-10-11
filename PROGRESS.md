@@ -16,11 +16,13 @@ Rivers sit 4.5 m below banks; DSM−DTM is 1.6 m on buildings vs 0.24 m on open 
 
 ## FOR THE USER (things Claude cannot do) — do these in order
 
-1. **Create the AWS profile `highground`** (blocks P4/P5: nothing can deploy without it; Claude will not touch `default`):
-   `aws configure --profile highground` → keys for the AWS account you want to use, region `us-east-1`.
-2. **Put your real inbox in `.env`**: `ALERT_TEST_EMAIL=you@yourdomain` (currently the placeholder `you@example.com`).
-3. **Bedrock model access**: in the AWS console (us-east-1) → Amazon Bedrock → Model access → enable an Anthropic Claude Sonnet model. `infra/deploy.sh` picks the newest enabled Claude Sonnet inference profile automatically.
-4. Then run (or ask Claude to run): `infra/deploy.sh`. It creates the $10 budget alarm, deploys the SAM stack, uploads the model outputs (~200 MB), builds the site, deploys it to Amplify, and runs the first forecast check. It prints the live URL and writes `data/deploy_outputs.json`; the admin token for `#admin` is in `data/admin_token`.
+1. **Use the existing AWS CLI `default` profile** (verified as account `451513981733`, IAM user `captions-dev`) for P4/P5. No new IAM user or CLI profile is required. The repo `.env` selects `default` and region `us-east-1`.
+2. **Put your real inbox in `.env`**: `ALERT_TEST_EMAIL=divue2003@gmail.com`.
+3. **AWS Support case (open, Sun 11 Oct): ask AWS to verify the account.** Two blocks share that cause, and only Support can lift them (the Support API needs a paid support plan, so this is console-only):
+   - CloudFront: "Your account must be verified before you can add new CloudFront resources" (Request ID `0c888394-1d8f-490b-8a02-4a7fabe1b23d`).
+   - Bedrock: every model returns "Operation not allowed", 313 of 322 Bedrock quotas are 0, and the Anthropic use case form is refused with "create a support case".
+   Until then: the site's data is served by Amplify Hosting, and Bedrock goes through a teammate's AWS account (he creates one access role; Claude supplies the commands).
+4. Then run (or ask Claude to run): `infra/deploy.sh`. It creates the $30 budget alarm, deploys the SAM stack, uploads the model outputs (~200 MB), builds the site, deploys it to Amplify, and runs the first forecast check. It prints the live URL and writes `data/deploy_outputs.json`; the admin token for `#admin` is in `data/admin_token`.
 5. **Subscribe once from the live site** with the `.env` email → **click the AWS Notifications confirmation link** in that inbox. Then `#admin` → "Run and send alerts" (e.g. 300 mm) sends a real alert email for the video.
 6. Verify student status on AWS Builder Center (eligibility). Teammates: video (script in `docs/DEMO.md`) and blog.
 
@@ -412,3 +414,20 @@ Done:
 - `web/tests/demo_streets.mjs` types 30 candidates into the search box; `docs/DEMO.md` now lists only streets whose card matched (generic numbered names dropped).
 - Footage: opening recorded 08:29–08:40 (660 frames); search, navigate, timelapse, what-if and proof re-recording on the fixed build. `docs/make_rough_cut.py` assembles a rough cut with sourced title cards, offline stills and two marked 10 s slots (alert email, assistant) for after the deploy.
 Team action (only they can): AWS profile + Bedrock access + real inbox, then `infra/deploy.sh`, then film the email and the assistant.
+
+### Deploy day (Sun 11 Oct): pre-deploy checks, first deploy attempt blocked by the new AWS account
+
+- **Git:** pushes go to `Divue/high_ground` with the stored `Divue` login; the repo identity is `Divue <divue2003@gmail.com>` from 10:22 IST. The 83 earlier commits stay authored `sept1st2c` (no history rewrite).
+- **Pre-deploy checks (read-only), all pass:** `tsc -b`; a deploy-style build (the CloudFront and API addresses reach the page and the service worker); `infra/tests/test_lambdas_moto.py`; `sam validate --lint`; service quotas for CloudFront, Lambda, API Gateway, Amplify, DynamoDB, SNS, S3 and Amazon Location are non-zero; Amazon Location answers through the real geocode handler.
+- **Bedrock is blocked on this account** (opened 16 Sep 2026, paid plan). Every Converse call returns `ValidationException: Operation not allowed`, including Amazon Nova Micro, in us-east-1 and us-west-2. 313 of 322 Bedrock token/request quotas are 0. `PutUseCaseForModelAccess` answers "Your account is not authorized to perform this action. Please create a support case". A Service Quotas request is refused for any value below the 6,000,000 default.
+- **Rehearsal of the live configuration.** The site was built as `deploy.sh` builds it, with data and API on a second local address that behaves like CloudFront + S3 (cross-origin, byte ranges, gzipped routing files, 403 for missing keys), the real geocode handler calling Amazon Location, and `/ask` returning 500.
+  - Page loads in 4.7 s with no page errors; offline gate 10/10; What if, Proof, Hospitals and About OK at 59 fps.
+  - **Search defect, live only.** Amazon's results are listed above the app's own streets (`Search.tsx`: `[...remote, ...local]`), and the deepest-stretch logic in `Tonight.tsx` runs only for local street entries. Typing a demo street and pressing Enter lands elsewhere: Dhandeeswaram Nagar 8th Cross Road shows 2 cm (guide: 118 cm), Velachery Main Road 2 cm (116), Kakkan Nagar Main Road 2 cm (109). By calculation 8 of the 12 `docs/DEMO.md` streets show a different depth. After picking an Amazon result the box re-searches the shortened label and the list reopens over the card. `tests/hero.mjs` fails `04_route` on the live-style build and passes 9/9 on the local build (control). It was never seen locally because `API_BASE` is empty there.
+  - **Lambda defect.** `deploy.sh` stores `graph/*.bin` gzipped, but `hg.graph()` and `edge_depth()` read them raw (`ValueError` on nodes, edges and depth; wrong values on `len.bin`), so the assistant's `safe_route` tool would fail.
+  - **Model parameters, not yet testable.** The script picks `us.anthropic.claude-sonnet-5-5`, which per the current Claude API reference rejects a non-default `temperature`. The assistant sends 0.1 and the alert writer 0.2 (the alert then falls back to the template text).
+- **Deploy attempt 1 (13:12 IST): rolled back.** `AWS::CloudFront::Distribution` CREATE_FAILED: "Your account must be verified before you can add new CloudFront resources. To verify your account, please contact AWS Support". The data bucket, DynamoDB table, SNS topic, both layers, the OAC and the Amplify app and branch had been created and were removed by the rollback. Left in the account: budget `highground-30usd` and the SAM artifact bucket.
+- **Decisions (user, 13:20 IST):**
+  - Bedrock goes through a teammate's AWS account later today; the assistant panel stays visible meanwhile.
+  - CloudFront fallback approved: Amplify Hosting serves the site's model data (same origin, the configuration every local gate ran on), S3 keeps only what the Lambdas read, and tonight's forecast reaches the site through an API route.
+  - The search fix goes in with the fallback (Claude's recommendation; the user excluded only hiding the assistant panel).
+- **Next:** implement the fallback and the search fix, rehearse, deploy, check the live URL, subscribe and confirm the alert email, then Bedrock through the teammate's account.

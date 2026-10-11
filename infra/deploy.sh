@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# One-command AWS deploy for HighGround. Uses ONLY the profile named in .env (AWS_PROFILE=highground).
-#   1. checks credentials, creates the $10 budget alarm if missing
+# One-command AWS deploy for HighGround. Uses only the profile named in .env (currently AWS_PROFILE=default).
+#   1. checks credentials, creates the $30 budget alarm if missing
 #   2. picks the newest enabled Claude Sonnet model/inference profile on Bedrock
 #   3. sam deploy (S3, CloudFront, Lambda, API Gateway, DynamoDB, SNS, EventBridge Scheduler, Amplify app)
 #   4. uploads model outputs to s3://<bucket>/data/
@@ -22,17 +22,17 @@ echo "== identity"
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 echo "account ${ACCOUNT:0:4}******** region $AWS_REGION profile $AWS_PROFILE"
 
-echo "== budget alarm (\$10)"
-if ! aws budgets describe-budget --account-id "$ACCOUNT" --budget-name highground-10usd >/dev/null 2>&1; then
+echo "== budget alarm (\$30)"
+if ! aws budgets describe-budget --account-id "$ACCOUNT" --budget-name highground-30usd >/dev/null 2>&1; then
   NOTIFY=${ALERT_TEST_EMAIL:-}
-  BUDGET='{"BudgetName":"highground-10usd","BudgetLimit":{"Amount":"10","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}'
+  BUDGET='{"BudgetName":"highground-30usd","BudgetLimit":{"Amount":"30","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}'
   if [[ "$NOTIFY" == *@* && "$NOTIFY" != "you@example.com" ]]; then
     aws budgets create-budget --account-id "$ACCOUNT" --budget "$BUDGET" \
       --notifications-with-subscribers "[{\"Notification\":{\"NotificationType\":\"ACTUAL\",\"ComparisonOperator\":\"GREATER_THAN\",\"Threshold\":80,\"ThresholdType\":\"PERCENTAGE\"},\"Subscribers\":[{\"SubscriptionType\":\"EMAIL\",\"Address\":\"$NOTIFY\"}]}]"
   else
     aws budgets create-budget --account-id "$ACCOUNT" --budget "$BUDGET"
   fi
-  echo "created budget highground-10usd"
+  echo "created budget highground-30usd"
 else
   echo "budget exists"
 fi
