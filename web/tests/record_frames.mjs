@@ -153,6 +153,31 @@ const shots = {
     await page.getByRole('button', { name: 'Preview the drive' }).click()
     await film(16)
   },
+  // the landing page: hero, then scroll through 'the city' and 'the water' (3D Velachery floods)
+  async landing() {
+    await startClock()
+    await page.goto(base)
+    for (let i = 0; i < 60; i++) { await page.clock.runFor(16); await page.waitForTimeout(100) }
+    const H = await page.evaluate(() => { const s = document.querySelector('.lp-story'); return { top: s.offsetTop, h: s.offsetHeight, vh: innerHeight } })
+    const at = (p) => page.evaluate((y) => window.scrollTo(0, y), H.top + (H.h - H.vh) * p)
+    await film(3)
+    const N = Math.round(15 * FPS)
+    for (let i = 0; i <= N; i++) {
+      const p = 0.44 * (0.5 - Math.cos(Math.PI * (i / N)) / 2)
+      await at(p)
+      await film(1 / FPS)
+    }
+    await film(2)
+  },
+  // Hospitals at 300 mm: which major hospitals cars can no longer reach
+  async hospitals() {
+    const url = `${base}app?replay=michaung2023#hospitals`
+    await startClock()
+    await page.goto(url)
+    await waitReady()
+    await skip(8)
+    await film(8)
+  },
   // a user's whole journey, for reviewing transitions frame by frame
   async journey() {
     const url = `${base}?replay=michaung2023`
