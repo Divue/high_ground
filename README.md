@@ -6,6 +6,10 @@
 
 **Live: <https://main.de7nem2wvfa4y.amplifyapp.com>** 
 
+**Demo video: <https://www.youtube.com/watch?v=Wh4UzlBKWoY>**
+
+**Blog post on AWS Builder Center: [HighGround: telling Chennai where the water will go tonight, street by street](https://builder.aws.com/content/3KYhOP5m1316THMKOsHLdEjFdZi/highground-telling-chennai-where-the-water-will-go-tonight-street-by-street)**
+
 Type your address. The camera flies to your street, the water rises to tonight's forecast depth, and HighGround tells you how deep it gets, when it passes 15 cm, where to park your car on dry ground, a route there that avoids water, and which hospitals get cut off. Ask for an email and you will get one when your street's risk changes.
 
 Chennai already has CFLOWS, a government flood warning system built for officials. HighGround is for the residents who still park their cars on the Velachery flyover every storm because nobody tells them where the water will go. We do not claim a better model than CFLOWS; we claim a tested one, built for citizens.
